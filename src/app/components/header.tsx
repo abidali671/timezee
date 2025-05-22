@@ -18,7 +18,7 @@ export default function Header() {
           {slideProducts.map((product, index) => (
             <CarouselItem
               key={index}
-              className="relative h-[calc(100vh_-_80px)] w-full"
+              className="relative h-[calc(100vh_-_80px)] w-full "
             >
               {/* Background Image */}
               <Image
@@ -32,34 +32,36 @@ export default function Header() {
 
               {/* Overlay */}
               <div
-                className={`relative ${
-                  index == 0 || index == 2
-                    ? "justify-center md:w-7/12"
-                    : "justify-end md:w-11/12"
-                } px-10 z-20 flex h-full w-full  items-center *:text-left  `}
+                className={`relative ${index == 0 || index == 2
+                  ? "justify-center md:w-7/12"
+                  : "justify-end md:w-11/12"
+                  } px-10 z-20 flex h-full w-full  items-center *:text-left  `}
               >
-                <div className=" p-8 rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/50 md:bg-transparent text-gray-800 text-center">
-                  <div className="relative w-6/12">
-                    <h2 className="text-6xl mb-2 text-white italic tracking-tight  ">
+                <div className="tex p-4 md:p-8 justify-center md:justify-start items-center  rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/50 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
+                  <div className="relative w-10/12 mx-auto md:mx-0 md:w-5/12 ">
+                    <h2 className="text-5xl md:text-6xl mb-2 text-white italic tracking-tight  ">
                       {product.title}
                     </h2>
-                    <hr className="w-auto text-red-300 border-3 border-yellow-400 relative bottom-4" />
+                    <hr className=" w-auto text-red-300 border-1 md:border-3 border-yellow-400 relative bottom-4 " />
                   </div>
-                  <h3 className="text-lg font-light text-yellow-400  mb-4">
+                  <h3 className="text-sm md:text-lg font-light text-yellow-400  mb-4">
                     {product.subtitle}
                   </h3>
-                  <p className="text-xl font-light text-white/70 mb-6 leading-8">
+                  <p className="text-sm md:text-xl font-light text-white/70 mb-6 leading-8">
                     {product.description}
                   </p>
-                  <div className="flex items-center gap-x-4 mb-8">
+                  <div className="flex gap-x-4 mb-8 justify-center md:justify-start">
                     <p className="text-lg  text-white/70  ">Starting @</p>
-                    <span className="text-yellow-400 text-4xl">
+                    <span className="text-yellow-400 text-2xl md:text-4xl">
                       {product.price}
                     </span>
                   </div>
-                  <AnimatedButton className="h-16">
+
+                  <AnimatedButton className="h-10 flex  text-sm md:h-16 md:mx-0 mx-auto">
                     Explore Services
                   </AnimatedButton>
+
+
                 </div>
               </div>
             </CarouselItem>
