@@ -9,6 +9,7 @@ import {
 import Image from "next/image";
 import { AnimatedButton } from "./animatedButton";
 import { slideProducts } from "@/lib/products";
+import SectionTitle from "./page/home/sectionTitle";
 
 export default function Header() {
   return (
@@ -38,12 +39,9 @@ export default function Header() {
                   } px-10 z-20 flex h-full w-full  items-center *:text-left  `}
               >
                 <div className="tex p-4 md:p-8 justify-center md:justify-start items-center  rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/50 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
-                  <div className="relative w-10/12 mx-auto md:mx-0 md:w-5/12 ">
-                    <h2 className="text-5xl md:text-6xl mb-2 text-white italic tracking-tight  ">
-                      {product.title}
-                    </h2>
-                    <hr className=" w-auto text-red-300 border-1 md:border-3 border-yellow-400 relative bottom-4 " />
-                  </div>
+                  <SectionTitle>
+                    {product.title}  
+                  </SectionTitle>
                   <h3 className="text-sm md:text-lg font-light text-yellow-400  mb-4">
                     {product.subtitle}
                   </h3>
