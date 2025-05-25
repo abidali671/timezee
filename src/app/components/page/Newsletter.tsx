@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { AnimatedButton } from "../animatedButton";
 import SectionTitle from "./home/sectionTitle";
 

@@ -2,8 +2,8 @@ import React from 'react'
 
 const SectionTitle = ({
     children,
-    className = '' // Default to an empty string in case no className is passed
-}: any) => {
+    className,
+    }: {children: React.ReactNode, className?: string}) => {
     return (
         <div className={`relative w-10/12 mx-auto md:mx-0 md:w-5/12 ${className}`}>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-2 text-white italic tracking-tight">

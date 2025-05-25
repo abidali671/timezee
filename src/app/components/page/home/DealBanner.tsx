@@ -17,33 +17,34 @@ const DealBanner = () => {
     });
 
     // Function to update the countdown timer
-    const updateTimer = () => {
-        const now = new Date().getTime();
-        const distance = endTime - now;
-
-        if (distance < 0) {
-            setTimeRemaining({
-                days: 0,
-                hours: 0,
-                minutes: 0,
-                seconds: 0,
-            });
-            return;
-        }
-
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        setTimeRemaining({ days, hours, minutes, seconds });
-    };
     useEffect(() => {
+        const updateTimer = () => {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+
+            if (distance < 0) {
+                setTimeRemaining({
+                    days: 0,
+                    hours: 0,
+                    minutes: 0,
+                    seconds: 0,
+                });
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            setTimeRemaining({ days, hours, minutes, seconds });
+        };
+
         const timerInterval = setInterval(updateTimer, 1000);
 
-        // Clear interval on component unmount
         return () => clearInterval(timerInterval);
     }, []);
+
 
     return (
         <section id="deal-banner" className="relative py-20">
