@@ -62,30 +62,30 @@ const DealBanner = () => {
 
             {/* Banner Content */}
             <div className="relative z-10 flex items-center justify-center w-full h-full px-4 py-8 sm:px-8 lg:px-16">
-                <div className="w-full max-w-screen-lg mx-auto flex flex-col justify-center items-center">
+                <div className="w-full max-w-screen-lg mx-auto flex flex-col justify-center items-center ">
                     {/* Banner Title */}
                     <SectionTitle className="font-bold text-white whitespace-nowrap !w-auto">
                         Most Wanted of the Year
                     </SectionTitle>
 
                     {/* Timer */}
-                    <div className="my-6 text-white">
+                    <div className="my-6 text-white ">
                         <div className="text-2xl">
-                            <ul className="flex justify-center *:bg-yellow-400 *:p-4 space-x-6 w-full h-auto rounded-md">
+                            <ul className="flex justify-center *:bg-yellow-400 *:px-3 *:p-2 md:*:p-4 space-x-6 w-full h-auto rounded-md">
                                 <li className="flex flex-col items-center">
-                                    <span className="text-4xl font-bold">{timeRemaining.days}</span>
+                                    <span className="text-2xl md:text-4xl font-bold">{timeRemaining.days}</span>
                                     <span className="text-xl">Days</span>
                                 </li>
                                 <li className="flex flex-col items-center">
-                                    <span className="text-4xl font-bold">{timeRemaining.hours}</span>
+                                    <span className="text-2xl md:text-4xl font-bold">{timeRemaining.hours}</span>
                                     <span className="text-xl">Hrs</span>
                                 </li>
                                 <li className="flex flex-col items-center">
-                                    <span className="text-4xl font-bold">{timeRemaining.minutes}</span>
+                                    <span className="text-2xl md:text-4xl font-bold">{timeRemaining.minutes}</span>
                                     <span className="text-xl">Mins</span>
                                 </li>
                                 <li className="flex flex-col items-center">
-                                    <span className="text-4xl font-bold">{timeRemaining.seconds}</span>
+                                    <span className="text-2xl md:text-4xl font-bold">{timeRemaining.seconds}</span>
                                     <span className="text-xl">Secs</span>
                                 </li>
                             </ul>

@@ -8,7 +8,7 @@ const ProductCategory = () => {
             {productCategories.map((product, index) => (
                 <div
                     key={index}
-                    className="flex-1 h-auto md:h-72 border-6 border-gray-100/30 outline-8 outline-black py-16 md:py-0"
+                    className="flex-1 h-auto md:h-72 border-6 border-gray-100/30 outline-8 outline-black  py-16 md:py-0"
                     style={{
                         backgroundImage: `url(${product.image})`,
                         backgroundSize: 'cover',
