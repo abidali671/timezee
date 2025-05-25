@@ -7,49 +7,90 @@ import {
     CarouselPrevious,
 } from '@/components/ui/carousel';
 import { ProductT } from '@/lib/products';
+import Image from 'next/image';
+import { AnimatedButton } from './animatedButton';
 
 const ProductCarousel = ({ products }: { products: ProductT[] }) => {
+    function calculateDiscountPercentage(originalPrice: number, discountedPrice: number) {
+        if (originalPrice <= 0 || originalPrice <= discountedPrice) return 0;
+
+        const discount = ((originalPrice - discountedPrice) / originalPrice) * 100;
+        return Math.round(discount);
+    }
+
     return (
         <div className="relative w-full">
             <Carousel opts={{ align: 'start' }} className="w-full">
-                <div className='w-10/12 mx-auto'>
-
-
+                <div className="w-10/12 mx-auto">
                     <CarouselContent>
-                        {products.map((item: ProductT, index: number) => (
-                            <CarouselItem
-                                key={index}
-                                className="basis-full sm:basis-1/2 lg:basis-1/4 px-2"
-                            >
-                                <div className="bg-zinc-900 text-white rounded-2xl shadow-lg hover:scale-[1.02] transition-transform duration-300">
-                                    <div className="p-4 flex flex-col items-center">
-                                        <img
-                                            src={item.img}
-                                            alt={item.title}
-                                            className="h-40 object-contain mb-4"
-                                        />
-                                        <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
-                                        <p className="text-md text-gray-400 mb-2">{item.price}</p>
+                        {products.map((item: ProductT, index: number) => {
+                            const hasDiscount = item.discount > item.price;
+                            const discountPercent = hasDiscount
+                                ? calculateDiscountPercentage(item.discount, item.price)
+                                : 0;
 
-                                        <p className="line-through text-sm text-red-400">
-                                            {item.discount}
-                                        </p>
+                            return (
+                                <CarouselItem
+                                    key={index}
+                                    className="basis-full sm:basis-1/2 lg:basis-1/4 "
+                                >
+                                    <div className="bg-zinc-900 text-white rounded-2xl shadow-lg hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden cursor-pointer">
+                                        {/* % OFF Label */}
+                                        {hasDiscount && (
+                                            <div className=" w-16 text-xs absolute top-2 right-2 bg-yellow-400 text-black  whitespace-nowrap font-semibold px-2 py-1 rounded">
+                                                {discountPercent}% OFF
+                                            </div>
+                                        )}
 
-                                        <p className="text-sm mt-2 text-yellow-400">
-                                            {'★'.repeat(item.rating)}
-                                        </p>
+                                        {/* Background */}
+                                        <div className="absolute -z-10 inset-0 h-60 bg-zinc-500 opacity-100 transition-opacity duration-300"></div>
+
+                                        {/* Content */}
+                                        <div className="p-4 flex flex-col items-center">
+                                            <Image
+                                                src={item.img}
+                                                alt={item.title}
+                                                width={100}
+                                                height={100}
+                                                className="w-60 object-contain mb-4"
+                                            />
+                                            <h3 className="text-2xl font-semibold mb-1 text-center">{item.title}</h3>
+
+                                            <div className="flex gap-x-3 items-center">
+                                                <p className="text-xl text-gray-200 mb-2">
+                                                    ₹{item.price.toFixed(2)}
+                                                </p>
+
+                                                {/* Show original price only if discount exists */}
+                                                {hasDiscount && (
+                                                    <p className="line-through text-sm text-red-400">
+                                                        ₹{item.discount.toFixed(2)}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {/* Rating */}
+                                            <p className="text-md mt-2 text-yellow-400">
+                                                {'★'.repeat(item.rating)}
+                                            </p>
+                                            <p className="text-md mt-2 text-yellow-400">
+                                                {item.brand}
+                                            </p>
+                                            <AnimatedButton className='!w-8/12 text-xs font-light mx-auto flex mt-3'>
+                                                Add to Cart
+                                            </AnimatedButton>
+                                        </div>
                                     </div>
-                                </div>
-                            </CarouselItem>
-                        ))}
+                                </CarouselItem>
+                            );
+                        })}
                     </CarouselContent>
                 </div>
-                {/* Absolute-positioned Nav Buttons */}
-                <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10" />
-                <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10" />
+                {/* Nav Buttons */}
+                <CarouselPrevious className="absolute md:left-0 top-1/2 -translate-y-2/4 z-10" />
+                <CarouselNext className="absolute  md:right-0 top-1/2 -translate-y-1/2 z-10" />
             </Carousel>
         </div>
-
     );
 };
 

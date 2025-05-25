@@ -18,7 +18,7 @@ const ProductSlider = () => {
             <div className="container p-6 py-16 mx-auto flex flex-col">
                 {/* Title */}
                 <div className="flex justify-center items-center mb-6">
-                    <SectionTitle className="text-center text-white">
+                    <SectionTitle className="text-center text-white whitespace-nowrap ">
                         Popular In Store
                     </SectionTitle>
                 </div>

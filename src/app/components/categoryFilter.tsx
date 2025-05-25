@@ -7,11 +7,11 @@ const CategoryFilter = ({ activeCategory, onChange }: {
     onChange: (category: string) => void;
 }) => {
     return (
-        <ul className="flex gap-x-8 text-white text-lg justify-center mb-10">
+        <ul className="flex gap-x-8 text-white  text-lg justify-center mb-10">
             {categories.map((cat) => (
                 <li
                     key={cat}
-                    className={`cursor-pointer cool-link ${activeCategory === cat ? ' underline' : 'opacity-70'
+                    className={`cursor-pointer   cool-link ${activeCategory === cat ? ' underline' : 'opacity-70'
                         }`}
                     onClick={() => onChange(cat)}
                 >
