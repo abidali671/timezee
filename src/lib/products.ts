@@ -10,10 +10,11 @@ export interface SlideProduct {
 // Define the structure for regular products
 export interface Product {
   title: string;
-  price: string;
+  price: number;
   rating: number;
-  discount: string;
+  discount: number;
   img: string;
+  brand: string
 }
 
 // Define the structure for all products
@@ -79,38 +80,43 @@ export const slideProducts: SlideProduct[] = [
 export const products: Product[] = [
   {
     title: 'Analog Numeral',
-    price: '$7500.00',
+    price: 7500.00,
     rating: 5,
-    discount: '0',
-    img: '/images/product1.webp'
+    discount: 0,
+    img: '/images/product1.webp',
+    brand: 'SKMEI'
   },
   {
     title: 'Black Numeral',
-    price: '$200.00',
+    price: 200.00,
     rating: 5,
-    discount: '$250.00',
-    img: '/images/product2.webp'
+    discount: 250.00,
+    img: '/images/product2.webp',
+    brand: 'Orient'
   },
   {
     title: 'Golden Automatic',
-    price: '$200.00',
+    price: 200.00,
     rating: 5,
-    discount: '$401.00',
-    img: '/images/product3.webp'
+    discount: 401.00,
+    img: '/images/product3.webp',
+    brand: 'Bvlgari'
   },
   {
     title: 'Golden Classic',
-    price: '$200.00',
+    price: 200.00,
     rating: 5,
-    discount: '$401.00',
-    img: '/images/product4.webp'
+    discount: 401.00,
+    img: '/images/product4.webp',
+    brand: 'Seiko'
   },
   {
     title: 'Golden Classic',
-    price: '$200.00',
+    price: 200.00,
     rating: 5,
-    discount: '$401.00',
-    img: '/images/product4.webp'
+    discount: 401.00,
+    img: '/images/product4.webp',
+    brand: 'Seiko'
   }
 ];
 
