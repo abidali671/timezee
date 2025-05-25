@@ -7,6 +7,7 @@
   --color-blue-900: #0e1d55;
   --color-gray-200: rgb(170, 170, 170);
   --color-yellow-400: rgb(204, 164, 113);
+  --color-gray-600: rgb(52 48 53)
 }
 
 @theme inline {
@@ -139,7 +140,7 @@ h6 {
 }
 
 .cool-link {
-  @apply relative inline-block text-yellow-400 text-2xl no-underline cursor-pointer;
+  @apply relative inline-block text-yellow-400 text-lg whitespace-nowrap md:text-2xl no-underline cursor-pointer;
 }
 
 .cool-link::after {
