@@ -15,9 +15,9 @@ const ProductCategory = () => {
                         backgroundPosition: 'center',
                     }}
                 >
-                    <div className="flex flex-col items-end px-10 gap-3 justify-center w-full h-full bg-black/50 text-white text-center">
+                    <div className="flex flex-col  whitespace-nowrap items-end px-10 gap-3 justify-center w-full h-full bg-black/50 text-white text-center">
                         <h3 className="text-2xl font-medium !italic text-yellow-400">{product.subtitle}</h3>
-                        <h2 className="text-5xl whitespace-nowrap">{product.title}</h2>
+                        <h2 className="text-3xl  md:text-5xl whitespace-nowrap">{product.title}</h2>
                         <p className="text-2xl font-light text-gray-200">{product.description}</p>
                     </div>
                 </div>

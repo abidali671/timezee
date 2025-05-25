@@ -39,7 +39,7 @@ export default function Header() {
                   } px-10 z-20 flex h-full w-full  items-center *:text-left  `}
               >
                 <div className="tex p-4 md:p-8 justify-center md:justify-start items-center  rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/50 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
-                  <SectionTitle className='w-32 md:w-52' font={true}>
+                  <SectionTitle className='w-52' font={true}>
                     {product.title}  
                   </SectionTitle>
                   <h3 className="text-sm md:text-lg font-light text-yellow-400  mb-4">
