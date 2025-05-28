@@ -5,6 +5,7 @@ export interface SlideProduct {
   description: string;
   price: string;
   image: string;
+  slug: string
 }
 
 // Define the structure for regular products
@@ -15,6 +16,7 @@ export interface Product {
   discount: number;
   img: string;
   brand: string
+  slug: string
 }
 
 // Define the structure for all products
@@ -26,6 +28,9 @@ export interface AllProduct {
   img: string;
   discount: number;
   brand: string;
+  slug: string
+  type: string;
+  availability: number;
 }
 
 // Define the structure for banners
@@ -47,6 +52,7 @@ export interface ProductCategory {
   subtitle: string;
   description: string;
   image: string;
+  slug: string
 }
 // Slide Products Data
 export const slideProducts: SlideProduct[] = [
@@ -57,6 +63,7 @@ export const slideProducts: SlideProduct[] = [
       "The watch bracelet gives a much far colder personality. Dress watch style. Swiss made luxury watch. Stainless steel case with a brown leather strap. Scratch resistant sapphire crystal.",
     price: "$350.00",
     image: "/images/slider1.webp",
+    slug: "alertzy",
   },
   {
     title: "Gertious",
@@ -65,6 +72,7 @@ export const slideProducts: SlideProduct[] = [
       "The watch bracelet gives a much far colder personality. Dress watch style. Swiss made luxury watch. Stainless steel case with a brown leather strap. Scratch resistant sapphire crystal.",
     price: "$350.00",
     image: "/images/slider2.webp",
+    slug: "gertious-exclusive-offer",
   },
   {
     title: "Gertious",
@@ -73,12 +81,14 @@ export const slideProducts: SlideProduct[] = [
       "The watch bracelet gives a much far colder personality. Dress watch style. Swiss made luxury watch. Stainless steel case with a brown leather strap. Scratch resistant sapphire crystal.",
     price: "$350.00",
     image: "/images/slider3.webp",
+    slug: "gertious-sales-tax",
   },
 ];
 
 // Products Data
 export const products: Product[] = [
   {
+    slug: 'analog-numeral',
     title: 'Analog Numeral',
     price: 7500.00,
     rating: 5,
@@ -87,6 +97,7 @@ export const products: Product[] = [
     brand: 'SKMEI'
   },
   {
+    slug: 'black-numeral',
     title: 'Black Numeral',
     price: 200.00,
     rating: 5,
@@ -95,6 +106,7 @@ export const products: Product[] = [
     brand: 'Orient'
   },
   {
+    slug: 'golden-automatic',
     title: 'Golden Automatic',
     price: 200.00,
     rating: 5,
@@ -103,6 +115,7 @@ export const products: Product[] = [
     brand: 'Bvlgari'
   },
   {
+    slug: 'golden-classic-seiko-1',
     title: 'Golden Classic',
     price: 200.00,
     rating: 5,
@@ -111,6 +124,7 @@ export const products: Product[] = [
     brand: 'Seiko'
   },
   {
+    slug: 'golden-classic-seiko-2',
     title: 'Golden Classic',
     price: 200.00,
     rating: 5,
@@ -130,6 +144,9 @@ export const allProducts: AllProduct[] = [
     category: 'Classic',
     img: '/images/product1.webp',
     brand: 'SKMEI',
+    slug: 'analog-numeral',
+    type: 'Analog',
+    availability: 10,
   },
   {
     title: 'Golden Classic',
@@ -139,6 +156,9 @@ export const allProducts: AllProduct[] = [
     category: 'Classic',
     img: '/images/product4.webp',
     brand: 'Seiko',
+    slug: 'golden-classic',
+    type: 'Analog',
+    availability: 0,
   },
   {
     title: 'Classic Retro',
@@ -148,6 +168,9 @@ export const allProducts: AllProduct[] = [
     category: 'Classic',
     img: '/images/product1.webp',
     brand: 'Timex',
+    slug: 'classic-retro',
+    type: 'Analog',
+    availability: 15,
   },
   {
     title: 'Timeless Elegance',
@@ -157,6 +180,9 @@ export const allProducts: AllProduct[] = [
     category: 'Classic',
     img: '/images/product4.webp',
     brand: 'Casio',
+    slug: 'timeless-elegance',
+    type: 'Analog',
+    availability: 20,
   },
   {
     title: 'Vintage Heritage',
@@ -166,6 +192,9 @@ export const allProducts: AllProduct[] = [
     category: 'Classic',
     img: '/images/product1.webp',
     brand: 'Rolex',
+    slug: 'vintage-heritage',
+    type: 'Automatic',
+    availability: 5,
   },
   {
     title: 'Timeless Elegance',
@@ -175,6 +204,9 @@ export const allProducts: AllProduct[] = [
     category: 'Classic',
     img: '/images/product4.webp',
     brand: 'Tissot',
+    slug: 'timeless-elegance-tissot',
+    type: 'Analog',
+    availability: 25,
   },
   {
     title: 'Black Numeral',
@@ -184,6 +216,9 @@ export const allProducts: AllProduct[] = [
     category: 'Modern',
     img: '/images/product2.webp',
     brand: 'Orient',
+    slug: 'black-numeral',
+    type: 'Digital',
+    availability: 30,
   },
   {
     title: 'Modern Marvel',
@@ -193,6 +228,9 @@ export const allProducts: AllProduct[] = [
     category: 'Modern',
     img: '/images/product4.webp',
     brand: 'TAG Heuer',
+    slug: 'modern-marvel',
+    type: 'Automatic',
+    availability: 0,
   },
   {
     title: 'Urban Steel',
@@ -202,6 +240,9 @@ export const allProducts: AllProduct[] = [
     category: 'Modern',
     img: '/images/product3.webp',
     brand: 'Citizen',
+    slug: 'urban-steel',
+    type: 'Analog',
+    availability: 12,
   },
   {
     title: 'Sleek Contemporary',
@@ -211,6 +252,9 @@ export const allProducts: AllProduct[] = [
     category: 'Modern',
     img: '/images/product2.webp',
     brand: 'Rado',
+    slug: 'sleek-contemporary',
+    type: 'Digital',
+    availability: 8,
   },
   {
     title: 'Golden Automatic',
@@ -220,6 +264,9 @@ export const allProducts: AllProduct[] = [
     category: 'Special Edition',
     img: '/images/product3.webp',
     brand: 'Bvlgari',
+    slug: 'golden-automatic',
+    type: 'Automatic',
+    availability: 18,
   },
   {
     title: 'Limited Gold',
@@ -229,6 +276,9 @@ export const allProducts: AllProduct[] = [
     category: 'Special Edition',
     img: '/images/product1.webp',
     brand: 'Piaget',
+    slug: 'limited-gold',
+    type: 'Analog',
+    availability: 0,
   },
   {
     title: 'Diamond Edge',
@@ -238,6 +288,9 @@ export const allProducts: AllProduct[] = [
     category: 'Special Edition',
     img: '/images/product2.webp',
     brand: 'Patek Philippe',
+    slug: 'diamond-edge',
+    type: 'Automatic',
+    availability: 10,
   },
   {
     title: 'Prestige Series',
@@ -247,6 +300,9 @@ export const allProducts: AllProduct[] = [
     category: 'Special Edition',
     img: '/images/product4.webp',
     brand: 'Cartier',
+    slug: 'prestige-series',
+    type: 'Automatic',
+    availability: 3,
   }
 ];
 
@@ -322,17 +378,20 @@ export const productCategories: ProductCategory[] = [
     subtitle: 'Flash Sale',
     description: '25% Discount',
     image: '/images/category1.webp',
+    slug: 'mens-watch',
   },
   {
     title: 'Women\'s Watch',
     subtitle: 'Limited Edition',
     description: '30% Discount',
     image: '/images/category2.webp',
+    slug: 'womens-watch',
   },
   {
     title: 'Couple Watch',
     subtitle: 'Limited Edition',
     description: '30% Discount',
     image: '/images/category3.webp',
+    slug: 'couple-watch',
   },
 ];
