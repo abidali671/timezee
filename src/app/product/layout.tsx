@@ -1,7 +1,9 @@
 import React from 'react'
 import ProductSidebar from '../components/page/productDetail/productSidebar'
 
-const Layout = ({ children }: any) => {
+import { ReactNode } from 'react';
+
+const Layout = ({ children }: { children: ReactNode }) => {
     return (
         <div className='bg-[#030D1D]   px-20 py-10 flex justify-center items-start text-white'>
 
@@ -14,7 +16,6 @@ const Layout = ({ children }: any) => {
                 </div>
 
             </div>
-
 
         </div>
     )
