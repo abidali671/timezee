@@ -10,6 +10,7 @@ import Image from 'next/image';
 
 import { AnimatedButton } from './animatedButton';
 import { Product } from '@/lib/products';
+import Link from 'next/link';
 
 const ProductCarousel = ({ products }: { products: Product[] }) => {
     function calculateDiscountPercentage(originalPrice: number, discountedPrice: number) {
@@ -31,10 +32,12 @@ const ProductCarousel = ({ products }: { products: Product[] }) => {
                                 : 0;
 
                             return (
+
                                 <CarouselItem
                                     key={index}
                                     className="basis-full sm:basis-1/2 lg:basis-1/4 "
                                 >
+
                                     <div className="bg-zinc-900 text-white rounded-2xl shadow-lg hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden cursor-pointer">
                                         {/* % OFF Label */}
                                         {hasDiscount && (
@@ -55,7 +58,7 @@ const ProductCarousel = ({ products }: { products: Product[] }) => {
                                                 height={100}
                                                 className="w-60 object-contain mb-4"
                                             />
-                                            <h3 className="text-2xl font-semibold mb-1 text-center">{item.title}</h3>
+                                            <Link href={`/product/${item.slug}`}><h3 className="text-2xl font-semibold mb-1 text-center">{item.title}</h3></Link>
 
                                             <div className="flex gap-x-3 items-center">
                                                 <p className="text-xl text-gray-200 mb-2">
@@ -82,6 +85,7 @@ const ProductCarousel = ({ products }: { products: Product[] }) => {
                                             </AnimatedButton>
                                         </div>
                                     </div>
+
                                 </CarouselItem>
                             );
                         })}
