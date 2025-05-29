@@ -1,12 +1,17 @@
 "use client";
 
+import { useCart } from "@/context/CartContext";
 import { Search, ShoppingCart, UserRound, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import CartToggle from "../CartToggle";
+import CartSidebar from "../cart";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { cart } = useCart();
+
 
   return (
     <nav className="bg-blue-900 text-gray-200 px-4 py-5  lg:px-8 relative z-50">
@@ -45,16 +50,15 @@ export default function Navbar() {
         {/* Icons */}
         <div className="flex gap-x-5 items-center">
           <UserRound size={20} />
-          <ShoppingCart size={20} />
+          <CartToggle />
           <Search size={20} />
         </div>
       </div>
 
       {/* Slide-in Mobile Menu */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-blue-900 text-white shadow-xl transition-transform duration-300 z-40 ${
-          isMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:hidden`}
+        className={`fixed top-0 left-0 h-full w-64 bg-blue-900 text-white shadow-xl transition-transform duration-300 z-40 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:hidden`}
       >
         <div className="flex items-center justify-between p-4 border-b border-white/20 ">
           {/* <span className="font-bold text-xl">Menu</span> */}
@@ -89,6 +93,7 @@ export default function Navbar() {
           onClick={() => setIsMenuOpen(false)}
         />
       )}
+      <CartSidebar />
     </nav>
   );
 }
