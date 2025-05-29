@@ -8,16 +8,6 @@ export interface SlideProduct {
   slug: string
 }
 
-// Define the structure for regular products
-export interface Product {
-  title: string;
-  price: number;
-  rating: number;
-  discount: number;
-  img: string;
-  brand: string
-  slug: string
-}
 
 // Define the structure for all products
 export interface AllProduct {
@@ -85,54 +75,6 @@ export const slideProducts: SlideProduct[] = [
   },
 ];
 
-// Products Data
-export const products: Product[] = [
-  {
-    slug: 'analog-numeral',
-    title: 'Analog Numeral',
-    price: 7500.00,
-    rating: 5,
-    discount: 0,
-    img: '/images/product1.webp',
-    brand: 'SKMEI'
-  },
-  {
-    slug: 'black-numeral',
-    title: 'Black Numeral',
-    price: 200.00,
-    rating: 5,
-    discount: 250.00,
-    img: '/images/product2.webp',
-    brand: 'Orient'
-  },
-  {
-    slug: 'golden-automatic',
-    title: 'Golden Automatic',
-    price: 200.00,
-    rating: 5,
-    discount: 401.00,
-    img: '/images/product3.webp',
-    brand: 'Bvlgari'
-  },
-  {
-    slug: 'golden-classic-seiko-1',
-    title: 'Golden Classic',
-    price: 200.00,
-    rating: 5,
-    discount: 401.00,
-    img: '/images/product4.webp',
-    brand: 'Seiko'
-  },
-  {
-    slug: 'golden-classic-seiko-2',
-    title: 'Golden Classic',
-    price: 200.00,
-    rating: 5,
-    discount: 401.00,
-    img: '/images/product4.webp',
-    brand: 'Seiko'
-  }
-];
 
 // All Products Data
 export const allProducts: AllProduct[] = [
@@ -208,102 +150,7 @@ export const allProducts: AllProduct[] = [
     type: 'Analog',
     availability: 25,
   },
-  {
-    title: 'Black Numeral',
-    price: 200.00,
-    discount: 250.00,
-    rating: 5,
-    category: 'Modern',
-    img: '/images/product2.webp',
-    brand: 'Orient',
-    slug: 'black-numeral',
-    type: 'Digital',
-    availability: 30,
-  },
-  {
-    title: 'Modern Marvel',
-    price: 350.00,
-    discount: 100.00,
-    rating: 4,
-    category: 'Modern',
-    img: '/images/product4.webp',
-    brand: 'TAG Heuer',
-    slug: 'modern-marvel',
-    type: 'Automatic',
-    availability: 0,
-  },
-  {
-    title: 'Urban Steel',
-    price: 300.00,
-    discount: 120.00,
-    rating: 5,
-    category: 'Modern',
-    img: '/images/product3.webp',
-    brand: 'Citizen',
-    slug: 'urban-steel',
-    type: 'Analog',
-    availability: 12,
-  },
-  {
-    title: 'Sleek Contemporary',
-    price: 400.00,
-    discount: 80.00,
-    rating: 4,
-    category: 'Modern',
-    img: '/images/product2.webp',
-    brand: 'Rado',
-    slug: 'sleek-contemporary',
-    type: 'Digital',
-    availability: 8,
-  },
-  {
-    title: 'Golden Automatic',
-    price: 200.00,
-    discount: 401.00,
-    rating: 5,
-    category: 'Special Edition',
-    img: '/images/product3.webp',
-    brand: 'Bvlgari',
-    slug: 'golden-automatic',
-    type: 'Automatic',
-    availability: 18,
-  },
-  {
-    title: 'Limited Gold',
-    price: 600.00,
-    discount: 150.00,
-    rating: 5,
-    category: 'Special Edition',
-    img: '/images/product1.webp',
-    brand: 'Piaget',
-    slug: 'limited-gold',
-    type: 'Analog',
-    availability: 0,
-  },
-  {
-    title: 'Diamond Edge',
-    price: 800.00,
-    discount: 300.00,
-    rating: 5,
-    category: 'Special Edition',
-    img: '/images/product2.webp',
-    brand: 'Patek Philippe',
-    slug: 'diamond-edge',
-    type: 'Automatic',
-    availability: 10,
-  },
-  {
-    title: 'Prestige Series',
-    price: 1000.00,
-    discount: 500.00,
-    rating: 5,
-    category: 'Special Edition',
-    img: '/images/product4.webp',
-    brand: 'Cartier',
-    slug: 'prestige-series',
-    type: 'Automatic',
-    availability: 3,
-  }
+
 ];
 
 // Banners Data

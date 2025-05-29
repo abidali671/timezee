@@ -25,9 +25,12 @@ export default function Header() {
               <Image
                 src={product.image}
                 alt={product.title}
-                layout="fill"
-                objectFit="cover"
-                className="absolute inset-0 z-0"
+               
+                style={{
+                  objectFit: 'cover', // cover, contain, none
+                }}
+                fill
+                className="absolute inset-0 z-0 w-full h-full"
                 priority
               />
 
@@ -40,7 +43,7 @@ export default function Header() {
               >
                 <div className="tex p-4 md:p-8 justify-center md:justify-start items-center  rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/50 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
                   <SectionTitle className='w-52' font={true}>
-                    {product.title}  
+                    {product.title}
                   </SectionTitle>
                   <h3 className="text-sm md:text-lg font-light text-yellow-400  mb-4">
                     {product.subtitle}

@@ -9,10 +9,10 @@ import {
 import Image from 'next/image';
 
 import { AnimatedButton } from './animatedButton';
-import { Product } from '@/lib/products';
+import { AllProduct } from '@/lib/products';
 import Link from 'next/link';
 
-const ProductCarousel = ({ products }: { products: Product[] }) => {
+const ProductCarousel = ({ products }: { products: AllProduct[] }) => {
     function calculateDiscountPercentage(originalPrice: number, discountedPrice: number) {
         if (originalPrice <= 0 || originalPrice <= discountedPrice) return 0;
 
@@ -25,7 +25,7 @@ const ProductCarousel = ({ products }: { products: Product[] }) => {
             <Carousel opts={{ align: 'start' }} className="w-full">
                 <div className="w-10/12 mx-auto">
                     <CarouselContent>
-                        {products.map((item: Product, index: number) => {
+                        {products.map((item: AllProduct, index: number) => {
                             const hasDiscount = item.discount > item.price;
                             const discountPercent = hasDiscount
                                 ? calculateDiscountPercentage(item.discount, item.price)

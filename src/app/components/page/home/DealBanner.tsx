@@ -53,9 +53,12 @@ const DealBanner = () => {
                 <Image
                     src="https://timzee-demo.myshopify.com/cdn/shop/files/Bg1full.jpg?v=1614300918&width=1920"
                     alt="Deal Banner Background"
-                    layout="fill"
-                    objectFit="cover"
-                    objectPosition="center"
+                   fill
+                    style={{
+                        objectFit: 'cover',
+                        objectPosition: 'center'
+                    }}
+
                     className="z-0"
                 />
             </div>

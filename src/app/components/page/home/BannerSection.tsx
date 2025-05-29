@@ -10,8 +10,10 @@ const BannerSection = () => {
                     <Image
                         src="/images/banner.webp"
                         alt="Roman or Numeral"
-                        layout="fill"
-                        objectFit="cover"
+                        fill
+                        style={{
+                            objectFit: 'cover', // cover, contain, none
+                        }}
                         priority
                         className="brightness-90"
                     />

@@ -38,7 +38,9 @@ export default function BrandLogoSlider() {
                                         alt={logo.alt}
                                         width={180}
                                         height={60}
-                                        objectFit="contain"
+                                        style={{
+                                            objectFit: 'contain', // cover, contain, none
+                                        }}
 
                                     />
                                 </CarouselItem>
