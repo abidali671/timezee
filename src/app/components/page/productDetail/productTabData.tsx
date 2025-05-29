@@ -1,7 +1,8 @@
 // lib/productTabData.tsx
+import { AllProduct } from "@/lib/products";
 import { TabItem } from "./ProductTabs";
 
-export const getProductTabs = (product: any): TabItem[] => [
+export const getProductTabs = (product: AllProduct): TabItem[] => [
     {
         label: "Description",
         value: "description",

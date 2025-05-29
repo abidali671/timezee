@@ -2,6 +2,7 @@
 import { useCart } from '@/context/CartContext';
 import { AnimatedButton } from './animatedButton';
 import { Trash2 } from 'lucide-react';
+import Image from 'next/image';
 
 export default function CartSidebar() {
     const { cart, dispatch, isOpen, toggleCart } = useCart();
@@ -26,7 +27,7 @@ export default function CartSidebar() {
                     cart.map(item => (
                         <div key={item.slug} className="grid grid-cols-2 w-8/12 gap-4">
                             <div>
-                                <img src={item.img} alt={item.title} height={100} width={100} />
+                                <Image src={item.img} alt={item.title} height={100} width={100} />
                             </div>
                             <div className='grid gap-2'>
                                 <p>{item.brand}</p>

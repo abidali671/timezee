@@ -1,7 +1,6 @@
 "use client";
 
-import { useCart } from "@/context/CartContext";
-import { Search, ShoppingCart, UserRound, Menu, X } from "lucide-react";
+import { Search, UserRound, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -10,7 +9,6 @@ import CartSidebar from "../cart";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { cart } = useCart();
 
 
   return (
