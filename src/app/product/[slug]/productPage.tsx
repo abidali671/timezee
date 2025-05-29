@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { AnimatedButton } from "@/app/components/animatedButton";
+import ZoomImage from "@/app/components/ZoomImage";
 
 interface Product {
     title: string;
@@ -24,12 +24,11 @@ export default function ProductPage({ product }: { product: Product }) {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 py-8">
                 <div className="col-span-6">
                     <div className="relative w-full max-w-md aspect-[4/5] overflow-hidden group">
-                        <Image
+                        <ZoomImage
+
                             src={product.img}
                             alt={product.title}
-                            fill
-                            className="object-contain transition-transform duration-300 group-hover:scale-125"
-                            priority
+                            className="max-w-md"
                         />
                     </div>
                 </div>
@@ -82,10 +81,10 @@ export default function ProductPage({ product }: { product: Product }) {
 
                     <div className="mt-6 flex flex-col gap-4">
                         <div className="flex gap-4 flex-col sm:flex-row">
-                            <AnimatedButton className="w-full sm:w-36">Add to Cart</AnimatedButton>
-                            <AnimatedButton className="w-full sm:w-36">Wishlist</AnimatedButton>
+                            <AnimatedButton className="w-full md:w-36 text-sm">Add to Cart</AnimatedButton>
+                            <AnimatedButton className="w-full md:w-36 text-sm">Wishlist</AnimatedButton>
                         </div>
-                        <AnimatedButton className="w-full">Buy Now</AnimatedButton>
+                        <AnimatedButton className="w-full text-sm">Buy Now</AnimatedButton>
                     </div>
                 </div>
             </div>
