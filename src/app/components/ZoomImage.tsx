@@ -1,10 +1,15 @@
+"use client";
+
 import React, { useRef, useState } from "react";
+import Image from "next/image";
 
 type ZoomImageProps = {
     src: string;
     zoomScale?: number;
     alt?: string;
     className?: string;
+    width?: number;
+    height?: number;
 };
 
 const ZoomImage: React.FC<ZoomImageProps> = ({
@@ -12,46 +17,62 @@ const ZoomImage: React.FC<ZoomImageProps> = ({
     zoomScale = 2,
     alt = "Zoomed Image",
     className = "",
+    width = 800,
+    height = 600,
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [backgroundPosition, setBackgroundPosition] = useState("0% 0%");
-    const [isHovering, setIsHovering] = useState(false);
+    const [isZoomed, setIsZoomed] = useState(false);
+
+    const updatePosition = (clientX: number, clientY: number) => {
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        const x = ((clientX - rect.left) / rect.width) * 100;
+        const y = ((clientY - rect.top) / rect.height) * 100;
+        setBackgroundPosition(`${x}% ${y}%`);
+    };
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        const { left, top, width, height } =
-            containerRef.current?.getBoundingClientRect() ?? {
-                left: 0,
-                top: 0,
-                width: 0,
-                height: 0,
-            };
+        updatePosition(e.clientX, e.clientY);
+    };
 
-        const x = ((e.pageX - left - window.scrollX) / width) * 100;
-        const y = ((e.pageY - top - window.scrollY) / height) * 100;
-
-        setBackgroundPosition(`${x}% ${y}%`);
+    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+        const touch = e.touches[0];
+        if (touch) {
+            updatePosition(touch.clientX, touch.clientY);
+        }
     };
 
     return (
         <div
             ref={containerRef}
-            className={`relative overflow-hidden     rounded-lg ${className}`}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
+            className={`relative overflow-hidden rounded-lg ${className}`}
+            onMouseEnter={() => setIsZoomed(true)}
+            onMouseLeave={() => setIsZoomed(false)}
             onMouseMove={handleMouseMove}
+            onTouchStart={() => setIsZoomed(true)}
+            onTouchEnd={() => setIsZoomed(false)}
+            onTouchMove={handleTouchMove}
             style={{
-                backgroundImage: isHovering ? `url(${src})` : "none",
+                cursor: isZoomed ? "zoom-out" : "zoom-in",
+                backgroundImage: isZoomed ? `url(${src})` : "none",
                 backgroundSize: `${zoomScale * 100}%`,
-                backgroundPosition: backgroundPosition,
+                backgroundPosition,
                 backgroundRepeat: "no-repeat",
+                transition: "background-position 0.2s ease, background-size 0.3s ease",
             }}
         >
-            <img
+            <Image
                 src={src}
                 alt={alt}
-                className={`w-full h-auto block pointer-events-none select-none transition-opacity duration-300 ${isHovering ? "opacity-0" : "opacity-100"
+                width={width}
+                height={height}
+                className={`w-full h-auto block pointer-events-none select-none transition-opacity duration-300 ${isZoomed ? "opacity-0" : "opacity-100"
                     }`}
                 draggable={false}
+                priority
+                unoptimized // Required if using src as background
             />
         </div>
     );

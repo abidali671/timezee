@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/accordion";
 import { SlidersHorizontal } from 'lucide-react'; // for filter icon
 import { cn } from "@/lib/utils";
+import Image from 'next/image';
+import { AnimatedButton } from '../../animatedButton';
 
 const sidebarData = [
     { title: 'Stylish Watches', children: [] },
@@ -58,7 +60,7 @@ const ProductSidebar = () => {
             <div
                 className={cn(
                     "bg-[#030D1D]  md:bg-transparent z-40 transition-transform duration-300 md:relative",
-                    "fixed top-0 left-0 h-full   overflow-y-auto md:translate-x-0  ",
+                    "fixed top-0 left-0 h-full w-auto md:w-96   overflow-y-auto md:translate-x-0  ",
                     open ? "translate-x-0" : "-translate-x-full"
                 )}
             >
@@ -73,36 +75,56 @@ const ProductSidebar = () => {
                 </div>
 
                 {/* Sidebar Content */}
-                <div className="flex flex-col py-10 px-7 md:p-4">
-                    <div className='flex flex-col gap-y-7 py-3'>
-                        <h1 className='text-4xl'>Heading</h1>
-                        <hr className="max-w-md text-red-300 border-1 md:border-2 border-yellow-400 relative bottom-4" />
-                    </div>
+                <div className='flex flex-col  '>
+                    <div className="flex flex-col py-10 px-7 md:p-4">
+                        <div className='flex flex-col gap-y-7 py-3'>
+                            <h1 className='text-3xl '>Heading</h1>
+                            <hr className="max-w-md text-red-300 border-1 md:border-2 border-yellow-400 relative bottom-4" />
+                        </div>
 
-                    {sidebarData.map((item, index) => (
-                        <Accordion key={index} type="single" collapsible className='*:py-3'>
-                            <AccordionItem value={`item-${index}`}>
-                                {item.children.length > 0 ? (
-                                    <AccordionTrigger className='text-2xl p-0 text-gray-400'>
-                                        {item.title}
-                                    </AccordionTrigger>
-                                ) : (
-                                    <h1 className='text-2xl text-gray-400'>{item.title}</h1>
-                                )}
-                                <AccordionContent>
-                                    {item.children.length > 0 && (
-                                        <ul className='list-disc pl-5 grid gap-y-5 pt-5'>
-                                            {item.children.map((child, childIndex) => (
-                                                <li key={childIndex} className='text-gray-400'>
-                                                    {child.title}
-                                                </li>
-                                            ))}
-                                        </ul>
+                        {sidebarData.map((item, index) => (
+                            <Accordion key={index} type="single" collapsible className='*:py-3'>
+                                <AccordionItem value={`item-${index}`}>
+                                    {item.children.length > 0 ? (
+                                        <AccordionTrigger className='text-lg p-0 text-gray-400'>
+                                            {item.title}
+                                        </AccordionTrigger>
+                                    ) : (
+                                        <h1 className='text-lg text-gray-400'>{item.title}</h1>
                                     )}
-                                </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
-                    ))}
+                                    <AccordionContent>
+                                        {item.children.length > 0 && (
+                                            <ul className='list-disc pl-5 grid gap-y-5 pt-5'>
+                                                {item.children.map((child, childIndex) => (
+                                                    <li key={childIndex} className='text-gray-400'>
+                                                        {child.title}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        ))}
+                    </div>
+                    <div className="flex flex-col py-10 px-7 md:p-4    ">
+                        <div className='flex flex-col gap-y-7 py-3'>
+                            <h1 className='text-3xl '>Shopping</h1>
+                            <hr className="max-w-md text-red-300 border-1 md:border-2 border-yellow-400 relative bottom-4" />
+                        </div>
+                        <div className="relative w-full h-[400px]">
+                            <Image
+                                src="https://timzee-demo.myshopify.com/cdn/shop/files/Watch6_750x.png?v=1614300921"
+                                alt="product"
+                                fill
+                                className="object-contain"
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                priority
+                            />
+                        </div>
+                        <AnimatedButton className="w-full text-sm mx-auto">Shop Now</AnimatedButton>
+
+                    </div>
                 </div>
             </div>
         </>
