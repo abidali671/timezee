@@ -38,7 +38,7 @@ const ProductSidebar = () => {
     return (
         <>
             {/* Mobile Filter Button */}
-            <div className="md:hidden p-4">
+            <div className="lg:hidden p-4">
                 <button
                     onClick={() => setOpen(true)}
                     className="flex items-center gap-2 text-lg  "
@@ -52,20 +52,20 @@ const ProductSidebar = () => {
             {open && (
                 <div
                     onClick={() => setOpen(false)}
-                    className="fixed inset-0 bg-black/40 z-30 md:hidden"
+                    className="fixed inset-0 bg-black/40 z-30 lg:hidden"
                 />
             )}
 
             {/* Sidebar */}
             <div
                 className={cn(
-                    "bg-[#030D1D]  md:bg-transparent z-40 transition-transform duration-300 md:relative",
-                    "fixed top-0 left-0 h-full w-auto md:w-96   overflow-y-auto md:translate-x-0  ",
+                    "bg-[#030D1D]  lg:bg-transparent z-40 transition-transform duration-300 lg:relative",
+                    "fixed top-0 left-0 h-full w-auto lg:w-96   overflow-y-auto lg:translate-x-0  ",
                     open ? "translate-x-0" : "-translate-x-full"
                 )}
             >
                 {/* Close button (mobile only) */}
-                <div className="md:hidden flex justify-end p-4">
+                <div className="lg:hidden flex justify-end p-4">
                     <button
                         onClick={() => setOpen(false)}
                         className="text-lg text-white   border px-3 py-1 rounded"
@@ -76,10 +76,10 @@ const ProductSidebar = () => {
 
                 {/* Sidebar Content */}
                 <div className='flex flex-col  '>
-                    <div className="flex flex-col py-10 px-7 md:p-4">
+                    <div className="flex flex-col py-10 px-7 lg:p-4">
                         <div className='flex flex-col gap-y-7 py-3'>
                             <h1 className='text-3xl '>Heading</h1>
-                            <hr className="max-w-md text-red-300 border-1 md:border-2 border-yellow-400 relative bottom-4" />
+                            <hr className="max-w-md text-red-300 border-1 lg:border-2 border-yellow-400 relative bottom-4" />
                         </div>
 
                         {sidebarData.map((item, index) => (
@@ -107,12 +107,12 @@ const ProductSidebar = () => {
                             </Accordion>
                         ))}
                     </div>
-                    <div className="flex flex-col py-10 px-7 md:p-4    ">
+                    <div className="flex flex-col py-10 px-7 lg:p-4    ">
                         <div className='flex flex-col gap-y-7 py-3'>
                             <h1 className='text-3xl '>Shopping</h1>
-                            <hr className="max-w-md text-red-300 border-1 md:border-2 border-yellow-400 relative bottom-4" />
+                            <hr className="max-w-md text-red-300 border-1 lg:border-2 border-yellow-400 relative bottom-4" />
                         </div>
-                        <div className="relative w-full h-60 md:h-96">
+                        <div className="relative w-full h-60 lg:h-96">
                             <Image
                                 src="https://timzee-demo.myshopify.com/cdn/shop/files/Watch6_750x.png?v=1614300921"
                                 alt="product"

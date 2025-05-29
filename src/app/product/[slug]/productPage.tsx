@@ -32,8 +32,8 @@ export default function ProductPage({ product }: { product: AllProduct }) {
                     </div>
                 </div>
                 <div className="col-span-6">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4">{product.title}</h1>
-                    <div className="w-full md:w-7/12 *:text-lg grid gap-y-4 text-gray-400 text-sm">
+                    <h1 className="text-4xl md:text-5xl font-bold mb-6">{product.title}</h1>
+                    <div className="w-full md:w-80 *:text-lg grid gap-y-4 text-gray-400 text-sm">
                         <div className="flex justify-between">
                             <span>Price</span>
                             <p>${product.price.toFixed(2)}</p>
@@ -80,11 +80,10 @@ export default function ProductPage({ product }: { product: AllProduct }) {
 
                     <div className="mt-6 flex flex-col gap-4">
                         <div className="flex gap-4 flex-col sm:flex-row">
-                            <AnimatedButton className="w-full md:w-36 text-sm" onClick={() => handleAdd(product)}>Add to Cart</AnimatedButton>
+                            <AnimatedButton className="w-full md:!w-3/5 text-sm md:!max-w-sm" onClick={() => handleAdd(product)}>Add to Cart</AnimatedButton>
 
-                            <AnimatedButton className="w-full md:w-36 text-sm">Wishlist</AnimatedButton>
                         </div>
-                        <AnimatedButton className="w-full md:!w-8/12 text-sm">Buy Now</AnimatedButton>
+                        <AnimatedButton className="w-full md:!w-3/5 md:!max-w-sm text-sm">Buy Now</AnimatedButton>
                     </div>
                 </div>
             </div>

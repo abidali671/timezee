@@ -18,8 +18,8 @@ export const getProductTabs = (product: AllProduct): TabItem[] => [
         content: (
             <ul className="text-white space-y-2 list-disc list-inside" >
                 <li>Free shipping on orders over $50 </li>
-                < li > Delivered within 3–5 business days </li>
-                < li > Tracked delivery with updates </li>
+                <li>Delivered within 3–5 business days </li>
+                <li>Tracked delivery with updates </li>
             </ul>
         ),
     },

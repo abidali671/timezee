@@ -24,7 +24,7 @@ const ProductTabs: React.FC<ProductTabsProps> = ({ tabs, defaultValue, className
                     <TabsTrigger
                         key={tab.value}
                         value={tab.value}
-                        className="relative overflow-hidden group px-4 py-2 text-sm font-medium     data-[state=active]:text-foreground transition-colors duration-300"
+                        className="relative overflow-hidden group px-4 py-2 text-sm font-medium  bg-gray-600 cursor-pointer   data-[state=active]:text-white  transition-colors duration-300"
                     >
                         <span className="relative z-10">{tab.label}</span>
 

@@ -12,7 +12,7 @@ export default function Navbar() {
 
 
   return (
-    <nav className="bg-blue-900 text-gray-200 px-4 py-5  lg:px-8 relative z-50">
+    <nav className="bg-blue-900 text-gray-200 px-4 py-5  lg:px-8 relative z-50 w-full ">
       <div className="flex justify-between items-center">
         {/* Left Section: Hamburger + Logo */}
         <div className="flex items-center gap-4">
