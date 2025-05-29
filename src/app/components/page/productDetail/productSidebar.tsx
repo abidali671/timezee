@@ -112,7 +112,7 @@ const ProductSidebar = () => {
                             <h1 className='text-3xl '>Shopping</h1>
                             <hr className="max-w-md text-red-300 border-1 md:border-2 border-yellow-400 relative bottom-4" />
                         </div>
-                        <div className="relative w-full h-[400px]">
+                        <div className="relative w-full h-60 md:h-96">
                             <Image
                                 src="https://timzee-demo.myshopify.com/cdn/shop/files/Watch6_750x.png?v=1614300921"
                                 alt="product"

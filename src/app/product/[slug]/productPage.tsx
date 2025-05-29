@@ -3,21 +3,21 @@
 import { useState } from "react";
 import { AnimatedButton } from "@/app/components/animatedButton";
 import ZoomImage from "@/app/components/ZoomImage";
+import { AllProduct } from "@/lib/products";
+import ProductTabs from "@/app/components/page/productDetail/ProductTabs";
+import { getProductTabs } from "@/app/components/page/productDetail/productTabData";
+import { useCart } from "@/context/CartContext";
 
-interface Product {
-    title: string;
-    slug: string;
-    img: string;
-    price: number;
-    brand: string;
-    category: string;
-    availability: number;
-    description?: string;
-}
 
-export default function ProductPage({ product }: { product: Product }) {
+
+export default function ProductPage({ product }: { product: AllProduct }) {
     const [quantity, setQuantity] = useState(1);
     const subTotal = product.price * quantity;
+    const { dispatch } = useCart();
+
+    const handleAdd = (product: AllProduct) => {
+        dispatch({ type: 'ADD_TO_CART', payload: product });
+    };
 
     return (
         <div className="flex flex-col px-4  ">
@@ -80,13 +80,18 @@ export default function ProductPage({ product }: { product: Product }) {
 
                     <div className="mt-6 flex flex-col gap-4">
                         <div className="flex gap-4 flex-col sm:flex-row">
-                            <AnimatedButton className="w-full md:w-36 text-sm">Add to Cart</AnimatedButton>
+                            <AnimatedButton className="w-full md:w-36 text-sm" onClick={() => handleAdd(product)}>Add to Cart</AnimatedButton>
+
                             <AnimatedButton className="w-full md:w-36 text-sm">Wishlist</AnimatedButton>
                         </div>
                         <AnimatedButton className="w-full md:!w-8/12 text-sm">Buy Now</AnimatedButton>
                     </div>
                 </div>
             </div>
+            <ProductTabs
+                className="mt-12"
+                tabs={getProductTabs(product)}
+            />
         </div>
     );
 }

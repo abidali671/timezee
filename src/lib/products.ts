@@ -32,7 +32,9 @@ export interface AllProduct {
   type: string;
   availability: number;
 }
-
+export interface CartItem extends AllProduct {
+  quantity: number;
+}
 // Define the structure for banners
 export interface Banner {
   title: string;
