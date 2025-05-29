@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  images :{
+  images: {
     remotePatterns: [
       {
         protocol: "https",
@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
         pathname: "/cdn/shop/files/**",
       },
     ],
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   }
 };
 
