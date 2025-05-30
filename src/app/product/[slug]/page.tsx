@@ -1,10 +1,15 @@
 import { allProducts } from "@/lib/products";
 import { notFound } from "next/navigation";
 import ProductPage from "./productPage";
+import { use } from "react";
 
-type Props = {
-    params: { slug: string };
-};
+
+// Generate static paths at build time
+export async function generateStaticParams() {
+    return allProducts.map((product) => ({
+        slug: product.slug,
+    }));
+}
 
 export async function generateMetadata(
     { params }: { params: Promise<{ slug: string }> }
@@ -23,9 +28,10 @@ export async function generateMetadata(
         description: product.title ?? "",
     };
 }
-// ✅ Server Component wrapper
-export default function Page({ params }: { params: Props["params"] }) {
-    const product = allProducts.find(p => p.slug === params.slug);
+
+export default function Page({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = use(params);
+    const product = allProducts.find(p => p.slug === slug);
     if (!product) return notFound();
 
     return <ProductPage product={product} />;
