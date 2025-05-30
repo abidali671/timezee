@@ -9,7 +9,7 @@ export default function CartSidebar() {
 
     return (
         <div
-            className={`fixed top-0 right-0 h-full w-80 md:w-96 bg-gray-900 shadow-lg z-50 transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+            className={`fixed top-0 right-0 h-full w-72 md:w-96 bg-gray-900 shadow-lg z-50 transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
                 }`}
         >
             <div className="p-4 flex justify-between items-center">
@@ -19,9 +19,9 @@ export default function CartSidebar() {
             <div className="p-4 space-y-4 overflow-y-auto h-[calc(100%-140px)]">
                 {cart.length === 0 ? (
                     <div className='flex justify-center items-center flex-col'>
-                        <h1 className='text-4xl text-white whitespace-nowrap'>Your cart is empty.</h1>
+                        <h1 className='text-3xl md:text-4xl text-white whitespace-nowrap'>Your cart is empty.</h1>
                         <br />
-                        <AnimatedButton className="w-full text-sm">Continue Shopping</AnimatedButton>
+                        <AnimatedButton className="!w-10/12 md:w-full text-sm">Continue Shopping</AnimatedButton>
                     </div>
                 ) : (
                     cart.map(item => (
