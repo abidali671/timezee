@@ -1,8 +1,8 @@
+
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "./components/layout/navbar";
-import Footer from "./components/layout/footer";
-import { CartProvider } from "@/context/CartContext";
+import { Providers } from "./providers";
+import ClientLayoutWrapper from "./ClientLayoutWrapper";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,14 +14,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
+
+ 
+  // Hide navbar and footer on dashboard and its children
+   return (
     <html lang="en">
       <body>
-        <CartProvider>
-          <Navbar />
-          {children}
-          <Footer />
-        </CartProvider>
+        <Providers>
+          <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+
+        </Providers>
       </body>
     </html>
   );
