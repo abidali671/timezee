@@ -36,11 +36,7 @@ const getFromLocalStorage = <T,>(key: string, fallback: T): T => {
     return data ? JSON.parse(data) : fallback;
 };
 
-const setToLocalStorage = (key: string, value: any) => {
-    if (typeof window !== 'undefined') {
-        localStorage.setItem(key, JSON.stringify(value));
-    }
-};
+
 
 // Provider
 export const StoreProvider = ({ children }: { children: ReactNode }) => {
