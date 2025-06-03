@@ -24,7 +24,7 @@ const ProductTabs: React.FC<ProductTabsProps> = ({ tabs, defaultValue, className
                     <TabsTrigger
                         key={tab.value}
                         value={tab.value}
-                        className="relative overflow-hidden group px-4 py-2 text-sm font-medium  bg-gray-600 cursor-pointer   data-[state=active]:text-white  transition-colors duration-300"
+                        className="relative  overflow-hidden group px-4 py-2 text-sm font-medium  bg-gray-600 cursor-pointer   data-[state=active]:text-white  transition-colors duration-300"
                     >
                         <span className="relative z-10">{tab.label}</span>
 
@@ -40,7 +40,7 @@ const ProductTabs: React.FC<ProductTabsProps> = ({ tabs, defaultValue, className
                 ))}
             </TabsList>
             {tabs.map((tab) => (
-                <TabsContent key={tab.value} value={tab.value} className="border h-full min-h-72 px-8 py-10 mt-0 border-gray-200">
+                <TabsContent key={tab.value} value={tab.value} className="border   h-full min-h-72 px-8 py-10 mt-0 border-gray-200">
                     {tab.content}
                 </TabsContent>
             ))}
