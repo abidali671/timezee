@@ -8,7 +8,7 @@ export const getProductTabs = (product: AllProduct): TabItem[] => [
         value: "description",
         content: (
             <p className="text-white" >
-                {product.title || "No description available."}
+                {product.description || "No description available."}
             </p>
         ),
     },

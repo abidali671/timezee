@@ -72,7 +72,7 @@ const ZoomImage: React.FC<ZoomImageProps> = ({
                     }`}
                 draggable={false}
                 priority
-                unoptimized // Required if using src as background
+                unoptimized
             />
         </div>
     );
