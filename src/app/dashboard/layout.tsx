@@ -60,7 +60,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <li>
                                 <Link
                                     href="/dashboard"
-                                    className={`hover:text-gray-300 ${isActive('/dashboard') ? 'text-gray-300 underline' : ''}`}
+                                    className={`hover:text-gray-300 ${pathname === '/dashboard' ? 'text-gray-300  ' : ''}`}
                                 >
                                     Dashboard
                                 </Link>
@@ -68,7 +68,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <li>
                                 <Link
                                     href="/dashboard/products"
-                                    className={`hover:text-gray-300 ${isActive('/dashboard/products') ? 'text-gray-300 underline' : ''}`}
+                                    className={`hover:text-gray-300 ${isActive('/dashboard/products') ? 'text-gray-300  ' : ''}`}
                                 >
                                     Manage Products
                                 </Link>
@@ -76,7 +76,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <li>
                                 <Link
                                     href="/dashboard/orders"
-                                    className={`hover:text-gray-300 ${isActive('/dashboard/orders') ? 'text-gray-300 underline' : ''}`}
+                                    className={`hover:text-gray-300 ${isActive('/dashboard/orders') ? 'text-gray-300  ' : ''}`}
                                 >
                                     Manage Orders
                                 </Link>
