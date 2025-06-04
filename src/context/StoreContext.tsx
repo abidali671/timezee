@@ -6,6 +6,8 @@ interface Product {
     name: string;
     price: number;
     stock: number;
+    description: string;
+    imageUrl?: string; // Optional image URL
 }
 
 interface Order {
@@ -42,9 +44,30 @@ const getFromLocalStorage = <T,>(key: string, fallback: T): T => {
 export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const [products, setProducts] = useState<Product[]>(() =>
         getFromLocalStorage<Product[]>('products', [
-            { id: 1, name: 'Watch A', price: 100, stock: 10 },
-            { id: 2, name: 'Watch B', price: 200, stock: 5 },
-            { id: 3, name: 'Watch C', price: 150, stock: 8 },
+            {
+                id: 1,
+                name: 'Watch A',
+                price: 100,
+                stock: 10,
+                description: 'A classic black leather strap watch.',
+                imageUrl: '', // Add your image URL or leave blank
+            },
+            {
+                id: 2,
+                name: 'Watch B',
+                price: 200,
+                stock: 5,
+                description: 'Luxury silver metal bracelet watch.',
+                imageUrl: '',
+            },
+            {
+                id: 3,
+                name: 'Watch C',
+                price: 150,
+                stock: 8,
+                description: 'Minimalist white face, brown strap.',
+                imageUrl: '',
+            },
         ])
     );
 
@@ -85,6 +108,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const addProduct = (product: Product) => setProducts([...products, product]);
     const updateProduct = (updated: Product) =>
         setProducts((prev) => prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p)));
+
     const removeProduct = (productId: number) =>
         setProducts(products.filter((p) => p.id !== productId));
 
