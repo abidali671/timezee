@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
+import Image from 'next/image';
 
 interface ProductT {
     id: number;
@@ -208,16 +209,18 @@ export default function ManageProducts() {
                                 <td className="py-2 px-4">{product.id}</td>
                                 <td className="py-2 px-4">
                                     {product.imageUrl && (
-                                        <img
+                                        <Image
                                             src={product.imageUrl}
                                             alt={product.name}
                                             className="h-12 w-12 object-cover mx-auto rounded"
                                             loading="lazy"
+                                            width={100}
+                                            height={100}
                                         />
                                     )}
                                 </td>
                                 <td className="py-2 px-4  truncate max-w-20">{product.name}</td>
-                                <td className="py-2 px-4 truncate max-w-20">{product.description.length > 40 ? product.description.slice(0, 40) + '...' : product.description}</td>
+                                <td className="py-2 px-4 truncate max-w-20">{product.description}</td>
                                 <td className="py-2 px-4">{product.price}</td>
                                 <td className="py-2 px-4">{product.stock}</td>
                                 <td className="py-2 px-4 relative">
@@ -346,7 +349,7 @@ function DropdownMenu({
                 top: position.top,
                 left: position.left,
                 marginTop: '0.25rem',
-                marginLeft:'-40px'
+                marginLeft: '-40px'
             }}
             role="menu"
             aria-orientation="vertical"
