@@ -2,15 +2,30 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
 
+interface OrderT {
+    id: number;
+    customer: string;
+    total: number;
+    status: string;
+}
+
 export default function ManageOrders() {
     const { orders, addOrder, updateOrder, removeOrder, loading } = useStore();
 
-    const [formOrder, setFormOrder] = useState({ id: 0, customer: '', total: 0, status: 'Pending' });
+    const initialOrder: OrderT = {
+        id: 0,
+        customer: '',
+        total: 0,
+        status: 'Pending',
+    };
+
+    const [formOrder, setFormOrder] = useState<OrderT>(initialOrder);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+    const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
     const popoverRef = useRef<HTMLDivElement>(null);
 
-    // Close popover when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
@@ -22,37 +37,59 @@ export default function ManageOrders() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const openAddPopover = () => {
-        setFormOrder({ id: 0, customer: '', total: 0, status: 'Pending' });
+    const resetForm = () => {
+        setFormOrder(initialOrder);
         setIsEditing(false);
+    };
+
+    const validateForm = () => {
+        if (!formOrder.customer.trim()) return 'Customer name is required';
+        if (formOrder.total <= 0) return 'Total must be greater than 0';
+        return null;
+    };
+
+    const openAddPopover = () => {
+        resetForm();
         setIsPopoverOpen(true);
     };
 
-    const openEditPopover = (order: typeof formOrder) => {
+    const openEditPopover = (order: OrderT) => {
         setFormOrder(order);
         setIsEditing(true);
         setIsPopoverOpen(true);
     };
 
     const handleFormSubmit = () => {
-        if (!formOrder.customer.trim()) {
-            alert('Customer name is required');
-            return;
-        }
-        if (formOrder.total <= 0) {
-            alert('Total must be greater than 0');
+        const error = validateForm();
+        if (error) {
+            alert(error);
             return;
         }
 
+        const orderToSave = {
+            ...formOrder,
+            id: isEditing ? formOrder.id : orders.length > 0 ? orders[orders.length - 1].id + 1 : 1,
+        };
+
         if (isEditing) {
-            updateOrder(formOrder);
+            updateOrder(orderToSave);
         } else {
-            addOrder({ ...formOrder, id: orders.length > 0 ? orders[orders.length - 1].id + 1 : 1 });
+            addOrder(orderToSave);
         }
 
         setIsPopoverOpen(false);
         setIsEditing(false);
     };
+
+    const handleDropdownOpen = (event: React.MouseEvent<HTMLButtonElement>, id: number) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        setDropdownPosition({
+            top: rect.bottom + window.scrollY + 4,
+            left: rect.left + window.scrollX,
+        });
+        setOpenDropdownId((prev) => (prev === id ? null : id));
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -60,59 +97,33 @@ export default function ManageOrders() {
             </div>
         );
     }
+
     return (
         <div className="relative">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold">Manage Orders</h2>
-                <button
-                    onClick={openAddPopover}
-                    className="bg-blue-900 text-white px-4 py-2 rounded cursor-pointer"
-                >
-                    +
-                </button>
+                <button onClick={openAddPopover} className="bg-blue-900 text-white px-4 py-2 rounded">+</button>
             </div>
 
-            {/* Popover for Add/Edit */}
+            {/* Popover */}
             {isPopoverOpen && (
                 <div
                     ref={popoverRef}
-                    className="absolute z-10 right-0 bg-white shadow-lg rounded-lg p-6 w-80 border border-gray-300"
+                    className="absolute z-10 right-0 mx-auto bg-white shadow-lg rounded-lg p-6 w-full md:w-6/12 border border-gray-300"
                 >
                     <h3 className="text-xl font-bold mb-4 font-serif">
                         {isEditing ? 'Edit Order' : 'Add New Order'}
                     </h3>
-                    <div className="flex flex-col mb-3">
-                        <label className="font-medium mb-1">Customer Name</label>
-                        <input
-                            type="text"
-                            value={formOrder.customer}
-                            onChange={(e) => setFormOrder({ ...formOrder, customer: e.target.value })}
-                            className="border p-2 rounded w-full"
-                            autoFocus
-                        />
-                    </div>
-                    <div className="flex flex-col mb-3">
-                        <label className="font-medium mb-1">Total</label>
-                        <input
-                            type="number"
-                            min={1}
-                            value={formOrder.total}
-                            onChange={(e) => setFormOrder({ ...formOrder, total: +e.target.value })}
-                            className="border p-2 rounded w-full"
-                        />
-                    </div>
-                    <div className="flex flex-col mb-3">
-                        <label className="font-medium mb-1">Status</label>
-                        <select
-                            value={formOrder.status}
-                            onChange={(e) => setFormOrder({ ...formOrder, status: e.target.value })}
-                            className="border p-2 rounded w-full"
-                        >
-                            <option value="Pending">Pending</option>
-                            <option value="Shipped">Shipped</option>
-                            <option value="Delivered">Delivered</option>
-                        </select>
-                    </div>
+
+                    <FormInput label="Customer Name" value={formOrder.customer} onChange={(val) => setFormOrder((o) => ({ ...o, customer: val }))} />
+                    <FormInput label="Total" type="number" value={formOrder.total} onChange={(val) => setFormOrder((o) => ({ ...o, total: +val }))} />
+                    <FormSelect
+                        label="Status"
+                        value={formOrder.status}
+                        options={['Pending', 'Shipped', 'Delivered']}
+                        onChange={(val) => setFormOrder((o) => ({ ...o, status: val }))}
+                    />
+
                     <div className="flex justify-end space-x-2">
                         <button
                             onClick={() => {
@@ -123,10 +134,7 @@ export default function ManageOrders() {
                         >
                             Cancel
                         </button>
-                        <button
-                            onClick={handleFormSubmit}
-                            className="px-4 py-2 rounded bg-blue-900 text-white"
-                        >
+                        <button onClick={handleFormSubmit} className="px-4 py-2 rounded bg-blue-900 text-white">
                             {isEditing ? 'Save' : 'Add'}
                         </button>
                     </div>
@@ -139,38 +147,143 @@ export default function ManageOrders() {
                     <thead>
                         <tr className="bg-gray-100 text-center">
                             <th className="py-3 px-4">Order ID</th>
-                            <th className="py-3 px-4">Customer</th>
+                            <th className="py-3 px-4  ">Customer</th>
                             <th className="py-3 px-4">Total</th>
                             <th className="py-3 px-4">Status</th>
                             <th className="py-3 px-4">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="*:hover:bg-gray-100 transition-colors text-center">
+                    <tbody className="text-center">
                         {orders.map((order) => (
-                            <tr key={order.id}>
+                            <tr key={order.id} className="hover:bg-gray-100">
                                 <td className="py-2 px-4">{order.id}</td>
-                                <td className="py-2 px-4">{order.customer}</td>
+                                <td className="py-2 px-4 truncate max-w-20">{order.customer}</td>
                                 <td className="py-2 px-4">{order.total}</td>
                                 <td className="py-2 px-4">{order.status}</td>
-                                <td className="py-2 px-4 space-x-2">
+                                <td className="py-2 px-4 relative">
                                     <button
-                                        onClick={() => openEditPopover(order)}
-                                        className="text-blue-600 hover:underline"
+                                        onClick={(e) => handleDropdownOpen(e, order.id)}
+                                        className="text-black hover:text-black focus:outline-none cursor-pointer h-10 w-10 bg-gray-50 rounded-full"
+
                                     >
-                                        Edit
+                                        ⋮
                                     </button>
-                                    <button
-                                        onClick={() => removeOrder(order.id)}
-                                        className="text-red-600 hover:underline"
-                                    >
-                                        Delete
-                                    </button>
+                                    {openDropdownId === order.id && (
+                                        <DropdownMenu
+                                            position={dropdownPosition}
+                                            onEdit={() => {
+                                                openEditPopover(order);
+                                                setOpenDropdownId(null);
+                                            }}
+                                            onDelete={() => {
+                                                removeOrder(order.id);
+                                                setOpenDropdownId(null);
+                                            }}
+                                        />
+                                    )}
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+        </div>
+    );
+}
+
+/** Reusable Form Input */
+function FormInput({
+    label,
+    value,
+    onChange,
+    type = 'text',
+}: {
+    label: string;
+    value: string | number;
+    onChange: (val: string) => void;
+    type?: React.HTMLInputTypeAttribute;
+}) {
+    return (
+        <div className="flex flex-col mb-3">
+            <label className="font-medium mb-1">{label}</label>
+            <input
+                type={type}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="border p-2 rounded w-full"
+            />
+        </div>
+    );
+}
+
+/** Reusable Select Dropdown */
+function FormSelect({
+    label,
+    value,
+    onChange,
+    options,
+}: {
+    label: string;
+    value: string;
+    onChange: (val: string) => void;
+    options: string[];
+}) {
+    return (
+        <div className="flex flex-col mb-3">
+            <label className="font-medium mb-1">{label}</label>
+            <select
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="border p-2 rounded w-full"
+            >
+                {options.map((opt) => (
+                    <option key={opt} value={opt}>
+                        {opt}
+                    </option>
+                ))}
+            </select>
+        </div>
+    );
+}
+
+/** Dropdown Menu Component */
+function DropdownMenu({
+    position,
+    onEdit,
+    onDelete,
+}: {
+    position: { top: number; left: number };
+    onEdit: () => void;
+    onDelete: () => void;
+}) {
+    return (
+        <div
+            className="z-50 bg-white border border-gray-200 rounded-md shadow-lg w-40"
+            style={{
+                position: 'fixed',
+                top: position.top,
+                left: position.left,
+                marginTop: '0.25rem',
+                marginLeft: '-40px'
+            }}
+            role="menu"
+        >
+            <button
+                onClick={onEdit}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
+                role="menuitem"
+            >
+                <span>✏️</span>
+                <span>Edit</span>
+            </button>
+            <button
+                onClick={onDelete}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
+                role="menuitem"
+            >
+                <span>🗑️</span>
+                <span>Delete</span>
+            </button>
         </div>
     );
 }
