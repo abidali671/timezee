@@ -58,7 +58,7 @@ const ProductCarousel = ({ products }: { products: AllProduct[] }) => {
                                                 height={100}
                                                 className="w-60 object-contain mb-4"
                                             />
-                                            <Link href={`/product/${item.slug}`}><h3 className="text-2xl font-semibold mb-1 text-center">{item.title}</h3></Link>
+                                            <Link href={`/product/${item.slug}`}><h3 className="text-2xl font-semibold mb-1 text-center hover:underline">{item.title}</h3></Link>
 
                                             <div className="flex gap-x-3 items-center">
                                                 <p className="text-xl text-gray-200 mb-2">
