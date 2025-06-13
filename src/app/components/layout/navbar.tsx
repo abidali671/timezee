@@ -27,13 +27,14 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/">
-            <Image
+            {/* <Image
               src="https://timzee-demo.myshopify.com/cdn/shop/files/logo_1.png?v=1645517921&width=500"
               width={120}
               height={120}
               alt="logo"
               className="w-auto h-10"
-            />
+            /> */}
+            <h1 className="text-3xl font-bold text-white">SwissTime</h1>
           </Link>
         </div>
 
