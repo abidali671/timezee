@@ -2,14 +2,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
 import Image from 'next/image';
+import { createContentfulProduct } from '@/lib/contentfull/management';
+
 
 interface ProductT {
-    id: number;
+    id?: number;
     name: string;
     price: number;
     stock: number;
     description: string;
     imageUrl?: string;
+    category?: string;
+    brand?: string;
+    type?: string;
+    discount?: number;
+    rating?: number;
+    imageFile?: File | null;
 }
 
 export default function ManageProducts() {
@@ -106,27 +114,45 @@ export default function ManageProducts() {
             return;
         }
 
-        let imageUrl = formProduct.imageUrl || '/images/product1.webp';
-        if (selectedImage) {
-            imageUrl = await toBase64(selectedImage);
+        try {
+            const productData = {
+                ...formProduct,
+                rating: Math.round(formProduct.rating || 1),
+            };
+
+            // Upload to Contentful
+            const contentfulProduct = await createContentfulProduct(productData, selectedImage);
+console.log(contentfulProduct, 'contentfulProduct');
+
+            // Create image URL for local state
+            let imageUrl = formProduct.imageUrl;
+            if (selectedImage) {
+                imageUrl = URL.createObjectURL(selectedImage);
+            }
+
+            // Update local state
+            const productToSave = {
+                ...formProduct,
+                id: parseInt(contentfulProduct.sys.id, 10),
+                imageUrl,
+            };
+
+            if (isEditing) {
+                updateProduct(productToSave);
+            } else {
+                addProduct(productToSave);
+            }
+
+            resetForm();
+            setIsPopoverOpen(false);
+            setIsEditing(false);
+            alert('Product successfully uploaded to Contentful!');
+        } catch (error) {
+            console.error('Error uploading product:', error);
+            alert(`Failed to upload product: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
-
-        const productToSave = {
-            ...formProduct,
-            imageUrl,
-            id: isEditing ? formProduct.id : (products.length > 0 ? products[products.length - 1].id + 1 : 1),
-        };
-
-        if (isEditing) {
-            updateProduct(productToSave);
-        } else {
-            addProduct(productToSave);
-        }
-
-        resetForm();
-        setIsPopoverOpen(false);
-        setIsEditing(false);
     };
+    console.log(products, 'produc');
 
     if (loading) {
         return (
@@ -326,7 +352,13 @@ function FormFileInput({
                 }}
                 className="border p-2 rounded w-full"
             />
-            {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 h-32 object-cover rounded border" />}
+            {imagePreview && (
+                <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="mt-2 h-32 object-cover rounded border"
+                />
+            )}
         </div>
     );
 }
