@@ -19,7 +19,7 @@ export default function Header() {
           {slideProducts.map((product, index) => (
             <CarouselItem
               key={index}
-              className="relative h-[calc(100vh_-_80px)] w-full "
+              className="relative h-[calc(100vh_-_75px)] w-full "
             >
               {/* Background Image */}
               <Image
