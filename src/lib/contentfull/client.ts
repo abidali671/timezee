@@ -6,4 +6,14 @@ const client = createClient({
     environment: process.env.CONTENTFUL_ENVIRONMENT_ID || 'master',
 });
 
+export const fetchAllProducts = async () => {
+    try {
+        const entries = await client.getEntries({ content_type: 'swissTime' });
+        return entries.items.map(item => item.fields);
+    } catch (error) {
+        console.error('Error fetching all products:', error);
+        throw error;
+    }
+};
+
 export default client;
