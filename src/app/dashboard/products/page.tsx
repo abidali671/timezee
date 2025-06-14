@@ -4,8 +4,9 @@ import Image from 'next/image';
 import { useForm, Controller } from 'react-hook-form';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { createContentfulProduct } from '@/lib/contentfull/management';
+import { createContentfulProduct, updateContentfulProduct } from '@/lib/contentfull/management';
 import { useProducts } from '@/context/productsContext';
+import SafeImage from '@/components/ui/SafeImage';
 
 
 
@@ -129,34 +130,39 @@ export default function ManageProducts() {
     };
 
     const onSubmit = async (data: ProductT) => {
+        closePopover()
         try {
             const productData = {
                 ...data,
                 rating: Math.round(data.rating || 1),
                 imageFile: selectedImage
             };
+            console.log(productData, 'data==');
 
-            // Upload to Contentful
-            const contentfulProduct = await createContentfulProduct(productData, selectedImage);
+            let contentfulProduct;
+            let clientSideImageUrl = data.imageUrl;
 
-            // Create image URL for local state
-            let imageUrl = data.imageUrl;
-            if (selectedImage) {
-                imageUrl = URL.createObjectURL(selectedImage);
+            if (isEditing && data.id) {
+                contentfulProduct = await updateContentfulProduct(data.id, productData, selectedImage || undefined);
+            } else {
+                contentfulProduct = await createContentfulProduct(productData, selectedImage);
+                if (selectedImage) {
+                    // Only create client-side URL for preview, not for storage
+                    clientSideImageUrl = URL.createObjectURL(selectedImage);
+                }
             }
 
-            // Update local state
             const productToSave = {
                 ...data,
                 id: contentfulProduct.id,
-                imageUrl,
+                imageUrl: data.imageUrl || clientSideImageUrl,
             };
 
             if (isEditing && data.id) {
-                updateProduct({ ...productToSave, id: data.id });
+                await updateProduct(productToSave, contentfulProduct.imageUrl);
                 toast.success('Product updated successfully!');
             } else {
-                addProduct(productToSave);
+                await addProduct(productToSave);
                 toast.success('Product created successfully!');
             }
 
@@ -166,7 +172,6 @@ export default function ManageProducts() {
             toast.error(`Failed to ${isEditing ? 'update' : 'create'} product`);
         }
     };
-
     const handleDelete = async (id: string) => {
         try {
             await removeProduct(id);
@@ -259,7 +264,7 @@ export default function ManageProducts() {
                                 accept="image/*"
                                 onChange={handleImageChange}
                                 className="border p-2 rounded w-full"
-                                disabled={isEditing}
+                            // disabled={isEditing}
                             />
                             {imagePreview && (
                                 <img
@@ -354,7 +359,7 @@ export default function ManageProducts() {
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 rounded bg-blue-900 text-white"
+                                className="px-4 py-2 rounded bg-blue-900 text-white cursor-pointer"
                                 disabled={!isEditing && !selectedImage}
                             >
                                 {isEditing ? 'Save' : 'Add'}
@@ -382,13 +387,12 @@ export default function ManageProducts() {
                                 <td className="py-2 px-4">{product.id}</td>
                                 <td className="py-2 px-4">
                                     {product.imageUrl && (
-                                        <Image
+                                        <SafeImage
                                             src={product.imageUrl}
                                             alt={product.name}
-                                            className="h-12 w-12 object-cover mx-auto rounded"
-                                            loading="lazy"
-                                            width={100}
-                                            height={100}
+                                            width={48}
+                                            height={48}
+                                            className="object-cover rounded mx-auto"
                                         />
                                     )}
                                 </td>

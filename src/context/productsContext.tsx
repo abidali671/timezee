@@ -28,7 +28,7 @@ interface ProductContextProps {
     products: Product[];
     loading: boolean;
     addProduct: (product: Product) => Promise<Product>;
-    updateProduct: (product: Product) => Promise<Product>;
+    updateProduct: (product: Product, ImageFile: File | undefined) => Promise<Product>;
     removeProduct: (productId: string) => Promise<void>;
     refreshProducts: () => Promise<void>;
 }
@@ -75,27 +75,20 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         return Promise.resolve(product);
     };
 
-    const updateProduct = async (product: Product): Promise<Product> => {
+    const updateProduct = async (product: Product, imageFile?: File): Promise<Product> => {
         try {
-            // Optimistically update local state
-            setProducts(prev => prev.map(p => p.id === product.id ? product : p));
+            const updatedProduct = await updateContentfulProduct(product.id, product, imageFile);
 
-            // Update in Contentful
-            const updatedProduct = await updateContentfulProduct(product.id, product);
-
-            // Update state with confirmed data
-            setProducts(prev => prev.map(p =>
-                p.id === product.id ? updatedProduct : p
-            ));
+            setProducts(prev => prev.map(p => p.id === product.id ? updatedProduct : p));
 
             return updatedProduct;
         } catch (error) {
-            // Refresh from server on error
             await fetchProducts();
-            console.error('Failed to update product:', error);
             throw error;
         }
     };
+
+
 
     const removeProduct = async (productId: string): Promise<void> => {
         try {
