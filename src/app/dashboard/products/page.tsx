@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { createContentfulProduct, updateContentfulProduct } from '@/lib/contentfull/management';
 import { useProducts } from '@/context/productsContext';
 import SafeImage from '@/components/ui/SafeImage';
+import Image from 'next/image';
 interface ProductT {
     id?: string;
     name: string;
@@ -263,7 +264,7 @@ export default function ManageProducts() {
                             // disabled={isEditing}
                             />
                             {imagePreview && (
-                                <img
+                                <Image
                                     src={imagePreview}
                                     alt="Preview"
                                     className="mt-2 h-32 object-cover rounded border"

@@ -25,8 +25,7 @@ const OrderContext = createContext<OrderContextProps | undefined>(undefined);
 
 export const OrderProvider = ({ children }: { children: ReactNode }) => {
     const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState(false); // or true if loading from API
-
+    const [loading] = useState(false);
     const addOrder = (order: Order) =>
         setOrders((prev) => [...prev, order]);
 

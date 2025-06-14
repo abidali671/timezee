@@ -8,7 +8,7 @@ import React, {
     useCallback,
 } from 'react';
 import { fetchAllProducts } from '@/lib/contentfull/client';
-import { deleteContentfulProduct, updateContentfulProduct, createContentfulProduct } from '@/lib/contentfull/management';
+import { deleteContentfulProduct, updateContentfulProduct } from '@/lib/contentfull/management';
 
 interface Product {
     id: string;
