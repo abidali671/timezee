@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import { useStore } from '@/context/StoreContext';
+import { useOrders } from '@/context/orderContext';
 
 interface OrderT {
     id: number;
@@ -10,7 +10,7 @@ interface OrderT {
 }
 
 export default function ManageOrders() {
-    const { orders, addOrder, updateOrder, removeOrder, loading } = useStore();
+    const { orders, addOrder, updateOrder, removeOrder, loading } = useOrders();
 
     const initialOrder: OrderT = {
         id: 0,

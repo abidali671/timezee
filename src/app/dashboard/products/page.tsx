@@ -1,12 +1,12 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import { useStore } from '@/context/StoreContext';
 import Image from 'next/image';
 import { createContentfulProduct } from '@/lib/contentfull/management';
+import { useProducts } from '@/context/productsContext';
 
 
 interface ProductT {
-    id?: number;
+    id?: string;
     name: string;
     price: number;
     stock: number;
@@ -21,10 +21,10 @@ interface ProductT {
 }
 
 export default function ManageProducts() {
-    const { products, addProduct, updateProduct, removeProduct, loading } = useStore();
+    const { products, addProduct, updateProduct, removeProduct, loading } = useProducts();
 
     const initialFormState: ProductT = {
-        id: 0,
+        id: '',
         name: '',
         price: 0,
         stock: 0,
@@ -37,7 +37,7 @@ export default function ManageProducts() {
     const [isEditing, setIsEditing] = useState(false);
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
     const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
     const popoverRef = useRef<HTMLDivElement>(null);
@@ -87,10 +87,10 @@ export default function ManageProducts() {
     };
 
     // Handle dropdown toggle & positioning
-    const handleDropdownOpen = (event: React.MouseEvent<HTMLButtonElement>, id: number) => {
+    const handleDropdownOpen = (event: React.MouseEvent<HTMLButtonElement>, id: string) => {
         const rect = event.currentTarget.getBoundingClientRect();
         setDropdownPosition({
-            top: rect.bottom + window.scrollY + 4, // small offset
+            top: rect.bottom + window.scrollY + 4,
             left: rect.left + window.scrollX,
         });
         setOpenDropdownId((currentId) => (currentId === id ? null : id));
@@ -122,7 +122,7 @@ export default function ManageProducts() {
 
             // Upload to Contentful
             const contentfulProduct = await createContentfulProduct(productData, selectedImage);
-console.log(contentfulProduct, 'contentfulProduct');
+            console.log(contentfulProduct, 'contentfulProduct');
 
             // Create image URL for local state
             let imageUrl = formProduct.imageUrl;
@@ -133,14 +133,14 @@ console.log(contentfulProduct, 'contentfulProduct');
             // Update local state
             const productToSave = {
                 ...formProduct,
-                id: parseInt(contentfulProduct.sys.id, 10),
+                id: contentfulProduct.sys.id,
                 imageUrl,
             };
 
             if (isEditing) {
-                updateProduct(productToSave);
+                updateProduct({ ...productToSave, id: productToSave.id });
             } else {
-                addProduct(productToSave);
+                addProduct({ ...productToSave, id: productToSave.id });
             }
 
             resetForm();
@@ -251,9 +251,10 @@ console.log(contentfulProduct, 'contentfulProduct');
                                 <td className="py-2 px-4">{product.stock}</td>
                                 <td className="py-2 px-4 relative">
                                     <button
-                                        onClick={(e) => handleDropdownOpen(e, product.id)}
+
                                         className="text-black hover:text-black focus:outline-none cursor-pointer h-10 w-10 bg-gray-50 rounded-full"
                                         aria-haspopup="true"
+                                        onClick={(e) => handleDropdownOpen(e, product.id)}
                                         aria-expanded={openDropdownId === product.id}
                                         aria-label={`Open actions for product ${product.name}`}
                                     >
@@ -264,11 +265,11 @@ console.log(contentfulProduct, 'contentfulProduct');
                                         <DropdownMenu
                                             position={dropdownPosition}
                                             onEdit={() => {
-                                                openEditPopover(product);
+                                                openEditPopover({ ...product, id: String(product.id) });
                                                 setOpenDropdownId(null);
                                             }}
                                             onDelete={() => {
-                                                removeProduct(product.id);
+                                                removeProduct(String(product.id));
                                                 setOpenDropdownId(null);
                                             }}
                                         />
