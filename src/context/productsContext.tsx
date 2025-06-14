@@ -5,10 +5,11 @@ import React, {
     useEffect,
     useContext,
     ReactNode,
+    useCallback,
 } from 'react';
 import { fetchAllProducts } from '@/lib/contentfull/client';
+import { deleteContentfulProduct, updateContentfulProduct, createContentfulProduct } from '@/lib/contentfull/management';
 
-// Product type
 interface Product {
     id: string;
     name: string;
@@ -16,63 +17,104 @@ interface Product {
     stock: number;
     description: string;
     imageUrl?: string;
+    category?: string;
+    brand?: string;
+    type?: string;
+    discount?: number;
+    rating?: number;
 }
 
-// Context props
 interface ProductContextProps {
     products: Product[];
     loading: boolean;
-    addProduct: (product: Product) => void;
-    updateProduct: (product: Product) => void;
-    removeProduct: (productId: string) => void;
+    addProduct: (product: Product) => Promise<Product>;
+    updateProduct: (product: Product) => Promise<Product>;
+    removeProduct: (productId: string) => Promise<void>;
+    refreshProducts: () => Promise<void>;
 }
 
-// Create context
 const ProductContext = createContext<ProductContextProps | undefined>(undefined);
 
-// Provider
 export const ProductProvider = ({ children }: { children: ReactNode }) => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const loadProducts = async () => {
-            try {
-                const contentfulProducts = await fetchAllProducts();
-
-                const mappedProducts: Product[] = contentfulProducts.map((item: any) => ({
-                    id: item.id || item.sys?.id,
-                    name: item.title,
-                    price: item.price,
-                    stock: item.availability || 0,
-                    description: item.description || '',
-                    imageUrl: item.image?.fields?.file?.url
-                        ? `https:${item.image.fields.file.url}`
-                        : '',
-                }));
-
-                setProducts(mappedProducts);
-            } catch (error) {
-                console.error('Failed to fetch products:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadProducts();
+    const fetchProducts = useCallback(async () => {
+        setLoading(true);
+        try {
+            const contentfulProducts = await fetchAllProducts();
+            const mappedProducts: Product[] = contentfulProducts.map((item: any) => ({
+                id: item.id || item.sys?.id,
+                name: item.title,
+                price: item.price,
+                stock: item.availability || 0,
+                description: item.description || '',
+                imageUrl: item.image?.fields?.file?.url
+                    ? `https:${item.image.fields.file.url}`
+                    : undefined, // Use undefined instead of empty string
+                category: item.category || 'general',
+                brand: item.brand || 'rado',
+                type: item.type || 'auto',
+                discount: item.discount || 0,
+                rating: item.rating || 1,
+            }));
+            setProducts(mappedProducts);
+        } catch (error) {
+            console.error('Failed to fetch products:', error);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    // Handlers
-    const addProduct = (product: Product) =>
+    useEffect(() => {
+        fetchProducts();
+    }, [fetchProducts]);
+
+    const addProduct = async (product: Product): Promise<Product> => {
         setProducts((prev) => [...prev, product]);
+        return Promise.resolve(product);
+    };
 
-    const updateProduct = (updated: Product) =>
-        setProducts((prev) =>
-            prev.map((p) => (p.id === updated.id ? updated : p))
-        );
+    const updateProduct = async (product: Product): Promise<Product> => {
+        try {
+            // Optimistically update local state
+            setProducts(prev => prev.map(p => p.id === product.id ? product : p));
 
-    const removeProduct = (productId: string) =>
-        setProducts((prev) => prev.filter((p) => p.id !== productId));
+            // Update in Contentful
+            const updatedProduct = await updateContentfulProduct(product.id, product);
+
+            // Update state with confirmed data
+            setProducts(prev => prev.map(p =>
+                p.id === product.id ? updatedProduct : p
+            ));
+
+            return updatedProduct;
+        } catch (error) {
+            // Refresh from server on error
+            await fetchProducts();
+            console.error('Failed to update product:', error);
+            throw error;
+        }
+    };
+
+    const removeProduct = async (productId: string): Promise<void> => {
+        try {
+            // Optimistically remove from local state
+            setProducts(prev => prev.filter(p => p.id !== productId));
+
+            // Delete from Contentful
+            await deleteContentfulProduct(productId);
+        } catch (error) {
+            // Refresh from server on error
+            await fetchProducts();
+            console.error('Failed to delete product:', error);
+            throw error;
+        }
+    };
+
+    const refreshProducts = async (): Promise<void> => {
+        await fetchProducts();
+    };
 
     return (
         <ProductContext.Provider
@@ -82,6 +124,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
                 addProduct,
                 updateProduct,
                 removeProduct,
+                refreshProducts,
             }}
         >
             {children}
@@ -89,8 +132,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     );
 };
 
-// Custom hook
-export const useProducts = () => {
+export const useProducts = (): ProductContextProps => {
     const context = useContext(ProductContext);
     if (!context) {
         throw new Error('useProducts must be used within a ProductProvider');

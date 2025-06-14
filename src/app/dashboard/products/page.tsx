@@ -1,8 +1,12 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import { useForm, Controller } from 'react-hook-form';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { createContentfulProduct } from '@/lib/contentfull/management';
 import { useProducts } from '@/context/productsContext';
+
 
 
 interface ProductT {
@@ -18,75 +22,103 @@ interface ProductT {
     discount?: number;
     rating?: number;
     imageFile?: File | null;
+    slug?: string;
 }
 
 export default function ManageProducts() {
     const { products, addProduct, updateProduct, removeProduct, loading } = useProducts();
+    const {
+        control,
+        handleSubmit,
+        reset,
+        watch,
+        setValue,
+        formState: { errors }
+    } = useForm<ProductT>({
+        defaultValues: {
+            name: '',
+            slug: '',
+            price: 0,
+            stock: 0,
+            description: '',
+            discount: 0,
+            rating: 1,
+            category: 'general',
+            brand: 'rado',
+            type: 'auto'
+        }
+    });
 
-    const initialFormState: ProductT = {
-        id: '',
-        name: '',
-        price: 0,
-        stock: 0,
-        description: '',
-        imageUrl: '',
-    };
-
-    const [formProduct, setFormProduct] = useState<ProductT>(initialFormState);
+    const name = watch('name');
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-    const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-
+    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
     const popoverRef = useRef<HTMLDivElement>(null);
 
-    // Convert File to Base64 string
-    const toBase64 = (file: File): Promise<string> =>
-        new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-        });
+    // Generate slug from product name
+    useEffect(() => {
+        if (name) {
+            const slug = name.toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^\w-]+/g, '');
+            setValue('slug', slug);
+        }
+    }, [name, setValue]);
 
-    // Close popover when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-                setIsPopoverOpen(false);
-                setIsEditing(false);
+                closePopover();
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Open add product popover
     const openAddPopover = () => {
-        resetForm();
-        setIsPopoverOpen(true);
+        reset({
+            name: '',
+            slug: '',
+            price: 0,
+            stock: 0,
+            description: '',
+            discount: 0,
+            rating: 1,
+            category: 'general',
+            brand: 'rado',
+            type: 'auto'
+        });
+        setSelectedImage(null);
+        setImagePreview(null);
         setIsEditing(false);
+        setIsPopoverOpen(true);
     };
 
-    // Open edit product popover
     const openEditPopover = (product: ProductT) => {
-        setFormProduct(product);
+        reset({
+            ...product,
+            slug: product.name.toLowerCase().replace(/\s+/g, '-')
+        });
         setImagePreview(product.imageUrl ?? null);
         setSelectedImage(null);
         setIsEditing(true);
         setIsPopoverOpen(true);
     };
 
-    // Reset form state
-    const resetForm = () => {
-        setFormProduct(initialFormState);
-        setSelectedImage(null);
-        setImagePreview(null);
+    const closePopover = () => {
+        setIsPopoverOpen(false);
+        setIsEditing(false);
     };
 
-    // Handle dropdown toggle & positioning
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setSelectedImage(file);
+        setImagePreview(file ? URL.createObjectURL(file) : null);
+    };
+
     const handleDropdownOpen = (event: React.MouseEvent<HTMLButtonElement>, id: string) => {
         const rect = event.currentTarget.getBoundingClientRect();
         setDropdownPosition({
@@ -96,63 +128,56 @@ export default function ManageProducts() {
         setOpenDropdownId((currentId) => (currentId === id ? null : id));
     };
 
-    // Validate form before submit
-    const validateForm = () => {
-        if (!formProduct.name.trim()) return 'Product name is required';
-        if (formProduct.price <= 0) return 'Price must be greater than 0';
-        if (formProduct.stock < 0) return 'Stock cannot be negative';
-        if (!formProduct.description.trim()) return 'Description is required';
-        if (!isEditing && !selectedImage) return 'Image is required for new product';
-        return null;
-    };
-
-    // Submit handler for form
-    const handleFormSubmit = async () => {
-        const validationError = validateForm();
-        if (validationError) {
-            alert(validationError);
-            return;
-        }
-
+    const onSubmit = async (data: ProductT) => {
         try {
             const productData = {
-                ...formProduct,
-                rating: Math.round(formProduct.rating || 1),
+                ...data,
+                rating: Math.round(data.rating || 1),
+                imageFile: selectedImage
             };
 
             // Upload to Contentful
             const contentfulProduct = await createContentfulProduct(productData, selectedImage);
-            console.log(contentfulProduct, 'contentfulProduct');
 
             // Create image URL for local state
-            let imageUrl = formProduct.imageUrl;
+            let imageUrl = data.imageUrl;
             if (selectedImage) {
                 imageUrl = URL.createObjectURL(selectedImage);
             }
 
             // Update local state
             const productToSave = {
-                ...formProduct,
-                id: contentfulProduct.sys.id,
+                ...data,
+                id: contentfulProduct.id,
                 imageUrl,
             };
 
-            if (isEditing) {
-                updateProduct({ ...productToSave, id: productToSave.id });
+            if (isEditing && data.id) {
+                updateProduct({ ...productToSave, id: data.id });
+                toast.success('Product updated successfully!');
             } else {
-                addProduct({ ...productToSave, id: productToSave.id });
+                addProduct(productToSave);
+                toast.success('Product created successfully!');
             }
 
-            resetForm();
-            setIsPopoverOpen(false);
-            setIsEditing(false);
-            alert('Product successfully uploaded to Contentful!');
+            closePopover();
         } catch (error) {
-            console.error('Error uploading product:', error);
-            alert(`Failed to upload product: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            console.error('Error submitting product:', error);
+            toast.error(`Failed to ${isEditing ? 'update' : 'create'} product`);
         }
     };
-    console.log(products, 'produc');
+
+    const handleDelete = async (id: string) => {
+        try {
+            await removeProduct(id);
+            toast.success('Product deleted successfully!');
+            setOpenDropdownId(null);
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            toast.error('Failed to delete product');
+        }
+    };
+
 
     if (loading) {
         return (
@@ -184,36 +209,158 @@ export default function ManageProducts() {
                     role="dialog"
                     aria-modal="true"
                 >
-                    <h3 className="text-xl font-bold mb-4 font-mono">{isEditing ? 'Edit Product' : 'Add New Product'}</h3>
+                    <h3 className="text-xl font-bold mb-4 font-mono">
+                        {isEditing ? 'Edit Product' : 'Add New Product'}
+                    </h3>
 
-                    <FormInput label="Product Name" value={formProduct.name} onChange={(val) => setFormProduct((p) => ({ ...p, name: val }))} />
-                    <FormFileInput
-                        label="Product Image"
-                        onFileSelect={(file) => {
-                            setSelectedImage(file);
-                            setImagePreview(file ? URL.createObjectURL(file) : null);
-                        }}
-                        imagePreview={imagePreview}
-                    />
-                    <FormTextarea label="Description" value={formProduct.description} onChange={(val) => setFormProduct((p) => ({ ...p, description: val }))} />
-                    <FormInput label="Price" type="number" value={formProduct.price} onChange={(val) => setFormProduct((p) => ({ ...p, price: +val }))} />
-                    <FormInput label="Stock" type="number" value={formProduct.stock} onChange={(val) => setFormProduct((p) => ({ ...p, stock: +val }))} />
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        {/* Product Name */}
+                        <div className="flex flex-col mb-3">
+                            <label className="font-medium mb-1">Product Name</label>
+                            <Controller
+                                name="name"
+                                control={control}
+                                rules={{ required: 'Product name is required' }}
+                                render={({ field }) => (
+                                    <input
+                                        {...field}
+                                        type="text"
+                                        className="border p-2 rounded w-full"
+                                    />
+                                )}
+                            />
+                            {errors.name && (
+                                <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+                            )}
+                        </div>
 
-                    <div className="flex justify-end space-x-2">
-                        <button
-                            onClick={() => {
-                                resetForm();
-                                setIsPopoverOpen(false);
-                                setIsEditing(false);
-                            }}
-                            className="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100"
-                        >
-                            Cancel
-                        </button>
-                        <button onClick={handleFormSubmit} className="px-4 py-2 rounded bg-blue-900 text-white">
-                            {isEditing ? 'Save' : 'Add'}
-                        </button>
-                    </div>
+                        {/* Slug (read-only) */}
+                        <div className="flex flex-col mb-3">
+                            <label className="font-medium mb-1">Slug</label>
+                            <Controller
+                                name="slug"
+                                control={control}
+                                render={({ field }) => (
+                                    <input
+                                        {...field}
+                                        type="text"
+                                        className="border p-2 rounded w-full bg-gray-100"
+                                        readOnly
+                                    />
+                                )}
+                            />
+                        </div>
+
+                        {/* Product Image */}
+                        <div className="flex flex-col mb-3">
+                            <label className="font-medium mb-1">Product Image</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="border p-2 rounded w-full"
+                                disabled={isEditing}
+                            />
+                            {imagePreview && (
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    className="mt-2 h-32 object-cover rounded border"
+                                />
+                            )}
+                            {!isEditing && !selectedImage && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    Image is required for new product
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Description */}
+                        <div className="flex flex-col mb-3">
+                            <label className="font-medium mb-1">Description</label>
+                            <Controller
+                                name="description"
+                                control={control}
+                                rules={{ required: 'Description is required' }}
+                                render={({ field }) => (
+                                    <textarea
+                                        {...field}
+                                        className="border p-2 rounded w-full"
+                                        rows={3}
+                                    />
+                                )}
+                            />
+                            {errors.description && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {errors.description.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Price */}
+                        <div className="flex flex-col mb-3">
+                            <label className="font-medium mb-1">Price</label>
+                            <Controller
+                                name="price"
+                                control={control}
+                                rules={{
+                                    required: 'Price is required',
+                                    min: { value: 0.01, message: 'Price must be greater than 0' }
+                                }}
+                                render={({ field }) => (
+                                    <input
+                                        {...field}
+                                        type="number"
+                                        step="0.01"
+                                        className="border p-2 rounded w-full"
+                                    />
+                                )}
+                            />
+                            {errors.price && (
+                                <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>
+                            )}
+                        </div>
+
+                        {/* Stock */}
+                        <div className="flex flex-col mb-3">
+                            <label className="font-medium mb-1">Stock</label>
+                            <Controller
+                                name="stock"
+                                control={control}
+                                rules={{
+                                    required: 'Stock is required',
+                                    min: { value: 0, message: 'Stock cannot be negative' }
+                                }}
+                                render={({ field }) => (
+                                    <input
+                                        {...field}
+                                        type="number"
+                                        className="border p-2 rounded w-full"
+                                    />
+                                )}
+                            />
+                            {errors.stock && (
+                                <p className="text-red-500 text-sm mt-1">{errors.stock.message}</p>
+                            )}
+                        </div>
+
+                        <div className="flex justify-end space-x-2">
+                            <button
+                                type="button"
+                                onClick={closePopover}
+                                className="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 rounded bg-blue-900 text-white"
+                                disabled={!isEditing && !selectedImage}
+                            >
+                                {isEditing ? 'Save' : 'Add'}
+                            </button>
+                        </div>
+                    </form>
                 </div>
             )}
 
@@ -245,13 +392,12 @@ export default function ManageProducts() {
                                         />
                                     )}
                                 </td>
-                                <td className="py-2 px-4  truncate max-w-20">{product.name}</td>
+                                <td className="py-2 px-4 truncate max-w-20">{product.name}</td>
                                 <td className="py-2 px-4 truncate max-w-20">{product.description}</td>
                                 <td className="py-2 px-4">{product.price}</td>
                                 <td className="py-2 px-4">{product.stock}</td>
                                 <td className="py-2 px-4 relative">
                                     <button
-
                                         className="text-black hover:text-black focus:outline-none cursor-pointer h-10 w-10 bg-gray-50 rounded-full"
                                         aria-haspopup="true"
                                         onClick={(e) => handleDropdownOpen(e, product.id)}
@@ -265,13 +411,10 @@ export default function ManageProducts() {
                                         <DropdownMenu
                                             position={dropdownPosition}
                                             onEdit={() => {
-                                                openEditPopover({ ...product, id: String(product.id) });
+                                                openEditPopover(product);
                                                 setOpenDropdownId(null);
                                             }}
-                                            onDelete={() => {
-                                                removeProduct(String(product.id));
-                                                setOpenDropdownId(null);
-                                            }}
+                                            onDelete={() => handleDelete(product.id)}
                                         />
                                     )}
                                 </td>
@@ -280,91 +423,13 @@ export default function ManageProducts() {
                     </tbody>
                 </table>
             </div>
+
+            {/* Toast Notifications */}
+            <ToastContainer position="bottom-right" autoClose={3000} />
         </div>
     );
 }
 
-function FormInput({
-    label,
-    value,
-    onChange,
-    type = 'text',
-}: {
-    label: string;
-    value: string | number;
-    onChange: (val: string) => void;
-    type?: React.HTMLInputTypeAttribute;
-}) {
-    return (
-        <div className="flex flex-col mb-3">
-            <label className="font-medium mb-1">{label}</label>
-            <input
-                type={type}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="border p-2 rounded w-full"
-            />
-        </div>
-    );
-}
-
-/** Textarea component */
-function FormTextarea({
-    label,
-    value,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    onChange: (val: string) => void;
-}) {
-    return (
-        <div className="flex flex-col mb-3">
-            <label className="font-medium mb-1">{label}</label>
-            <textarea
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="border p-2 rounded w-full"
-                rows={3}
-            />
-        </div>
-    );
-}
-
-/** File input with image preview */
-function FormFileInput({
-    label,
-    onFileSelect,
-    imagePreview,
-}: {
-    label: string;
-    onFileSelect: (file: File | null) => void;
-    imagePreview: string | null;
-}) {
-    return (
-        <div className="flex flex-col mb-3">
-            <label className="font-medium mb-1">{label}</label>
-            <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                    const file = e.target.files?.[0] ?? null;
-                    onFileSelect(file);
-                }}
-                className="border p-2 rounded w-full"
-            />
-            {imagePreview && (
-                <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="mt-2 h-32 object-cover rounded border"
-                />
-            )}
-        </div>
-    );
-}
-
-/** Dropdown menu component */
 function DropdownMenu({
     position,
     onEdit,
