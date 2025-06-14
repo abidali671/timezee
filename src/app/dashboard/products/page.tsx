@@ -1,15 +1,11 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
 import { useForm, Controller } from 'react-hook-form';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { createContentfulProduct, updateContentfulProduct } from '@/lib/contentfull/management';
 import { useProducts } from '@/context/productsContext';
 import SafeImage from '@/components/ui/SafeImage';
-
-
-
 interface ProductT {
     id?: string;
     name: string;
@@ -371,7 +367,7 @@ export default function ManageProducts() {
 
             {/* Products Table */}
             <div className="overflow-x-auto relative">
-                <table className="min-w-full bg-white shadow-md rounded-lg">
+                <table className="min-w-full bg-white shadow-md rounded-lg text-center">
                     <thead>
                         <tr className="bg-gray-100 text-center">
                             {['ID', 'Image', 'Name', 'Desc', 'Price', 'Stock', 'Actions'].map((head) => (
@@ -423,9 +419,21 @@ export default function ManageProducts() {
                                     )}
                                 </td>
                             </tr>
+
+
+
                         ))}
+
                     </tbody>
+
                 </table>
+                {products.length === 0 && (
+                    <div className='flex justify-center items-center my-5'>
+
+
+                        <span className='font-bold'>No Products..</span>
+                    </div>
+                )}
             </div>
 
             {/* Toast Notifications */}
