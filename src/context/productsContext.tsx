@@ -46,16 +46,16 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
             console.log(contentfulProducts, 'prod-');
 
             const mappedProducts: Product[] = contentfulProducts.map((item: any) => ({
-                id: item.sys?.id || '', // Fallback to empty string if undefined
-                name: item.fields?.title || '', // Contentful often nests data in 'fields'
+                id: item.sys?.id || '',
+                name: item.fields?.title || '',
                 price: item.fields?.price || 0,
                 stock: item.fields?.inStock || 0,
                 description: item.fields?.description,
                 imageUrl: item.fields?.image?.fields?.file?.url
                     ? `https:${item.fields.image.fields.file.url}`
                     : undefined,
-                category: item.fields?.category || 'general',
-                // brand: item.fields?.brand?.fields?.name,
+                category: item.fields?.category?.sys?.id,
+                brand: item.fields?.brands?.sys?.id,
                 type: item.fields?.type || '',
                 discount: item.fields?.discount || 0,
                 rating: item.fields?.rating || 0,

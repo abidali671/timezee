@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Controller } from 'react-hook-form';
 import Image from 'next/image';
 import { ProductSidebarProps } from '@/types/product';
-import { fetchAllProducts, fetchProductSlugs } from '@/lib/contentfull/client';
+import { fetchProductSlugs } from '@/lib/contentfull/client';
 import { X } from 'lucide-react';
 
 
@@ -29,7 +29,6 @@ export function ProductSidebar({
     const slug = watch('slug');
     const [slugHas, setSlugHas] = React.useState(false);
 
-    // Slug generator based on name
     useEffect(() => {
         if (name) {
             const generatedSlug = name
@@ -52,9 +51,13 @@ export function ProductSidebar({
                 console.error('Error checking slug availability:', error);
             }
         }
-
         checkSlugAvailability();
     }, [slug]);
+    useEffect(() => {
+        if (!isOpen) {
+            setSlugHas(false);
+        }
+    }, [isOpen]);
 
     return (
         <div>
@@ -130,9 +133,9 @@ export function ProductSidebar({
                             )}
                         </div>
                         <div className="space-y-2">
-                            <label className="block font-medium">Brand</label>
+                            <label className="block font-medium">Category</label>
                             {brandsLoading ? (
-                                <div className="border p-2 rounded bg-gray-100">Loading brands...</div>
+                                <div className="border p-2 rounded bg-gray-100">Loading Category...</div>
                             ) : (
                                 <Controller
                                     name="category"

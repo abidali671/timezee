@@ -12,6 +12,7 @@ export interface ProductT {
     rating?: number;
     imageFile?: File | null;
     slug?: string;
+
 }
 
 export interface Brand {

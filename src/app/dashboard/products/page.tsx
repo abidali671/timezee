@@ -116,9 +116,11 @@ export default function ManageProducts() {
     };
 
     const openEditSidebar = (product: ProductT) => {
+     
         reset({
             ...product,
-            slug: product.name.toLowerCase().replace(/\s+/g, '-')
+            slug: product.name.toLowerCase().replace(/\s+/g, '-'),
+
         });
         setImagePreview(product.imageUrl ?? null);
         setSelectedImage(null);
