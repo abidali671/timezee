@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { createContentfulProduct, fetchAllBrands, updateContentfulProduct } from '@/lib/contentfull/management';
+import { createContentfulProduct, fetchAllBrands, fetchAllCategories, updateContentfulProduct } from '@/lib/contentfull/management';
 import { useProducts } from '@/context/productsContext';
 import SafeImage from '@/components/ui/SafeImage';
 import { ProductT, Brand } from '@/types/product';
@@ -41,6 +41,7 @@ export default function ManageProducts() {
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
     const [brands, setBrands] = useState<Brand[]>([]);
+    const [categories, SetCategories] = useState<any>([])
     const [brandsLoading, setBrandsLoading] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -73,6 +74,26 @@ export default function ManageProducts() {
             }
         };
         loadBrands();
+    }, []);
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                setBrandsLoading(true);
+                const contentfulBrands = await fetchAllCategories();
+                const mappedBrands = contentfulBrands.map((category: any) => ({
+                    id: category.sys.id,
+                    name: category.fields.name?.['en-US'] || 'Unnamed category'
+                }));
+                SetCategories(mappedBrands);
+            } catch (error) {
+                console.error('Failed to fetch brands:', error);
+                toast.error('Failed to load brands');
+            } finally {
+                setBrandsLoading(false);
+            }
+        };
+        loadCategories();
     }, []);
 
     const openAddSidebar = () => {
@@ -202,7 +223,7 @@ export default function ManageProducts() {
                 </div>
 
                 {/* Products Table */}
-            
+
                 <div className="w-full overflow-x-auto">
                     <table className="min-w-[800px] w-full bg-white shadow-md rounded-lg text-center">
                         <thead>
@@ -285,6 +306,7 @@ export default function ManageProducts() {
                 selectedImage={selectedImage}
                 watch={watch}
                 setValue={setValue}
+                categories={categories}
             />
 
             {/* Toast Notifications */}

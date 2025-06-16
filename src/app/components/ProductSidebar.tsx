@@ -21,7 +21,8 @@ export function ProductSidebar({
     handleImageChange,
     selectedImage,
     watch,
-    setValue
+    setValue,
+    categories
 }: ProductSidebarProps) {
     const rating = watch('rating') || 1;
     const name = watch('name');
@@ -128,7 +129,31 @@ export function ProductSidebar({
                                 <p className="text-red-500 text-sm">{errors.brands.message}</p>
                             )}
                         </div>
-
+                        <div className="space-y-2">
+                            <label className="block font-medium">Brand</label>
+                            {brandsLoading ? (
+                                <div className="border p-2 rounded bg-gray-100">Loading brands...</div>
+                            ) : (
+                                <Controller
+                                    name="category"
+                                    control={control}
+                                    rules={{ required: 'Category is required' }}
+                                    render={({ field }) => (
+                                        <select {...field} className="w-full border p-2 rounded">
+                                            <option value="">Select a Category</option>
+                                            {categories.map((category) => (
+                                                <option key={category.id} value={category.id}>
+                                                    {category.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                />
+                            )}
+                            {errors.brands && (
+                                <p className="text-red-500 text-sm">{errors.brands.message}</p>
+                            )}
+                        </div>
                         {/* Type */}
                         <div className="space-y-2">
                             <label className="block font-medium">Type</label>

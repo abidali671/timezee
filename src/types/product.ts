@@ -34,4 +34,5 @@ export interface ProductSidebarProps {
     selectedImage: File | null;
     watch: any;
     setValue: any;
+    categories: Brand[]
 }

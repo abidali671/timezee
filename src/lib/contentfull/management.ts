@@ -32,7 +32,20 @@ export async function fetchAllBrands() {
     }
 }
 
-
+export async function fetchAllCategories() {
+    try {
+        const space = await client.getSpace(CONTENTFUL_SPACE_ID);
+        const environment = await space.getEnvironment('master');
+        const entries = await environment.getEntries({
+            content_type: 'categories',
+            limit: 1000
+        });
+        return entries.items;
+    } catch (error) {
+        console.error('Error fetching brands:', error);
+        throw error;
+    }
+}
 
 export async function createContentfulProduct(productData: any, imageFile: File | null) {
     try {
@@ -90,14 +103,22 @@ export async function createContentfulProduct(productData: any, imageFile: File 
             rating: { 'en-US': sanitizedData.rating },
             inStock: { 'en-US': sanitizedData.stock },
             description: { 'en-US': sanitizedData.description },
-            category: { 'en-US': sanitizedData.category || 'general' },
             type: { 'en-US': sanitizedData.type || 'auto' },
             brands: {
                 'en-US': {
                     sys: {
                         type: 'Link',
                         linkType: 'Entry',
-                        id: sanitizedData.brands, // Important: use field ID "brands"
+                        id: sanitizedData.brands,
+                    },
+                },
+            },
+            category: {
+                'en-US': {
+                    sys: {
+                        type: 'Link',
+                        linkType: 'Entry',
+                        id: sanitizedData.category,
                     },
                 },
             },
@@ -130,7 +151,7 @@ export async function createContentfulProduct(productData: any, imageFile: File 
             imageUrl: assetId
                 ? `https://images.ctfassets.net/${CONTENTFUL_SPACE_ID}/${assetId}`
                 : '',
-            category: entry.fields.category?.['en-US'] || 'general',
+            category: sanitizedData.category,
             type: entry.fields.type?.['en-US'] || 'auto',
             discount: entry.fields.discount?.['en-US'] || 0,
             rating: entry.fields.rating?.['en-US'] || 1,
@@ -207,7 +228,7 @@ export const updateContentfulProduct = async (
         entry.fields.rating['en-US'] = sanitizedData.rating;
         entry.fields.inStock['en-US'] = sanitizedData.stock;
         entry.fields.description['en-US'] = sanitizedData.description;
-        entry.fields.category['en-US'] = sanitizedData.category || 'general';
+        // entry.fields.category['en-US'] = sanitizedData.category || 'general';
         entry.fields.type['en-US'] = sanitizedData.type || 'auto';
 
         // Update brand reference
@@ -220,7 +241,15 @@ export const updateContentfulProduct = async (
                 },
             },
         };
-
+        entry.fields.category = {
+            'en-US': {
+                sys: {
+                    type: 'Link',
+                    linkType: 'Entry',
+                    id: sanitizedData.category,
+                },
+            },
+        };
         // Update image if needed
         if (assetId) {
             entry.fields.image = {
@@ -247,7 +276,7 @@ export const updateContentfulProduct = async (
             imageUrl: assetId
                 ? `https://images.ctfassets.net/${CONTENTFUL_SPACE_ID}/${assetId}`
                 : productData.imageUrl,
-            category: publishedEntry.fields.category?.['en-US'] || 'general',
+            category: sanitizedData.category,
             brandId: sanitizedData.brands,
             type: publishedEntry.fields.type?.['en-US'] || 'auto',
             discount: publishedEntry.fields.discount?.['en-US'] || 0,
