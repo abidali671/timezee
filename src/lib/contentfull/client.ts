@@ -16,4 +16,13 @@ export const fetchAllProducts = async () => {
         throw error;
     }
 };
+export const fetchProductSlugs = async () => {
+    try {
+        const entries = await client.getEntries({ content_type: 'products' });
+        return entries.items.map((item) => item.fields.slug);
+    } catch (error) {
+        console.error('Error fetching product slugs:', error);
+        throw error;
+    }
+};
 export default client;
