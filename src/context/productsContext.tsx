@@ -43,21 +43,26 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         setLoading(true);
         try {
             const contentfulProducts = await fetchAllProducts();
+            console.log(contentfulProducts, 'prod-');
+
             const mappedProducts: Product[] = contentfulProducts.map((item: any) => ({
-                id: item.id || item.sys?.id,
-                name: item.title,
-                price: item.price,
-                stock: item.availability || 0,
-                description: item.description || '',
-                imageUrl: item.image?.fields?.file?.url
-                    ? `https:${item.image.fields.file.url}`
-                    : undefined, // Use undefined instead of empty string
-                category: item.category || 'general',
-                brand: item.brand || 'rado',
-                type: item.type || 'auto',
-                discount: item.discount || 0,
-                rating: item.rating || 1,
+                id: item.sys?.id || '', // Fallback to empty string if undefined
+                name: item.fields?.title || '', // Contentful often nests data in 'fields'
+                price: item.fields?.price || 0,
+                stock: item.fields?.inStock || 0,
+                description: item.fields?.description,
+                imageUrl: item.fields?.image?.fields?.file?.url
+                    ? `https:${item.fields.image.fields.file.url}`
+                    : undefined,
+                category: item.fields?.category || 'general',
+                // brand: item.fields?.brand?.fields?.name,
+                type: item.fields?.type || '',
+                discount: item.fields?.discount || 0,
+                rating: item.fields?.rating || 0,
+
             }));
+            console.log(mappedProducts, 'mapp');
+
             setProducts(mappedProducts);
         } catch (error) {
             console.error('Failed to fetch products:', error);

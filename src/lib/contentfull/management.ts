@@ -59,9 +59,9 @@ export async function createContentfulProduct(productData: any, imageFile: File 
             discount: { 'en-US': any },
             rating: { 'en-US': any },
             category: { 'en-US': any },
-            brand: { 'en-US': any },
+            // brand: { 'en-US': any },
             type: { 'en-US': any },
-            availability: { 'en-US': any },
+            inStock: { 'en-US': any },
             description: { 'en-US': any },
             image?: { 'en-US': { sys: { type: string, linkType: string, id: string } } }
         } = {
@@ -71,9 +71,9 @@ export async function createContentfulProduct(productData: any, imageFile: File 
             discount: { 'en-US': sanitizedData.discount },
             rating: { 'en-US': sanitizedData.rating },
             category: { 'en-US': sanitizedData.category || 'general' },
-            brand: { 'en-US': sanitizedData.brand || 'rado' },
+            // brand: { 'en-US': sanitizedData.brand || 'rado' },
             type: { 'en-US': sanitizedData.type || 'auto' },
-            availability: { 'en-US': sanitizedData.stock },
+            inStock: { 'en-US': sanitizedData.stock },
             description: { 'en-US': sanitizedData.description },
         }
 
@@ -89,19 +89,20 @@ export async function createContentfulProduct(productData: any, imageFile: File 
                 },
             }
         }
+        // Add Brand reference if provided
 
-        const entry = await environment.createEntry('swissTime', { fields: entryFields })
+        const entry = await environment.createEntry('products', { fields: entryFields })
         await entry.publish()
 
         return {
             id: entry.sys.id,
             name: entry.fields.title['en-US'],
             price: entry.fields.price['en-US'],
-            stock: entry.fields.availability['en-US'],
+            stock: entry.fields.inStock['en-US'],
             description: entry.fields.description['en-US'],
             imageUrl: assetId ? `https:${entry.fields.image?.['en-US']?.fields?.file?.url}` : '',
             category: entry.fields.category?.['en-US'] || 'general',
-            brand: entry.fields.brand?.['en-US'] || 'rado',
+            // brand: entry.fields.brand?.['en-US'] || 'rado',
             type: entry.fields.type?.['en-US'] || 'auto',
             discount: entry.fields.discount?.['en-US'] || 0,
             rating: entry.fields.rating?.['en-US'] || 1,
@@ -160,10 +161,10 @@ export const updateContentfulProduct = async (id: string, productData: any, imag
         entry.fields.price['en-US'] = sanitizedData.price;
         entry.fields.discount['en-US'] = sanitizedData.discount;
         entry.fields.rating['en-US'] = sanitizedData.rating;
-        entry.fields.availability['en-US'] = sanitizedData.stock;
+        entry.fields.inStock['en-US'] = sanitizedData.stock;
         entry.fields.description['en-US'] = sanitizedData.description;
         entry.fields.category['en-US'] = sanitizedData.category || 'general';
-        entry.fields.brand['en-US'] = sanitizedData.brand || 'rado';
+        // entry.fields.brand['en-US'] = sanitizedData.brand || 'rado';
         entry.fields.type['en-US'] = sanitizedData.type || 'auto';
 
         if (assetId) {
@@ -178,6 +179,10 @@ export const updateContentfulProduct = async (id: string, productData: any, imag
             };
         }
 
+
+
+
+
         // Update and publish the entry
         const updatedEntry = await entry.update();
         console.log("Updated entry:", updatedEntry);
@@ -189,7 +194,7 @@ export const updateContentfulProduct = async (id: string, productData: any, imag
             id: publishedEntry.sys.id,
             name: publishedEntry.fields.title['en-US'],
             price: publishedEntry.fields.price['en-US'],
-            stock: publishedEntry.fields.availability['en-US'],
+            stock: publishedEntry.fields.inStock['en-US'],
             description: publishedEntry.fields.description['en-US'],
             imageUrl: assetId ? `https://images.ctfassets.net/${assetId}` : productData.imageUrl,
             category: publishedEntry.fields.category?.['en-US'] || 'general',

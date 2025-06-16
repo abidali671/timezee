@@ -42,8 +42,8 @@ export default function ManageProducts() {
             discount: 0,
             rating: 1,
             category: 'general',
-            brand: 'rado',
-            type: 'auto'
+            brand: 'rolex',
+            type: 'Kids'
         }
     });
 
@@ -86,8 +86,9 @@ export default function ManageProducts() {
             discount: 0,
             rating: 1,
             category: 'general',
-            brand: 'rado',
-            type: 'auto'
+            brand: 'rolex',
+            type: 'Kids'
+
         });
         setSelectedImage(null);
         setImagePreview(null);
@@ -267,6 +268,8 @@ export default function ManageProducts() {
                                 <Image
                                     src={imagePreview}
                                     alt="Preview"
+                                    width={100}
+                                    height={100}
                                     className="mt-2 h-32 object-cover rounded border"
                                 />
                             )}

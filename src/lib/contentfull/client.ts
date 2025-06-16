@@ -8,12 +8,9 @@ const client = createClient({
 
 export const fetchAllProducts = async () => {
     try {
-        const entries = await client.getEntries({ content_type: 'swissTime' });
+        const entries = await client.getEntries({ content_type: 'products' });
 
-        return entries.items.map((item) => ({
-            id: item.sys.id,
-            ...item.fields,
-        }));
+        return entries.items;
     } catch (error) {
         console.error('Error fetching all products:', error);
         throw error;
