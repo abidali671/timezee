@@ -3,10 +3,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { createContentfulProduct, updateContentfulProduct } from '@/lib/contentfull/management';
+import { createContentfulProduct, fetchAllBrands, updateContentfulProduct } from '@/lib/contentfull/management';
 import { useProducts } from '@/context/productsContext';
 import SafeImage from '@/components/ui/SafeImage';
 import Image from 'next/image';
+
 interface ProductT {
     id?: string;
     name: string;
@@ -15,12 +16,17 @@ interface ProductT {
     description: string;
     imageUrl?: string;
     category?: string;
-    brand?: string;
+    brands?: string;
     type?: string;
     discount?: number;
     rating?: number;
     imageFile?: File | null;
     slug?: string;
+}
+
+interface Brand {
+    id: string;
+    name: string;
 }
 
 export default function ManageProducts() {
@@ -42,7 +48,7 @@ export default function ManageProducts() {
             discount: 0,
             rating: 1,
             category: 'general',
-            brand: 'rolex',
+            brands: '',
             type: 'Kids'
         }
     });
@@ -55,7 +61,8 @@ export default function ManageProducts() {
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
     const popoverRef = useRef<HTMLDivElement>(null);
-
+    const [brands, setBrands] = useState<Brand[]>([]);
+    const [brandsLoading, setBrandsLoading] = useState(true);
     // Generate slug from product name
     useEffect(() => {
         if (name) {
@@ -76,6 +83,26 @@ export default function ManageProducts() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+
+    useEffect(() => {
+        const loadBrands = async () => {
+            try {
+                setBrandsLoading(true);
+                const contentfulBrands = await fetchAllBrands();
+                const mappedBrands = contentfulBrands.map((brand: any) => ({
+                    id: brand.sys.id,
+                    name: brand.fields.name?.['en-US'] || 'Unnamed Brand'
+                }));
+                setBrands(mappedBrands);
+            } catch (error) {
+                console.error('Failed to fetch brands:', error);
+                toast.error('Failed to load brands');
+            } finally {
+                setBrandsLoading(false);
+            }
+        };
+        loadBrands();
+    }, []);
     const openAddPopover = () => {
         reset({
             name: '',
@@ -86,8 +113,8 @@ export default function ManageProducts() {
             discount: 0,
             rating: 1,
             category: 'general',
-            brand: 'rolex',
-            type: 'Kids'
+            brands: '',
+            type: 'Male'
 
         });
         setSelectedImage(null);
@@ -236,7 +263,48 @@ export default function ManageProducts() {
                                 <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
                             )}
                         </div>
+                        <div className="flex flex-col mb-3">
+                            <label className="font-medium mb-1">Brand</label>
+                            {brandsLoading ? (
+                                <div className="border p-2 rounded bg-gray-100">Loading brands...</div>
+                            ) : (
+                                <Controller
+                                    name="brands"
+                                    control={control}
+                                    rules={{ required: 'Brand is required' }}
+                                    render={({ field }) => (
+                                        <select {...field} className="border p-2 rounded w-full">
+                                            <option value="">Select a Brand</option>
+                                            {brands.map((brand) => (
+                                                <option key={brand.id} value={brand.id}>
+                                                    {brand.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                />
 
+                            )}
+                        </div>
+                        {/* Type */}
+                        <div className="flex flex-col mb-3">
+                            <label className="font-medium mb-1">Type</label>
+                            <Controller
+                                name="type"
+                                control={control}
+                                rules={{ required: 'Type is required' }}
+                                render={({ field }) => (
+                                    <select {...field} className="border p-2 rounded w-full">
+                                        <option value="Kids">Kids</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                )}
+                            />
+                            {errors.type && (
+                                <p className="text-red-500 text-sm mt-1">{errors.type.message}</p>
+                            )}
+                        </div>
                         {/* Slug (read-only) */}
                         <div className="flex flex-col mb-3">
                             <label className="font-medium mb-1">Slug</label>

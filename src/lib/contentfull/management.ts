@@ -16,17 +16,52 @@ const sanitizeProductData = (productData: any) => ({
     rating: Math.round(Number(productData.rating || 1))
 })
 
+// Add this helper function to fetch brands
+export async function fetchAllBrands() {
+    try {
+        const space = await client.getSpace(CONTENTFUL_SPACE_ID);
+        const environment = await space.getEnvironment('master');
+        const entries = await environment.getEntries({
+            content_type: 'brands', // Your brand content type
+            limit: 1000
+        });
+        return entries.items;
+    } catch (error) {
+        console.error('Error fetching brands:', error);
+        throw error;
+    }
+}
+
+
+
 export async function createContentfulProduct(productData: any, imageFile: File | null) {
     try {
-        const space = await client.getSpace(CONTENTFUL_SPACE_ID)
-        const environment = await space.getEnvironment('master')
+        const space = await client.getSpace(CONTENTFUL_SPACE_ID);
+        const environment = await space.getEnvironment('master');
 
-        // Sanitize numeric fields
-        const sanitizedData = sanitizeProductData(productData)
-        let assetId = null
+        const sanitizedData = sanitizeProductData(productData);
 
-        // Handle image upload first if exists
+        if (!sanitizedData.brands) {
+            throw new Error('Brand is required for product creation');
+        }
+
+        // Validate Brand exists
+        const brandEntry = await environment.getEntry(sanitizedData.brands);
+        if (!brandEntry) {
+            throw new Error(`Brand with ID ${sanitizedData.brands} not found`);
+        }
+
+        let assetId: string | null = null;
+
+        // Upload image if provided
         if (imageFile) {
+            const fileBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as ArrayBuffer);
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(imageFile);
+            });
+
             const asset = await environment.createAssetFromFiles({
                 fields: {
                     title: { 'en-US': sanitizedData.name },
@@ -35,48 +70,38 @@ export async function createContentfulProduct(productData: any, imageFile: File 
                         'en-US': {
                             contentType: imageFile.type,
                             fileName: imageFile.name,
-                            file: await new Promise<ArrayBuffer>((resolve, reject) => {
-                                const reader = new FileReader()
-                                reader.onload = () => resolve(reader.result as ArrayBuffer)
-                                reader.onerror = reject
-                                reader.readAsArrayBuffer(imageFile)
-                            }),
+                            file: fileBuffer,
                         },
                     },
                 },
-            })
+            });
 
-            const processedAsset = await asset.processForAllLocales()
-            await processedAsset.publish()
-            assetId = processedAsset.sys.id
+            const processedAsset = await asset.processForAllLocales();
+            await processedAsset.publish();
+            assetId = processedAsset.sys.id;
         }
 
-
-        const entryFields: {
-            title: { 'en-US': any },
-            slug: { 'en-US': any },
-            price: { 'en-US': any },
-            discount: { 'en-US': any },
-            rating: { 'en-US': any },
-            category: { 'en-US': any },
-            // brand: { 'en-US': any },
-            type: { 'en-US': any },
-            inStock: { 'en-US': any },
-            description: { 'en-US': any },
-            image?: { 'en-US': { sys: { type: string, linkType: string, id: string } } }
-        } = {
+        // Build entry fields
+        const entryFields: any = {
             title: { 'en-US': sanitizedData.name },
             slug: { 'en-US': sanitizedData.slug },
             price: { 'en-US': sanitizedData.price },
             discount: { 'en-US': sanitizedData.discount },
             rating: { 'en-US': sanitizedData.rating },
-            category: { 'en-US': sanitizedData.category || 'general' },
-            // brand: { 'en-US': sanitizedData.brand || 'rado' },
-            type: { 'en-US': sanitizedData.type || 'auto' },
             inStock: { 'en-US': sanitizedData.stock },
             description: { 'en-US': sanitizedData.description },
-        }
-
+            category: { 'en-US': sanitizedData.category || 'general' },
+            type: { 'en-US': sanitizedData.type || 'auto' },
+            brands: {
+                'en-US': {
+                    sys: {
+                        type: 'Link',
+                        linkType: 'Entry',
+                        id: sanitizedData.brands, // Important: use field ID "brands"
+                    },
+                },
+            },
+        };
 
         if (assetId) {
             entryFields.image = {
@@ -87,12 +112,14 @@ export async function createContentfulProduct(productData: any, imageFile: File 
                         id: assetId,
                     },
                 },
-            }
+            };
         }
-        // Add Brand reference if provided
 
-        const entry = await environment.createEntry('products', { fields: entryFields })
-        await entry.publish()
+        const entry = await environment.createEntry('products', {
+            fields: entryFields,
+        });
+
+        await entry.publish();
 
         return {
             id: entry.sys.id,
@@ -100,25 +127,31 @@ export async function createContentfulProduct(productData: any, imageFile: File 
             price: entry.fields.price['en-US'],
             stock: entry.fields.inStock['en-US'],
             description: entry.fields.description['en-US'],
-            imageUrl: assetId ? `https:${entry.fields.image?.['en-US']?.fields?.file?.url}` : '',
+            imageUrl: assetId
+                ? `https://images.ctfassets.net/${CONTENTFUL_SPACE_ID}/${assetId}`
+                : '',
             category: entry.fields.category?.['en-US'] || 'general',
-            // brand: entry.fields.brand?.['en-US'] || 'rado',
             type: entry.fields.type?.['en-US'] || 'auto',
             discount: entry.fields.discount?.['en-US'] || 0,
             rating: entry.fields.rating?.['en-US'] || 1,
-        }
-
+            brandId: sanitizedData.brands,
+        };
     } catch (error) {
-        console.error('Error creating Contentful product:', error)
-        throw error
+        console.error('Error creating Contentful product:', error);
+        throw error;
     }
 }
-
-export const updateContentfulProduct = async (id: string, productData: any, imageFile?: File | null) => {
+export const updateContentfulProduct = async (
+    id: string,
+    productData: any,
+    imageFile?: File | null
+) => {
     try {
         const space = await client.getSpace(CONTENTFUL_SPACE_ID);
         const environment = await space.getEnvironment('master');
-        console.log('Attempting to update product with ID:', id); // Debug log
+
+        console.log('Attempting to update product with ID:', id);
+
         // Retrieve the existing entry
         const entry = await environment.getEntry(id);
         if (!entry) {
@@ -127,11 +160,26 @@ export const updateContentfulProduct = async (id: string, productData: any, imag
 
         const sanitizedData = sanitizeProductData(productData);
 
-        // Optional: upload new image asset if a new image is passed
-        let assetId = entry.fields.image?.['en-US']?.sys?.id;
-        console.log('Found existing entry:', entry.sys.id); // Debug log
+        // Ensure brand exists
+        if (!sanitizedData.brands) {
+            throw new Error('Brand is required to update the product');
+        }
 
+        const brandEntry = await environment.getEntry(sanitizedData.brands);
+        if (!brandEntry) {
+            throw new Error(`Brand with ID ${sanitizedData.brands} not found`);
+        }
+
+        // Optional: upload new image
+        let assetId = entry.fields.image?.['en-US']?.sys?.id;
         if (imageFile) {
+            const fileBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as ArrayBuffer);
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(imageFile);
+            });
+
             const asset = await environment.createAssetFromFiles({
                 fields: {
                     title: { 'en-US': sanitizedData.name },
@@ -140,22 +188,18 @@ export const updateContentfulProduct = async (id: string, productData: any, imag
                         'en-US': {
                             contentType: imageFile.type,
                             fileName: imageFile.name,
-                            file: await new Promise<ArrayBuffer>((resolve, reject) => {
-                                const reader = new FileReader();
-                                reader.onload = () => resolve(reader.result as ArrayBuffer);
-                                reader.onerror = reject;
-                                reader.readAsArrayBuffer(imageFile);
-                            }),
+                            file: fileBuffer,
                         },
                     },
                 },
             });
+
             const processedAsset = await asset.processForAllLocales();
             await processedAsset.publish();
             assetId = processedAsset.sys.id;
         }
 
-        // Update fields
+        // Update product fields
         entry.fields.title['en-US'] = sanitizedData.name;
         entry.fields.slug['en-US'] = sanitizedData.slug;
         entry.fields.price['en-US'] = sanitizedData.price;
@@ -164,9 +208,20 @@ export const updateContentfulProduct = async (id: string, productData: any, imag
         entry.fields.inStock['en-US'] = sanitizedData.stock;
         entry.fields.description['en-US'] = sanitizedData.description;
         entry.fields.category['en-US'] = sanitizedData.category || 'general';
-        // entry.fields.brand['en-US'] = sanitizedData.brand || 'rado';
         entry.fields.type['en-US'] = sanitizedData.type || 'auto';
 
+        // Update brand reference
+        entry.fields.brands = {
+            'en-US': {
+                sys: {
+                    type: 'Link',
+                    linkType: 'Entry',
+                    id: sanitizedData.brands,
+                },
+            },
+        };
+
+        // Update image if needed
         if (assetId) {
             entry.fields.image = {
                 'en-US': {
@@ -179,16 +234,9 @@ export const updateContentfulProduct = async (id: string, productData: any, imag
             };
         }
 
-
-
-
-
-        // Update and publish the entry
+        // Save + publish
         const updatedEntry = await entry.update();
-        console.log("Updated entry:", updatedEntry);
-
         const publishedEntry = await updatedEntry.publish();
-        console.log("Published entry:", publishedEntry);
 
         return {
             id: publishedEntry.sys.id,
@@ -196,18 +244,21 @@ export const updateContentfulProduct = async (id: string, productData: any, imag
             price: publishedEntry.fields.price['en-US'],
             stock: publishedEntry.fields.inStock['en-US'],
             description: publishedEntry.fields.description['en-US'],
-            imageUrl: assetId ? `https://images.ctfassets.net/${assetId}` : productData.imageUrl,
+            imageUrl: assetId
+                ? `https://images.ctfassets.net/${CONTENTFUL_SPACE_ID}/${assetId}`
+                : productData.imageUrl,
             category: publishedEntry.fields.category?.['en-US'] || 'general',
-            brand: publishedEntry.fields.brand?.['en-US'] || 'rado',
+            brandId: sanitizedData.brands,
             type: publishedEntry.fields.type?.['en-US'] || 'auto',
             discount: publishedEntry.fields.discount?.['en-US'] || 0,
             rating: publishedEntry.fields.rating?.['en-US'] || 1,
         };
     } catch (error) {
-        console.error("Error updating Contentful product:", error);
+        console.error('Error updating Contentful product:', error);
         throw error;
     }
 };
+
 
 
 export const deleteContentfulProduct = async (id: string) => {
