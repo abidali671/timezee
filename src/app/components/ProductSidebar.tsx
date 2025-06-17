@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ProductSidebarProps } from '@/types/product';
 import { fetchProductSlugs } from '@/lib/contentfull/client';
 import { X } from 'lucide-react';
+import { Editor } from '@tinymce/tinymce-react';
 
 
 
@@ -232,13 +233,13 @@ export function ProductSidebar({
                             <Controller
                                 name="description"
                                 control={control}
-                                rules={{ required: 'Description is required' }}
+                                rules={{ required: 'Description required' }}
                                 render={({ field }) => (
-                                    <textarea
-                                        {...field}
-                                        className="w-full border p-2 rounded"
-                                        rows={3}
-                                        placeholder="Enter product description"
+                                    <Editor
+                                        apiKey="guzz67riwxyq6togbmrclq75sje1hgp4s6efquyo0jh95c76"
+                                        value={field.value || ''}
+                                        init={{ menubar: false, plugins: 'link lists media table', toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link media table' }}
+                                        onEditorChange={(content) => field.onChange(content)}
                                     />
                                 )}
                             />

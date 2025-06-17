@@ -8,7 +8,7 @@ import { useProducts } from '@/context/productsContext';
 import SafeImage from '@/components/ui/SafeImage';
 import { ProductT, Brand } from '@/types/product';
 import { ProductSidebar } from '@/app/components/ProductSidebar';
-
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
 
 export default function ManageProducts() {
@@ -116,9 +116,11 @@ export default function ManageProducts() {
     };
 
     const openEditSidebar = (product: ProductT) => {
-     
         reset({
             ...product,
+            description: typeof product.description === 'object'
+                ? documentToHtmlString(product.description)
+                : product.description,
             slug: product.name.toLowerCase().replace(/\s+/g, '-'),
 
         });
@@ -148,6 +150,7 @@ export default function ManageProducts() {
     };
 
     const onSubmit = async (data: ProductT) => {
+        console.log(data, 'data===')
         closeSidebar();
         try {
             const productData = {
@@ -230,7 +233,7 @@ export default function ManageProducts() {
                     <table className="min-w-[800px] w-full bg-white shadow-md rounded-lg text-center">
                         <thead>
                             <tr className="bg-gray-100">
-                                {['ID', 'Image', 'Name', 'Desc', 'Price', 'Stock', 'Actions'].map((head) => (
+                                {['ID', 'Image', 'Name', 'Price', 'Stock', 'Actions'].map((head) => (
                                     <th key={head} className="py-3 px-4 whitespace-nowrap">
                                         {head}
                                     </th>
@@ -240,7 +243,7 @@ export default function ManageProducts() {
                         <tbody className="transition-colors">
                             {products.map((product) => (
                                 <tr key={product.id} className="hover:bg-gray-100">
-                                    <td className="py-2 px-4">{product.id}</td>
+                                    <td className="py-2 px-4 max-w-20">{product.id}</td>
                                     <td className="py-2 px-4">
                                         {product.imageUrl && (
                                             <SafeImage
@@ -253,7 +256,9 @@ export default function ManageProducts() {
                                         )}
                                     </td>
                                     <td className="py-2 px-4 truncate max-w-[120px]">{product.name}</td>
-                                    <td className="py-2 px-4 truncate max-w-[150px]">{product.description}</td>
+                                    {/* <td className="py-2 px-4 truncate max-w-[150px]">
+                                        {documentToReactComponents(product.description as any)}
+                                    </td> */}
                                     <td className="py-2 px-4">{product.price}</td>
                                     <td className="py-2 px-4">{product.stock}</td>
                                     <td className="py-2 px-4 relative">

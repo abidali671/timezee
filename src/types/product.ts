@@ -3,7 +3,7 @@ export interface ProductT {
     name: string;
     price: number;
     stock: number;
-    description: string;
+    description: string | Document;
     imageUrl?: string;
     category?: string;
     brands?: string;

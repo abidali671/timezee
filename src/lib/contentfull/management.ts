@@ -1,4 +1,5 @@
 import { createClient } from 'contentful-management'
+import { parseHtml } from 'contentful-html-rich-text-converter';
 
 const CONTENTFUL_SPACE_ID = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID!
 const CONTENTFUL_MANAGEMENT_TOKEN = process.env.NEXT_PUBLIC_CONTENTFUL_MANAGEMENT_TOKEN!
@@ -7,7 +8,6 @@ const client = createClient({
     accessToken: CONTENTFUL_MANAGEMENT_TOKEN,
 })
 
-// Helper function to ensure numeric fields are proper numbers
 const sanitizeProductData = (productData: any) => ({
     ...productData,
     price: Number(productData.price),
@@ -16,13 +16,12 @@ const sanitizeProductData = (productData: any) => ({
     rating: Math.round(Number(productData.rating || 1))
 })
 
-// Add this helper function to fetch brands
 export async function fetchAllBrands() {
     try {
         const space = await client.getSpace(CONTENTFUL_SPACE_ID);
         const environment = await space.getEnvironment('master');
         const entries = await environment.getEntries({
-            content_type: 'brands', // Your brand content type
+            content_type: 'brands',
             limit: 1000
         });
         return entries.items;
@@ -93,6 +92,8 @@ export async function createContentfulProduct(productData: any, imageFile: File 
             await processedAsset.publish();
             assetId = processedAsset.sys.id;
         }
+        const richDescription = await parseHtml(sanitizedData.description);
+
 
         // Build entry fields
         const entryFields: any = {
@@ -102,7 +103,7 @@ export async function createContentfulProduct(productData: any, imageFile: File 
             discount: { 'en-US': sanitizedData.discount },
             rating: { 'en-US': sanitizedData.rating },
             inStock: { 'en-US': sanitizedData.stock },
-            description: { 'en-US': sanitizedData.description },
+            description: { 'en-US': richDescription },
             type: { 'en-US': sanitizedData.type || 'auto' },
             brands: {
                 'en-US': {
@@ -219,7 +220,10 @@ export const updateContentfulProduct = async (
             await processedAsset.publish();
             assetId = processedAsset.sys.id;
         }
-
+        const richDescription = await parseHtml(sanitizedData.description);
+        entry.fields.description = {
+            'en-US': richDescription,
+        };
         // Update product fields
         entry.fields.title['en-US'] = sanitizedData.name;
         entry.fields.slug['en-US'] = sanitizedData.slug;
@@ -227,9 +231,8 @@ export const updateContentfulProduct = async (
         entry.fields.discount['en-US'] = sanitizedData.discount;
         entry.fields.rating['en-US'] = sanitizedData.rating;
         entry.fields.inStock['en-US'] = sanitizedData.stock;
-        entry.fields.description['en-US'] = sanitizedData.description;
-        // entry.fields.category['en-US'] = sanitizedData.category || 'general';
-        entry.fields.type['en-US'] = sanitizedData.type || 'auto';
+        entry.fields.description['en-US'] = richDescription;
+        entry.fields.type['en-US'] = sanitizedData.type;
 
         // Update brand reference
         entry.fields.brands = {
