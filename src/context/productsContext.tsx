@@ -55,7 +55,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
                     ? `https:${item.fields.image.fields.file.url}`
                     : undefined,
                 category: item.fields?.category?.sys?.id,
-                brand: item.fields?.brands?.sys?.id,
+                brands: item.fields?.brands?.sys?.id,
                 type: item.fields?.type || '',
                 discount: item.fields?.discount || 0,
                 rating: item.fields?.rating || 0,
