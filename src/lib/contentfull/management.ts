@@ -1,5 +1,5 @@
 import { createClient } from 'contentful-management'
-import { parseHtml } from 'contentful-html-rich-text-converter';
+import { htmlToContentfulRichText } from '../../utils/contentful-utils';
 
 const CONTENTFUL_SPACE_ID = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID!
 const CONTENTFUL_MANAGEMENT_TOKEN = process.env.NEXT_PUBLIC_CONTENTFUL_MANAGEMENT_TOKEN!
@@ -92,7 +92,7 @@ export async function createContentfulProduct(productData: any, imageFile: File 
             await processedAsset.publish();
             assetId = processedAsset.sys.id;
         }
-        const richDescription = await parseHtml(sanitizedData.description);
+        const richDescription = htmlToContentfulRichText(sanitizedData.description);
 
 
         // Build entry fields
@@ -220,7 +220,8 @@ export const updateContentfulProduct = async (
             await processedAsset.publish();
             assetId = processedAsset.sys.id;
         }
-        const richDescription = await parseHtml(sanitizedData.description);
+        const richDescription = htmlToContentfulRichText(sanitizedData.description);
+
         entry.fields.description = {
             'en-US': richDescription,
         };
@@ -290,8 +291,6 @@ export const updateContentfulProduct = async (
         throw error;
     }
 };
-
-
 
 export const deleteContentfulProduct = async (id: string) => {
     try {
