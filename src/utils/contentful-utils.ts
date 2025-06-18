@@ -2,22 +2,38 @@
 import { BLOCKS, INLINES, MARKS, Document } from '@contentful/rich-text-types';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
+// Supported HTML tags and their corresponding Contentful marks
+const MARK_TAGS: Record<string, string> = {
+    'strong': MARKS.BOLD,
+    'b': MARKS.BOLD,
+    'em': MARKS.ITALIC,
+    'i': MARKS.ITALIC,
+    'u': MARKS.UNDERLINE,
+    's': MARKS.STRIKETHROUGH,
+    'strike': MARKS.STRIKETHROUGH,
+    'code': MARKS.CODE
+};
+
 export const htmlToContentfulRichText = (html: string): Document => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
     const body = doc.body.firstChild as HTMLElement;
 
     const processNode = (node: Node, currentMarks: { type: string }[] = []): any => {
+        // Handle text nodes
         if (node.nodeType === Node.TEXT_NODE) {
             const text = node.textContent?.trim();
-            return text ? {
+            if (!text) return null;
+
+            return {
                 nodeType: 'text',
                 value: text,
                 marks: [...currentMarks],
                 data: {}
-            } : null;
+            };
         }
 
+        // Only process element nodes
         if (node.nodeType !== Node.ELEMENT_NODE) return null;
 
         const element = node as HTMLElement;
@@ -28,31 +44,13 @@ export const htmlToContentfulRichText = (html: string): Document => {
             .flat();
 
         // Handle text formatting marks
-        const newMarks = [...currentMarks];
-        switch (tagName) {
-            case 'strong':
-            case 'b':
-                newMarks.push({ type: 'bold' });
-                break;
-            case 'em':
-            case 'i':
-                newMarks.push({ type: 'italic' });
-                break;
-            case 'u':
-                newMarks.push({ type: 'underline' });
-                break;
-            case 's':
-            case 'strike':
-                newMarks.push({ type: 'strikethrough' });
-                break;
-            case 'code':
-                newMarks.push({ type: 'code' });
-                break;
-        }
-
-        // For mark elements, just process children with new marks
-        if (['strong', 'b', 'em', 'i', 'u', 's', 'strike', 'code'].includes(tagName)) {
-            return children;
+        const markType = MARK_TAGS[tagName];
+        if (markType) {
+            const newMarks = [...currentMarks, { type: markType }];
+            return children.map(child => ({
+                ...child,
+                marks: [...(child.marks || []), { type: markType }]
+            }));
         }
 
         // Handle block elements
