@@ -1,4 +1,3 @@
-// contentful-utils.ts
 import { BLOCKS, INLINES, MARKS, Document } from '@contentful/rich-text-types';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
@@ -13,6 +12,25 @@ const MARK_TAGS: Record<string, string> = {
     'strike': MARKS.STRIKETHROUGH,
     'code': MARKS.CODE
 };
+
+const createBlockNode = (nodeType: BLOCKS, content: any[]) => ({
+    nodeType,
+    data: {},
+    content: content.length ? content : [createTextNode(' ')]
+});
+
+const createInlineNode = (nodeType: INLINES, content: any[], data: any) => ({
+    nodeType,
+    data,
+    content
+});
+
+const createTextNode = (value: string, marks: { type: string }[] = []) => ({
+    nodeType: 'text',
+    value,
+    marks,
+    data: {}
+});
 
 export const htmlToContentfulRichText = (html: string): Document => {
     const parser = new DOMParser();
@@ -46,7 +64,6 @@ export const htmlToContentfulRichText = (html: string): Document => {
         // Handle text formatting marks
         const markType = MARK_TAGS[tagName];
         if (markType) {
-            const newMarks = [...currentMarks, { type: markType }];
             return children.map(child => ({
                 ...child,
                 marks: [...(child.marks || []), { type: markType }]
@@ -55,46 +72,40 @@ export const htmlToContentfulRichText = (html: string): Document => {
 
         // Handle block elements
         switch (tagName) {
-            case 'h1': return createBlockNode(BLOCKS.HEADING_1, children);
-            case 'h2': return createBlockNode(BLOCKS.HEADING_2, children);
-            case 'h3': return createBlockNode(BLOCKS.HEADING_3, children);
-            case 'h4': return createBlockNode(BLOCKS.HEADING_4, children);
-            case 'h5': return createBlockNode(BLOCKS.HEADING_5, children);
-            case 'h6': return createBlockNode(BLOCKS.HEADING_6, children);
-            case 'p': return createBlockNode(BLOCKS.PARAGRAPH, children);
-            case 'ul': return createBlockNode(BLOCKS.UL_LIST, children);
-            case 'ol': return createBlockNode(BLOCKS.OL_LIST, children);
-            case 'li':
+            case 'h1':
+                return createBlockNode(BLOCKS.HEADING_1, children);
+            case 'h2':
+                return createBlockNode(BLOCKS.HEADING_2, children);
+            case 'h3':
+                return createBlockNode(BLOCKS.HEADING_3, children);
+            case 'h4':
+                return createBlockNode(BLOCKS.HEADING_4, children);
+            case 'h5':
+                return createBlockNode(BLOCKS.HEADING_5, children);
+            case 'h6':
+                return createBlockNode(BLOCKS.HEADING_6, children);
+            case 'p':
+                return createBlockNode(BLOCKS.PARAGRAPH, children);
+            case 'ul':
+                return createBlockNode(BLOCKS.UL_LIST, children);
+            case 'ol':
+                return createBlockNode(BLOCKS.OL_LIST, children);
+            case 'li': {
                 const liContent = children.some(c => c.nodeType === BLOCKS.PARAGRAPH)
                     ? children
                     : [createBlockNode(BLOCKS.PARAGRAPH, children)];
                 return createBlockNode(BLOCKS.LIST_ITEM, liContent);
-            case 'a': return createInlineNode(INLINES.HYPERLINK, children, {
-                uri: element.getAttribute('href') || ''
-            });
-            case 'br': return createTextNode('\n', currentMarks);
-            default: return children.length ? children : null;
+            }
+            case 'a':
+                return createInlineNode(INLINES.HYPERLINK, children, {
+                    uri: element.getAttribute('href') || ''
+                });
+            case 'br':
+                return createTextNode('\n', currentMarks);
+            default:
+                return children.length ? children : null;
         }
     };
-
-    const createBlockNode = (nodeType: BLOCKS, content: any[]) => ({
-        nodeType,
-        data: {},
-        content: content.length ? content : [createTextNode(' ')]
-    });
-
-    const createInlineNode = (nodeType: INLINES, content: any[], data: any) => ({
-        nodeType,
-        data,
-        content
-    });
-
-    const createTextNode = (value: string, marks: { type: string }[] = []) => ({
-        nodeType: 'text',
-        value,
-        marks,
-        data: {}
-    });
 
     // Process all nodes
     const content = Array.from(body.childNodes)
@@ -134,5 +145,6 @@ export const contentfulRichTextToHtml = (document: Document): string => {
         }
     };
 
+    // @ts-expect-error - Contentful types don't perfectly match the actual implementation
     return documentToHtmlString(document, options);
 };
