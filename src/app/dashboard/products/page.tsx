@@ -9,6 +9,7 @@ import SafeImage from '@/components/ui/SafeImage';
 import { ProductT, Brand } from '@/types/product';
 import { ProductSidebar } from '@/app/components/ProductSidebar';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import { duplicateContentfulProduct } from '../../../lib/contentfull/management';
 
 
 export default function ManageProducts() {
@@ -31,6 +32,7 @@ export default function ManageProducts() {
             rating: 1,
             category: 'general',
             brands: '',
+            excerpt: '',
             type: 'Kids'
         }
     });
@@ -148,6 +150,8 @@ export default function ManageProducts() {
         });
         setOpenDropdownId((currentId) => (currentId === id ? null : id));
     };
+
+
 
     const onSubmit = async (data: ProductT) => {
         console.log(data, 'data===')

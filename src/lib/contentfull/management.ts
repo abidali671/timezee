@@ -98,6 +98,7 @@ export async function createContentfulProduct(productData: any, imageFile: File 
         // Build entry fields
         const entryFields: any = {
             title: { 'en-US': sanitizedData.name },
+            excerpt: { 'en-US': sanitizedData.excerpt },
             slug: { 'en-US': sanitizedData.slug },
             price: { 'en-US': sanitizedData.price },
             discount: { 'en-US': sanitizedData.discount },
@@ -234,6 +235,7 @@ export const updateContentfulProduct = async (
         entry.fields.inStock['en-US'] = sanitizedData.stock;
         entry.fields.description['en-US'] = richDescription;
         entry.fields.type['en-US'] = sanitizedData.type;
+        entry.fields.excerpt['en-US'] = sanitizedData.excerpt;
 
         // Update brand reference
         entry.fields.brands = {

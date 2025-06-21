@@ -226,7 +226,25 @@ export function ProductSidebar({
                                 </p>
                             )}
                         </div>
-
+                        <div className="space-y-2">
+                            <label className="block font-medium">Excerpt</label>
+                            <Controller
+                                name="excerpt"
+                                control={control}
+                                rules={{ required: 'Excerpt is required' }}
+                                render={({ field }) => (
+                                    <input
+                                        {...field}
+                                        type="text"
+                                        className="w-full border p-2 rounded"
+                                        placeholder="Enter excerpt"
+                                    />
+                                )}
+                            />
+                            {errors.name && (
+                                <p className="text-red-500 text-sm">{errors.excerpt.message}</p>
+                            )}
+                        </div>
                         {/* Description */}
                         <div className="space-y-2">
                             <label className="block font-medium">Description</label>
@@ -262,7 +280,7 @@ export function ProductSidebar({
                                     <input
                                         {...field}
                                         type="number"
-                                        step="0.01"
+                                        step="1"
                                         className="w-full border p-2 rounded"
                                         placeholder="0.00"
                                     />
