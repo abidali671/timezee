@@ -31,7 +31,7 @@ interface Product {
 
 // Define the structure for all products
 export interface AllProduct {
-  image: any;
+  image?: any;
   id: string;
   brandName: string;
   categoryName: string;
