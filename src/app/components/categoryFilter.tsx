@@ -1,6 +1,6 @@
 import React from 'react';
 
-const categories = ['Classic', 'Modern', 'Special Edition'];
+const categories = ['Rolex', 'Classic', 'Luxury'];
 
 const CategoryFilter = ({ activeCategory, onChange }: {
     activeCategory: string;

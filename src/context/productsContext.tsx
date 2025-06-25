@@ -10,7 +10,7 @@ import React, {
 import { fetchAllProducts } from '@/lib/contentfull/client';
 import { deleteContentfulProduct, updateContentfulProduct } from '@/lib/contentfull/management';
 
-interface Product {
+export interface Product {
     id: string;
     name: string;
     price: number;
@@ -59,6 +59,10 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
                 type: item.fields?.type || '',
                 discount: item.fields?.discount || 0,
                 rating: item.fields?.rating || 0,
+                categoryName: item.fields?.category?.fields?.name || '',
+                excerpt: item.fields?.excerpt || '',
+                brandName: item.fields?.brands?.fields?.name || '',
+                slug: item.fields?.slug || '',
 
             }));
             console.log(mappedProducts, 'mapp');

@@ -11,14 +11,19 @@ import Image from 'next/image';
 import { AnimatedButton } from './animatedButton';
 import { AllProduct } from '@/lib/products';
 import Link from 'next/link';
+import { useCart } from '@/context/CartContext';
 
-const ProductCarousel = ({ products }: { products: AllProduct[] }) => {
+const ProductCarousel = ({ products }: { products: any }) => {
     function calculateDiscountPercentage(originalPrice: number, discountedPrice: number) {
         if (originalPrice <= 0 || originalPrice <= discountedPrice) return 0;
 
         const discount = ((originalPrice - discountedPrice) / originalPrice) * 100;
         return Math.round(discount);
     }
+    const { dispatch } = useCart();
+    const handleAddToCart = (product: AllProduct) => {
+        dispatch({ type: 'ADD_TO_CART', payload: product });
+    };
 
     return (
         <div className="relative w-full">
@@ -47,18 +52,18 @@ const ProductCarousel = ({ products }: { products: AllProduct[] }) => {
                                         )}
 
                                         {/* Background */}
-                                        <div className="absolute -z-10 inset-0 h-60 bg-zinc-500 opacity-100 transition-opacity duration-300"></div>
+                                        <div className="absolute -z-10 inset-0 h-60   opacity-100 transition-opacity duration-300"></div>
 
                                         {/* Content */}
                                         <div className="p-4 flex flex-col items-center">
                                             <Image
-                                                src={item.img}
-                                                alt={item.title}
+                                                src={item.imageUrl}
+                                                alt={item.name}
                                                 width={100}
                                                 height={100}
-                                                className="w-60 object-contain mb-4"
+                                                className="w-60 object-contain mb-4 max-h-32"
                                             />
-                                            <Link href={`/product/${item.slug}`}><h3 className="text-2xl font-semibold mb-1 text-center hover:underline">{item.title}</h3></Link>
+                                            <Link href={`/product/${item.slug}`}><h3 className="text-xl    font-semibold mb-1 text-center hover:underline">{item.name}</h3></Link>
 
                                             <div className="flex gap-x-3 items-center">
                                                 <p className="text-xl text-gray-200 mb-2">
@@ -78,9 +83,9 @@ const ProductCarousel = ({ products }: { products: AllProduct[] }) => {
                                                 {'★'.repeat(item.rating)}
                                             </p>
                                             <p className="text-md mt-2 text-yellow-400">
-                                                {item.brand}
+                                                {item.brandName}
                                             </p>
-                                            <AnimatedButton className='!w-8/12 text-xs font-light mx-auto flex mt-3'>
+                                            <AnimatedButton onClick={() => handleAddToCart(item)} className='!w-8/12 text-xs font-light mx-auto flex mt-3'>
                                                 Add to Cart
                                             </AnimatedButton>
                                         </div>

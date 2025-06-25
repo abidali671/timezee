@@ -10,14 +10,15 @@ import { useCart } from "@/context/CartContext";
 
 
 
-export default function ProductPage({ product }: { product: AllProduct }) {
+export default function ProductPage({ product }: { product: any }) {
     const [quantity, setQuantity] = useState(1);
-    const subTotal = product.price * quantity;
+    // const subTotal = product.price * quantity;
     const { dispatch } = useCart();
 
     const handleAdd = (product: AllProduct) => {
         dispatch({ type: 'ADD_TO_CART', payload: product });
     };
+    console.log(product, 'prsdsf');
 
     return (
         <div className="flex flex-col px-4  ">
@@ -25,8 +26,8 @@ export default function ProductPage({ product }: { product: AllProduct }) {
                 <div className="col-span-6">
                     <div className="relative w-full max-w-md aspect-[4/5] overflow-hidden group">
                         <ZoomImage
-                            src={product.img}
-                            alt={product.title}
+                            src={'https:' + product.image?.fields?.file?.url}
+                            alt={product.name}
                             className="max-w-md"
                         />
                     </div>
@@ -36,19 +37,19 @@ export default function ProductPage({ product }: { product: AllProduct }) {
                     <div className="w-full md:w-80 *:text-lg grid gap-y-4 text-gray-400 text-sm">
                         <div className="flex justify-between">
                             <span>Price</span>
-                            <p>${product.price.toFixed(2)}</p>
+                            <p>PKR {product.price}</p>
                         </div>
                         <div className="flex justify-between">
                             <span>Availability</span>
-                            <p>{product.availability > 0 ? `${product.availability} in stock` : "Out of Stock"}</p>
+                            <p>{product.inStock > 0 ? `${product.inStock} in stock` : "Out of Stock"}</p>
                         </div>
                         <div className="flex justify-between">
                             <span>Brand</span>
-                            <p>{product.brand}</p>
+                            <p>{product.brands.fields.name}</p>
                         </div>
                         <div className="flex justify-between">
                             <span>Category</span>
-                            <p>{product.category}</p>
+                            <p>{product.category.fields.name}</p>
                         </div>
 
                         <div className="flex justify-between items-center">
@@ -63,9 +64,9 @@ export default function ProductPage({ product }: { product: AllProduct }) {
                                 </button>
                                 <span>{quantity}</span>
                                 <button
-                                    onClick={() => quantity < product.availability && setQuantity(quantity + 1)}
+                                    onClick={() => quantity < product.stock && setQuantity(quantity + 1)}
                                     className="px-3 py-1 border rounded"
-                                    disabled={quantity >= product.availability}
+                                    disabled={quantity >= product.stock}
                                 >
                                     +
                                 </button>
@@ -74,7 +75,7 @@ export default function ProductPage({ product }: { product: AllProduct }) {
 
                         <div className="flex justify-between font-semibold mt-4">
                             <span>Subtotal</span>
-                            <p>${subTotal.toFixed(2)}</p>
+                            {/* <p>${subTotal.toFixed(2)}</p> */}
                         </div>
                     </div>
 
@@ -87,10 +88,10 @@ export default function ProductPage({ product }: { product: AllProduct }) {
                     </div>
                 </div>
             </div>
-            <ProductTabs
+            {/* <ProductTabs
                 className="mt-12"
                 tabs={getProductTabs(product)}
-            />
+            /> */}
         </div>
     );
 }

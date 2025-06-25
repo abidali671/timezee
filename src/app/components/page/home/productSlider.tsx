@@ -1,17 +1,21 @@
 'use client';
-
 import React, { useState } from 'react';
 import SectionTitle from './sectionTitle';
 import CategoryFilter from '../../categoryFilter';
 import ProductCarousel from '../../ProductCarousel';
 import { allProducts } from '@/lib/products';
+import { useProducts } from '@/context/productsContext';
 
 const ProductSlider = () => {
-    const [activeCategory, setActiveCategory] = useState('Classic');
-
-    const filteredProducts = allProducts.filter(
-        (product) => product.category === activeCategory
+    const { products } = useProducts()
+    const [activeCategory, setActiveCategory] = useState('Rolex');
+    
+    const filteredProducts = [...allProducts, ...products].filter(
+        (product: any) => product.brandName === activeCategory
     );
+
+
+
 
     return (
         <div className="bg-black min-h-screen">
