@@ -9,7 +9,6 @@ const client = createClient({
 export const fetchAllProducts = async () => {
     try {
         const entries = await client.getEntries({ content_type: 'products' });
-
         return entries.items;
     } catch (error) {
         console.error('Error fetching all products:', error);
@@ -23,6 +22,21 @@ export const fetchProductSlugs = async () => {
     } catch (error) {
         console.error('Error fetching product slugs:', error);
         throw error;
+    }
+};
+export const getProductBySlugFromContentful = async (slug: string) => {
+    try {
+        const entries = await client.getEntries({
+            content_type: "products",
+            "fields.slug": slug,
+        });
+
+        if (!entries.items.length) return null;
+
+        return entries.items[0].fields;
+    } catch (error) {
+        console.error("Error fetching product by slug:", error);
+        return null;
     }
 };
 export default client;

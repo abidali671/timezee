@@ -7,7 +7,7 @@ import React, {
     useEffect,
     useState,
 } from 'react';
-import { CartItem, AllProduct } from '../lib/products';
+import { AllProduct } from '../lib/products';
 
 // Extend Action type with increase and decrease quantity
 type Action =
@@ -18,7 +18,7 @@ type Action =
     | { type: 'DECREASE_QUANTITY'; payload: string };
 
 const CartContext = createContext<{
-    cart: CartItem[];
+    cart: AllProduct[];
     dispatch: React.Dispatch<Action>;
     isOpen: boolean;
     toggleCart: () => void;
@@ -29,18 +29,18 @@ const CartContext = createContext<{
     toggleCart: () => { },
 });
 
-const reducer = (state: CartItem[], action: Action): CartItem[] => {
+const reducer = (state: AllProduct[], action: Action): AllProduct[] => {
     switch (action.type) {
         case 'ADD_TO_CART': {
             const existing = state.find(item => item.slug === action.payload.slug);
             if (existing) {
                 return state.map(item =>
                     item.slug === action.payload.slug
-                        ? { ...item, quantity: item.quantity + 1 }
+                        ? { ...item, stock: item.stock + 1 }
                         : item
                 );
             }
-            return [...state, { ...action.payload, quantity: 1 }];
+            return [...state, { ...action.payload, stock: 1 }];
         }
         case 'REMOVE_FROM_CART':
             return state.filter(item => item.slug !== action.payload);
@@ -51,14 +51,14 @@ const reducer = (state: CartItem[], action: Action): CartItem[] => {
         case 'INCREASE_QUANTITY':
             return state.map(item =>
                 item.slug === action.payload
-                    ? { ...item, quantity: item.quantity + 1 }
+                    ? { ...item, stock: item.stock + 1 }
                     : item
             );
 
         case 'DECREASE_QUANTITY':
             return state.map(item =>
-                item.slug === action.payload && item.quantity > 1
-                    ? { ...item, quantity: item.quantity - 1 }
+                item.slug === action.payload && item.stock > 1
+                    ? { ...item, stock: item.stock - 1 }
                     : item
             );
 
@@ -78,7 +78,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         const storedCart = localStorage.getItem('cart');
         if (storedCart) {
             try {
-                const parsed = JSON.parse(storedCart) as CartItem[];
+                const parsed = JSON.parse(storedCart) as AllProduct[];
                 if (Array.isArray(parsed)) {
                     dispatch({ type: 'CLEAR_CART' });
                     parsed.forEach(item => {
