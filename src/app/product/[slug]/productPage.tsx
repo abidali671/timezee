@@ -4,8 +4,8 @@ import { useState } from "react";
 import { AnimatedButton } from "@/app/components/animatedButton";
 import ZoomImage from "@/app/components/ZoomImage";
 import { AllProduct } from "@/lib/products";
-import ProductTabs from "@/app/components/page/productDetail/ProductTabs";
-import { getProductTabs } from "@/app/components/page/productDetail/productTabData";
+// import ProductTabs from "@/app/components/page/productDetail/ProductTabs";
+// import { getProductTabs } from "@/app/components/page/productDetail/productTabData";
 import { useCart } from "@/context/CartContext";
 
 

@@ -9,7 +9,6 @@ import SafeImage from '@/components/ui/SafeImage';
 import { ProductT, Brand } from '@/types/product';
 import { ProductSidebar } from '@/app/components/ProductSidebar';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
-import { duplicateContentfulProduct } from '../../../lib/contentfull/management';
 
 
 export default function ManageProducts() {

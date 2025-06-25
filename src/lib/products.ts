@@ -8,26 +8,7 @@ export interface SlideProduct {
   slug: string
 }
 
-// Define the structure for regular products
-interface Product {
-  id: string;
-  brandName: string;
-  categoryName: string;
-  imageUrl: string;
-  name: string;
-  price: number;
-  rating: number;
-  category: string;
-  img: string;
-  discount: number;
-  brand: string;
-  slug: string;
-  type: string;
-  stock: number;
-  description: string;
-  excerpt: string;
-  brands: string;
-}
+
 
 // Define the structure for all products
 export interface AllProduct {
