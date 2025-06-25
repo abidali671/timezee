@@ -6,6 +6,7 @@ import Image from 'next/image';
 
 export default function CartSidebar() {
     const { cart, dispatch, isOpen, toggleCart } = useCart();
+    console.log(cart, 'cart');
 
     return (
         <div
@@ -25,14 +26,15 @@ export default function CartSidebar() {
                     </div>
                 ) : (
                     cart.map(item => (
-                        <div key={item.slug} className="grid grid-cols-2 w-8/12 gap-4">
+                        <div key={item.slug} className="grid grid-cols-2  w-8/12 gap-4">
                             <div>
-                                <Image src={item.img} alt={item.title} height={100} width={100} />
+                                <Image src={'https:' + item.image?.fields?.file?.url}
+                                    alt={item.name} height={100} width={100} />
                             </div>
                             <div className='grid gap-2'>
-                                <p>{item.brand}</p>
-                                <h1 className='text-2xl text-white whitespace-nowrap'>{item.title}</h1>
-                                <p>${(item.quantity * item.price).toFixed(2)}</p>
+                                <p>{item.brandName}</p>
+                                <h1 className='text-md text-white whitespace-nowrap '>{item.name}</h1>
+                                <p>PKR {(item.stock * item.price).toFixed(2)}</p>
                                 <div className='flex items-center space-x-2'>
                                     {/* Decrease quantity */}
                                     <button
@@ -40,12 +42,12 @@ export default function CartSidebar() {
                                         onClick={() =>
                                             dispatch({ type: 'DECREASE_QUANTITY', payload: item.slug })
                                         }
-                                        disabled={item.quantity <= 1}
+                                        disabled={item.stock <= 1}
                                     >
                                         -
                                     </button>
 
-                                    <span className="text-white">{item.quantity}</span>
+                                    <span className="text-white">{item.stock}</span>
 
                                     {/* Increase quantity */}
                                     <button
@@ -64,7 +66,7 @@ export default function CartSidebar() {
                                             dispatch({ type: 'REMOVE_FROM_CART', payload: item.slug })
                                         }
                                     >
-                                        <Trash2 size={16} />
+                                        <Trash2 size={16} cursor='pointer' />
                                     </button>
                                 </div>
                             </div>

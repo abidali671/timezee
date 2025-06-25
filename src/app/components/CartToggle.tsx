@@ -4,7 +4,7 @@ import { useCart } from '@/context/CartContext';
 
 export default function CartToggle({ color }: { color?: string }) {
     const { cart, toggleCart } = useCart();
-    const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
+    const itemCount = cart.reduce((total, item) => total + item.stock, 0);
 
     return (
         <div className="relative cursor-pointer" onClick={toggleCart}>
