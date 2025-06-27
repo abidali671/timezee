@@ -3,6 +3,7 @@ import { useCart } from '@/context/CartContext';
 import { AnimatedButton } from './animatedButton';
 import { Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function CartSidebar() {
     const { cart, dispatch, isOpen, toggleCart } = useCart();
@@ -17,7 +18,7 @@ export default function CartSidebar() {
                 {cart.length > 0 && <h1 className='text-4xl text-white whitespace-nowrap'>Your cart  </h1>}
                 <button onClick={toggleCart} className='text-2xl cursor-pointer'>✕</button>
             </div>
-            <div className="p-4 space-y-4 overflow-y-auto h-[calc(100%-140px)]">
+            <div className="p-4 space-y-4 overflow-y-auto h-[calc(100%-180px)]">
                 {cart.length === 0 ? (
                     <div className='flex justify-center items-center flex-col'>
                         <h1 className='text-3xl md:text-4xl text-white whitespace-nowrap'>Your cart is empty.</h1>
@@ -28,7 +29,7 @@ export default function CartSidebar() {
                     cart.map(item => (
                         <div key={item.slug} className="grid grid-cols-2  w-8/12 gap-4">
                             <div>
-                                <Image src={'https:' + item.image?.fields?.file?.url}
+                                <Image src={item.image?.fields?.file?.url}
                                     alt={item.name} height={100} width={100} />
                             </div>
                             <div className='grid gap-2'>
@@ -74,14 +75,25 @@ export default function CartSidebar() {
                     ))
                 )}
             </div>
+
             {cart.length > 0 && (
-                <div className="p-4 border-t">
-                    <button
-                        className="w-full bg-black text-white py-2 rounded cursor-pointer hover:bg-white hover:text-black transition-colors"
-                        onClick={() => dispatch({ type: 'CLEAR_CART' })}
-                    >
-                        Clear Cart
-                    </button>
+                <div className='flex justify-center items-center flex-col'>
+                    <Link href="/checkout" passHref>
+                        <AnimatedButton
+                            className="w-full text-sm"
+                            onClick={toggleCart}
+                        >
+                            Proceed to Checkout
+                        </AnimatedButton>
+                    </Link>
+                    <div className="p-4 border-t w-full">
+                        <button
+                            className="w-full bg-black text-white py-2 rounded cursor-pointer hover:bg-white hover:text-black transition-colors"
+                            onClick={() => dispatch({ type: 'CLEAR_CART' })}
+                        >
+                            Clear Cart
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
