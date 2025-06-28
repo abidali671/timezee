@@ -22,7 +22,7 @@ const ProductCarousel = ({ products }: { products: any }) => {
     }
     const { dispatch } = useCart();
     const handleAddToCart = (product: AllProduct) => {
-        dispatch({ type: 'ADD_TO_CART', payload: product });
+        dispatch({ type: 'ADD_TO_CART', payload: { ...product, inStock: product.stock }, });
     };
 
     return (

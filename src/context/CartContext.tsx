@@ -55,6 +55,8 @@ const reducer = (state: AllProduct[], action: Action): AllProduct[] => {
                     : item
             );
 
+
+
         case 'DECREASE_QUANTITY':
             return state.map(item =>
                 item.slug === action.payload && item.stock > 1

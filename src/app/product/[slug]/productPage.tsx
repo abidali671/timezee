@@ -4,21 +4,32 @@ import { useState } from "react";
 import { AnimatedButton } from "@/app/components/animatedButton";
 import ZoomImage from "@/app/components/ZoomImage";
 import { AllProduct } from "@/lib/products";
-// import ProductTabs from "@/app/components/page/productDetail/ProductTabs";
-// import { getProductTabs } from "@/app/components/page/productDetail/productTabData";
+import ProductTabs from "@/app/components/page/productDetail/ProductTabs";
+import { getProductTabs } from "@/app/components/page/productDetail/productTabData";
 import { useCart } from "@/context/CartContext";
 
 
 
 export default function ProductPage({ product }: { product: any }) {
     const [quantity, setQuantity] = useState(1);
-    // const subTotal = product.price * quantity;
     const { dispatch } = useCart();
 
     const handleAdd = (product: AllProduct) => {
-        dispatch({ type: 'ADD_TO_CART', payload: product });
+        if (quantity > product.stock) {
+            alert("Not enough stock available.");
+            return;
+        }
+
+        dispatch({
+            type: 'ADD_TO_CART',
+            payload: {
+                ...product,
+                stock: quantity,
+            }
+        });
     };
-    console.log(product, 'prsdsf');
+
+
 
     return (
         <div className="flex flex-col px-4  ">
@@ -64,19 +75,15 @@ export default function ProductPage({ product }: { product: any }) {
                                 </button>
                                 <span>{quantity}</span>
                                 <button
-                                    onClick={() => quantity < product.stock && setQuantity(quantity + 1)}
+                                    onClick={() => setQuantity(quantity + 1)}
                                     className="px-3 py-1 border rounded"
-                                    disabled={quantity >= product.stock}
+                                    disabled={quantity >= product.inStock}
                                 >
                                     +
                                 </button>
                             </div>
                         </div>
 
-                        <div className="flex justify-between font-semibold mt-4">
-                            <span>Subtotal</span>
-                            {/* <p>${subTotal.toFixed(2)}</p> */}
-                        </div>
                     </div>
 
                     <div className="mt-6 flex flex-col gap-4">
@@ -88,10 +95,10 @@ export default function ProductPage({ product }: { product: any }) {
                     </div>
                 </div>
             </div>
-            {/* <ProductTabs
+            <ProductTabs
                 className="mt-12"
                 tabs={getProductTabs(product)}
-            /> */}
+            />
         </div>
     );
 }

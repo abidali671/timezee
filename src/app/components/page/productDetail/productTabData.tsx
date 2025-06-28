@@ -1,14 +1,18 @@
-// lib/productTabData.tsx
-import { AllProduct } from "@/lib/products";
 import { TabItem } from "./ProductTabs";
+import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
+import { Document } from '@contentful/rich-text-types';
 
-export const getProductTabs = (product: AllProduct): TabItem[] => [
+interface Product {
+    description: Document;
+}
+
+export const getProductTabs = (product: Product): TabItem[] => [
     {
         label: "Description",
         value: "description",
         content: (
             <p className="text-white" >
-                {product.description || "No description available."}
+                {documentToReactComponents(product.description)}
             </p>
         ),
     },

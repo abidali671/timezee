@@ -43,8 +43,6 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         setLoading(true);
         try {
             const contentfulProducts = await fetchAllProducts();
-            console.log(contentfulProducts, 'prod-');
-
             const mappedProducts: Product[] = contentfulProducts.map((item: any) => ({
                 id: item.sys?.id || '',
                 name: item.fields?.title || '',
@@ -65,7 +63,6 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
                 slug: item.fields?.slug || '',
 
             }));
-            console.log(mappedProducts, 'mapp');
 
             setProducts(mappedProducts);
         } catch (error) {
