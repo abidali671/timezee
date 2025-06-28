@@ -31,29 +31,28 @@ export default function CheckoutPage() {
 
     const onSubmit = async (data: FormData) => {
         try {
-            // Prepare order data
             const orderData = {
                 customerName: data.name,
                 customerEmail: data.email,
                 customerPhoneNumber: data.phone,
-                products: cart.map(item => item.id || ''),
+                products: cart.map(item => ({
+                    id: item.id,
+                    quantity: item.stock
+                })),
                 status: 'pending',
                 orderDate: new Date().toISOString(),
                 price: cart.reduce((total, item) => total + (item.price * item.stock), 0),
             };
 
-            // Create order in Contentful
             await createOrderInContentful(orderData);
-
-            router.push('/checkout/success');
-
             dispatch({ type: 'CLEAR_CART' });
-
+            router.push('/checkout/success');
         } catch (error) {
-            console.error('Checkout failed:', error);
-            alert('Failed to place order. Please try again.');
+            console.error('Checkout error:', error);
+            alert('Order failed. Try again.');
         }
     };
+
 
     if (cart.length === 0) {
         return null;

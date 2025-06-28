@@ -7,7 +7,6 @@ import Link from 'next/link';
 
 export default function CartSidebar() {
     const { cart, dispatch, isOpen, toggleCart } = useCart();
-    console.log(cart, 'cart===');
 
     return (
         <div
@@ -30,7 +29,7 @@ export default function CartSidebar() {
                         <div key={item.slug} className="grid grid-cols-2  w-8/12 gap-4">
                             <div>
                                 <Image src={item.imageUrl || 'https:' + item.image?.fields?.file?.url}
-                                    alt={item.name || item.title} height={100} width={100} />
+                                    alt={item.name} height={100} width={100} />
                             </div>
                             <div className='grid gap-2'>
                                 <p>{item.brandName}</p>
