@@ -42,35 +42,15 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         try {
-            const contentfulProducts = await fetchAllProducts();
-            const mappedProducts: Product[] = contentfulProducts.map((item: any) => ({
-                id: item.sys?.id || '',
-                name: item.fields?.title || '',
-                price: item.fields?.price || 0,
-                stock: item.fields?.inStock || 0,
-                description: item.fields?.description,
-                imageUrl: item.fields?.image?.fields?.file?.url
-                    ? `https:${item.fields.image.fields.file.url}`
-                    : undefined,
-                category: item.fields?.category?.sys?.id,
-                brands: item.fields?.brands?.sys?.id,
-                type: item.fields?.type || '',
-                discount: item.fields?.discount || 0,
-                rating: item.fields?.rating || 0,
-                categoryName: item.fields?.category?.fields?.name || '',
-                excerpt: item.fields?.excerpt || '',
-                brandName: item.fields?.brands?.fields?.name || '',
-                slug: item.fields?.slug || '',
-
-            }));
-
-            setProducts(mappedProducts);
+            const products = await fetchAllProducts();
+            setProducts(products);
         } catch (error) {
             console.error('Failed to fetch products:', error);
         } finally {
             setLoading(false);
         }
     }, []);
+
 
     useEffect(() => {
         fetchProducts();

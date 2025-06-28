@@ -1,3 +1,4 @@
+import { Product } from '@/context/productsContext';
 import { createClient } from 'contentful';
 
 const client = createClient({
@@ -6,15 +7,38 @@ const client = createClient({
     environment: process.env.CONTENTFUL_ENVIRONMENT_ID || 'master',
 });
 
-export const fetchAllProducts = async () => {
+
+export const fetchAllProducts = async (): Promise<Product[]> => {
     try {
         const entries = await client.getEntries({ content_type: 'products' });
-        return entries.items;
+
+        const mappedProducts: Product[] = entries.items.map((item: any) => ({
+            id: item.sys?.id || '',
+            name: item.fields?.title || '',
+            price: item.fields?.price || 0,
+            stock: item.fields?.inStock || 0,
+            description: item.fields?.description || '',
+            imageUrl: item.fields?.image?.fields?.file?.url
+                ? `https:${item.fields.image.fields.file.url}`
+                : undefined,
+            category: item.fields?.category?.sys?.id || '',
+            brands: item.fields?.brands?.sys?.id || '',
+            type: item.fields?.type || '',
+            discount: item.fields?.discount || 0,
+            rating: item.fields?.rating || 0,
+            categoryName: item.fields?.category?.fields?.name || '',
+            excerpt: item.fields?.excerpt || '',
+            brandName: item.fields?.brands?.fields?.name || '',
+            slug: item.fields?.slug || '',
+        }));
+
+        return mappedProducts;
     } catch (error) {
         console.error('Error fetching all products:', error);
         throw error;
     }
 };
+
 export const fetchProductSlugs = async () => {
     try {
         const entries = await client.getEntries({ content_type: 'products' });
