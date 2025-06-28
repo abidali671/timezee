@@ -16,19 +16,17 @@ const DealBanner = () => {
         seconds: 0,
     });
 
-    // Function to update the countdown timer
     useEffect(() => {
+        let mounted = true;
+
         const updateTimer = () => {
             const now = new Date().getTime();
             const distance = endTime - now;
 
             if (distance < 0) {
-                setTimeRemaining({
-                    days: 0,
-                    hours: 0,
-                    minutes: 0,
-                    seconds: 0,
-                });
+                if (mounted) {
+                    setTimeRemaining({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+                }
                 return;
             }
 
@@ -37,12 +35,18 @@ const DealBanner = () => {
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            setTimeRemaining({ days, hours, minutes, seconds });
+            if (mounted) {
+                setTimeRemaining({ days, hours, minutes, seconds });
+            }
         };
 
         const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
 
-        return () => clearInterval(timerInterval);
+        return () => {
+            mounted = false;
+            clearInterval(timerInterval);
+        };
     }, []);
 
 
@@ -53,7 +57,7 @@ const DealBanner = () => {
                 <Image
                     src="https://timzee-demo.myshopify.com/cdn/shop/files/Bg1full.jpg?v=1614300918&width=1920"
                     alt="Deal Banner Background"
-                   fill
+                    fill
                     style={{
                         objectFit: 'cover',
                         objectPosition: 'center'

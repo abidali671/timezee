@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Carousel,
     CarouselContent,
@@ -7,98 +7,148 @@ import {
     CarouselPrevious,
 } from '@/components/ui/carousel';
 import Image from 'next/image';
-
-import { AnimatedButton } from './animatedButton';
-import { AllProduct } from '@/lib/products';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import { AnimatedButton } from './animatedButton';
+import { AllProduct } from '@/lib/products';
 
-const ProductCarousel = ({ products }: { products: any }) => {
-    function calculateDiscountPercentage(originalPrice: number, discountedPrice: number) {
+
+interface ProductCarouselProps {
+    products: any;
+    loading?: boolean;
+}
+
+const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselProps) => {
+    const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+    const { dispatch } = useCart();
+
+    const calculateDiscountPercentage = (originalPrice: number, discountedPrice: number) => {
         if (originalPrice <= 0 || originalPrice <= discountedPrice) return 0;
-
         const discount = ((originalPrice - discountedPrice) / originalPrice) * 100;
         return Math.round(discount);
-    }
-    const { dispatch } = useCart();
-    const handleAddToCart = (product: AllProduct) => {
-        dispatch({ type: 'ADD_TO_CART', payload: { ...product, inStock: product.stock }, });
     };
+
+    const handleAddToCart = async (product: AllProduct) => {
+        try {
+            setLoadingStates(prev => ({ ...prev, [product.id]: true }));
+            dispatch({
+                type: 'ADD_TO_CART',
+                payload: { ...product, inStock: product.stock }
+            });
+            await new Promise(resolve => setTimeout(resolve, 500));
+        } catch (error) {
+            console.error('Failed to add to cart:', error);
+        } finally {
+            setLoadingStates(prev => ({ ...prev, [product.id]: false }));
+        }
+    };
+
+    if (parentLoading) {
+        return (
+            <div className="relative w-full">
+                <Carousel opts={{ align: 'start' }} className="w-full">
+                    <div className="w-10/12 mx-auto">
+                        <CarouselContent>
+                            {[...Array(4)].map((_, index) => (
+                                <CarouselItem key={index} className="basis-full  sm:basis-1/2 lg:basis-1/4">
+                                    <div className="bg-zinc-900  text-white   rounded-2xl shadow-lg p-4">
+                                        <div className="animate-pulse flex flex-col items-center">
+                                            <div className="bg-zinc-700 h-32 w-full rounded mb-4"></div>
+                                            <div className="bg-zinc-700 h-6 w-3/4 rounded mb-2"></div>
+                                            <div className="bg-zinc-700 h-4 w-1/2 rounded mb-4"></div>
+                                            <div className="bg-zinc-700 h-8 w-full rounded"></div>
+                                        </div>
+                                    </div>
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                    </div>
+                </Carousel>
+            </div>
+        );
+    }
 
     return (
         <div className="relative w-full">
             <Carousel opts={{ align: 'start' }} className="w-full">
                 <div className="w-10/12 mx-auto">
                     <CarouselContent>
-                        {products.map((item: AllProduct, index: number) => {
+                        {products.map((item: AllProduct) => {
                             const hasDiscount = item.discount > item.price;
                             const discountPercent = hasDiscount
                                 ? calculateDiscountPercentage(item.discount, item.price)
                                 : 0;
+                            const isLoading = loadingStates[item.id] || false;
 
                             return (
-
                                 <CarouselItem
-                                    key={index}
-                                    className="basis-full sm:basis-1/2 lg:basis-1/4 "
+                                    key={item.id}
+                                    className="basis-full sm:basis-1/2 lg:basis-1/4"
                                 >
-
-                                    <div className="bg-zinc-900 text-white rounded-2xl shadow-lg hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden cursor-pointer">
-                                        {/* % OFF Label */}
+                                    <div className="bg-zinc-900 text-white rounded-2xl shadow-lg hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden cursor-pointer group">
                                         {hasDiscount && (
-                                            <div className=" w-16 text-xs absolute top-2 right-2 bg-yellow-400 text-black  whitespace-nowrap font-semibold px-2 py-1 rounded">
+                                            <div className="w-16 text-xs absolute top-2 right-2 bg-yellow-400 text-black whitespace-nowrap font-semibold px-2 py-1 rounded z-10">
                                                 {discountPercent}% OFF
                                             </div>
                                         )}
 
-                                        {/* Background */}
-                                        <div className="absolute -z-10 inset-0 h-60   opacity-100 transition-opacity duration-300"></div>
+                                        <div className="absolute -z-10 inset-0 h-60 opacity-100 transition-opacity duration-300"></div>
 
-                                        {/* Content */}
-                                        <div className="p-4 flex flex-col items-center">
-                                            <Image
-                                                src={item.imageUrl}
-                                                alt={item.name}
-                                                width={100}
-                                                height={100}
-                                                className="w-60 object-contain mb-4 max-h-32"
-                                            />
-                                            <Link href={`/product/${item.slug}`}><h3 className="text-xl    font-semibold mb-1 text-center hover:underline">{item.name}</h3></Link>
+                                        <div className="p-4 flex flex-col items-center relative">
+                                            <div className="relative w-60 h-32 mb-4">
+                                                <Image
+                                                    src={item.imageUrl}
+                                                    alt={item.name}
+                                                    fill
+                                                    className="object-contain"
+                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                                                    priority={false}
+                                                />
+                                            </div>
+
+                                            <Link href={`/product/${item.slug}`} className="hover:underline">
+                                                <h3 className="text-xl font-semibold mb-1 text-center line-clamp-2">
+                                                    {item.name}
+                                                </h3>
+                                            </Link>
 
                                             <div className="flex gap-x-3 items-center">
                                                 <p className="text-xl text-gray-200 mb-2">
                                                     ₹{item.price.toFixed(2)}
                                                 </p>
-
-                                                {/* Show original price only if discount exists */}
                                                 {hasDiscount && (
                                                     <p className="line-through text-sm text-red-400">
                                                         ₹{item.discount.toFixed(2)}
                                                     </p>
                                                 )}
                                             </div>
-
-                                            {/* Rating */}
-                                            <p className="text-md mt-2 text-yellow-400">
-                                                {'★'.repeat(item.rating)}
-                                            </p>
-                                            <p className="text-md mt-2 text-yellow-400">
+                                            <p className="text-sm text-gray-400 mb-2">
                                                 {item.brandName}
                                             </p>
-                                            <AnimatedButton onClick={() => handleAddToCart(item)} className='!w-8/12 text-xs font-light mx-auto flex mt-3'>
-                                                Add to Cart
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-md text-yellow-400">
+                                                    {'★'.repeat(Math.floor(item.rating))}
+                                                    {'☆'.repeat(5 - Math.floor(item.rating))}
+                                                </p>
+
+                                            </div>
+
+                                            <AnimatedButton
+                                                disabled={item.stock === 0 || isLoading}
+                                                onClick={() => handleAddToCart(item)}
+                                                className="!w-8/12 text-xs font-light mx-auto flex mt-3"
+                                            >
+                                                {item.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                                             </AnimatedButton>
                                         </div>
                                     </div>
-
                                 </CarouselItem>
                             );
                         })}
                     </CarouselContent>
                 </div>
-                {/* Nav Buttons */}
                 <CarouselPrevious className="absolute md:left-0 top-1/2 -translate-y-2/4 z-10" />
-                <CarouselNext className="absolute  md:right-0 top-1/2 -translate-y-1/2 z-10" />
+                <CarouselNext className="absolute md:right-0 top-1/2 -translate-y-1/2 z-10" />
             </Carousel>
         </div>
     );
