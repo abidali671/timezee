@@ -33,10 +33,16 @@ export const getProductBySlugFromContentful = async (slug: string) => {
 
         if (!entries.items.length) return null;
 
-        return entries.items[0].fields;
+        const product = entries.items[0];
+
+        return {
+            id: product.sys.id,
+            ...product.fields,
+        };
     } catch (error) {
         console.error("Error fetching product by slug:", error);
         return null;
     }
 };
+
 export default client;
