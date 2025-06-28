@@ -12,6 +12,9 @@ export interface SlideProduct {
 
 // Define the structure for all products
 export interface AllProduct {
+  inStock?: number;
+  quantity?: number;
+  title?: string;
   image?: any;
   id: string;
   brandName: string;
