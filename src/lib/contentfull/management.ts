@@ -164,6 +164,74 @@ export async function createContentfulProduct(productData: any, imageFile: File 
         throw error;
     }
 }
+
+export async function duplicateContentfulProduct(productId: string) {
+    try {
+        const space = await client.getSpace(CONTENTFUL_SPACE_ID);
+        const environment = await space.getEnvironment('master');
+
+        const originalEntry = await environment.getEntry(productId);
+
+        if (!originalEntry || originalEntry.sys.contentType.sys.id !== 'products') {
+            throw new Error('Invalid product entry');
+        }
+
+        const fields = originalEntry.fields;
+
+        const originalName = fields.title['en-US'];
+        const originalSlug = fields.slug['en-US'];
+        // Clean previous " (Copy)" or " (Copy N)"
+        const cleanedName = originalName.replace(/\s*\(Copy(?: (\d+))?\)$/i, '');
+        const cleanedSlug = originalSlug.replace(/-copy(?:-\d+)?$/i, '');
+
+        // Detect if original had a copy number
+        const copyNumberMatch = originalName.match(/\(Copy(?: (\d+))?\)$/i);
+        let newCopyNumber = 1;
+        if (copyNumberMatch) {
+            newCopyNumber = copyNumberMatch[1] ? parseInt(copyNumberMatch[1], 10) + 1 : 2;
+        }
+
+        const newName = newCopyNumber === 1
+            ? `${cleanedName} (Copy)`
+            : `${cleanedName} (Copy ${newCopyNumber})`;
+
+        const newSlug = `${cleanedSlug}-copy-${Math.floor(Math.random() * 10000)}`;
+
+        const newEntryFields = {
+            ...fields,
+            title: { 'en-US': newName },
+            slug: { 'en-US': newSlug },
+        };
+
+        const newEntry = await environment.createEntry('products', {
+            fields: newEntryFields,
+        });
+
+        await newEntry.publish();
+
+        return {
+            id: newEntry.sys.id,
+            name: newName,
+            price: newEntry.fields.price['en-US'],
+            stock: newEntry.fields.inStock['en-US'],
+            imageUrl: newEntry.fields.image?.['en-US']
+                ? `https://images.ctfassets.net/${CONTENTFUL_SPACE_ID}/${newEntry.fields.image['en-US'].sys.id}`
+                : '',
+            description: newEntry.fields.description['en-US'],
+            rating: newEntry.fields.rating?.['en-US'] || 1,
+            discount: newEntry.fields.discount?.['en-US'] || 0,
+            category: newEntry.fields.category?.['en-US']?.sys?.id,
+            type: newEntry.fields.type?.['en-US'] || 'auto',
+            brandId: newEntry.fields.brands?.['en-US']?.sys?.id,
+        };
+    } catch (error) {
+        console.error('Error duplicating product:', error);
+        throw error;
+    }
+}
+
+
+
 export const updateContentfulProduct = async (
     id: string,
     productData: any,

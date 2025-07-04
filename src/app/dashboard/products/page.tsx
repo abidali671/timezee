@@ -9,7 +9,8 @@ import SafeImage from '@/components/ui/SafeImage';
 import { ProductT, Brand } from '@/types/product';
 import { ProductSidebar } from '@/app/components/ProductSidebar';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
-
+import { duplicateContentfulProduct } from '../../../lib/contentfull/management';
+import { RefreshCcw } from 'lucide-react';
 
 export default function ManageProducts() {
     const { products, addProduct, updateProduct, removeProduct, loading } = useProducts();
@@ -150,10 +151,19 @@ export default function ManageProducts() {
         setOpenDropdownId((currentId) => (currentId === id ? null : id));
     };
 
+    const handleDuplicate = async (productId: string) => {
+        try {
+            const newProduct = await duplicateContentfulProduct(productId);
+            await addProduct(newProduct);
+            toast.success('Product duplicated successfully!');
+            setOpenDropdownId(null);
+        } catch (error) {
+            toast.error('Failed to duplicate product');
+        }
+    };
 
 
     const onSubmit = async (data: ProductT) => {
-        console.log(data, 'data===')
         closeSidebar();
         try {
             const productData = {
@@ -221,13 +231,16 @@ export default function ManageProducts() {
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-semibold">Manage Products</h2>
-                    <button
-                        onClick={openAddSidebar}
-                        className="bg-blue-900 text-white px-4 py-2 rounded cursor-pointer"
-                        aria-label="Add new product"
-                    >
-                        +
-                    </button>
+                    <div className="flex items-center space-x-2">
+                        <RefreshCcw className="transition-transform duration-300 hover:rotate-90 text-gray-200 cursor-pointer" />
+                        <button
+                            onClick={openAddSidebar}
+                            className="bg-blue-900 text-white px-4 py-2 rounded cursor-pointer"
+                            aria-label="Add new product"
+                        >
+                            +
+                        </button>
+                    </div>
                 </div>
 
                 {/* Products Table */}
@@ -282,6 +295,9 @@ export default function ManageProducts() {
                                                     setOpenDropdownId(null);
                                                 }}
                                                 onDelete={() => handleDelete(product.id)}
+                                                onDuplicate={() => handleDuplicate(product.id)}
+
+
                                             />
                                         )}
                                     </td>
@@ -331,10 +347,12 @@ function DropdownMenu({
     position,
     onEdit,
     onDelete,
+    onDuplicate,
 }: {
     position: { top: number; left: number };
     onEdit: () => void;
     onDelete: () => void;
+    onDuplicate: () => void;
 }) {
     return (
         <div
@@ -366,6 +384,15 @@ function DropdownMenu({
                 <span>🗑️</span>
                 <span>Delete</span>
             </button>
+            <button
+                onClick={onDuplicate}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
+                role="menuitem"
+            >
+                <span>📋</span>
+                <span>Duplicate</span>
+            </button>
+
         </div>
     );
 }
