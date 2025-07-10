@@ -38,3 +38,20 @@ export interface ProductSidebarProps {
     setValue: any;
     categories: Brand[]
 }
+
+export interface ProductData {
+    id:string;
+    name: string;
+    excerpt: string;
+    slug: string;
+    price: number;
+    stock: number;
+    discount?: number;
+    rating?: number;
+    description: string;
+    type?: string;
+    brands: string;
+    category: string;
+    imageUrl?: string;
+    imageFile?: File | null;
+}

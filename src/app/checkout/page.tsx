@@ -4,7 +4,6 @@ import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { AnimatedButton } from '../components/animatedButton';
-import Link from 'next/link';
 import { createOrderInContentful } from '@/lib/contentfull/order';
 
 type FormData = {

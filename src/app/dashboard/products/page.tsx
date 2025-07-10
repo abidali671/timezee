@@ -158,7 +158,7 @@ export default function ManageProducts() {
             toast.success('Product duplicated successfully!');
             setOpenDropdownId(null);
         } catch (error) {
-            toast.error('Failed to duplicate product');
+            toast.error('Failed to duplicate product',error);
         }
     };
 
@@ -191,7 +191,7 @@ export default function ManageProducts() {
             };
 
             if (isEditing && data.id) {
-                await updateProduct(productToSave, contentfulProduct.imageUrl);
+                await updateProduct(productToSave,  contentfulProduct.imageUrl);
                 toast.success('Product updated successfully!');
             } else {
                 await addProduct(productToSave);

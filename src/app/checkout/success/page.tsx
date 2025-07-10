@@ -10,7 +10,7 @@ export default function CheckoutSuccess() {
                 </svg>
                 <h1 className="text-3xl font-bold mb-4">Order Placed Successfully!</h1>
                 <p className="text-gray-600 mb-8">
-                    Thank you for your purchase. We've sent a confirmation email with your order details.
+                    Thank you for your purchase. We&rsquo;ve sent a confirmation email with your order details.
                 </p>
                 <Link href="/" passHref>
                     <AnimatedButton className="w-full md:w-auto">

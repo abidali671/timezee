@@ -22,43 +22,53 @@ export function ProductSidebar({
     handleImageChange,
     selectedImage,
     watch,
+    categories,
     setValue,
-    categories
 }: ProductSidebarProps) {
     const rating = watch('rating') || 1;
     const name = watch('name');
     const slug = watch('slug');
     const [slugHas, setSlugHas] = React.useState(false);
-
     useEffect(() => {
-        if (name) {
+        if (!name) return;
+        const handler = setTimeout(() => {
             const generatedSlug = name
                 .trim()
                 .toLowerCase()
                 .replace(/\s+/g, '-')
                 .replace(/[^\w-]+/g, '');
             setValue('slug', generatedSlug);
-        }
+        }, 300); // debounce 300ms
+
+        return () => clearTimeout(handler);
     }, [name, setValue]);
 
     useEffect(() => {
-        async function checkSlugAvailability(): Promise<void> {
-            if (!slug) return;
+        let cancelled = false;
+
+        async function checkSlug() {
+            if (!slug) {
+                setSlugHas(false);
+                return;
+            }
             try {
-                const result = await fetchProductSlugs();
-                const isSlugTaken = result.includes(slug);
-                setSlugHas(isSlugTaken);
+                const slugs = await fetchProductSlugs();
+                if (!cancelled) setSlugHas(slugs.includes(slug));
             } catch (error) {
-                console.error('Error checking slug availability:', error);
+                if (!cancelled) console.error('Slug check error:', error);
             }
         }
-        checkSlugAvailability();
+        checkSlug();
+
+        return () => {
+            cancelled = true;
+        };
     }, [slug]);
+
     useEffect(() => {
-        if (!isOpen) {
-            setSlugHas(false);
-        }
+        if (!isOpen) setSlugHas(false);
     }, [isOpen]);
+
 
     return (
         <div>
@@ -154,8 +164,8 @@ export function ProductSidebar({
                                     )}
                                 />
                             )}
-                            {errors.brands && (
-                                <p className="text-red-500 text-sm">{errors.brands.message}</p>
+                            {errors.category && (
+                                <p className="text-red-500 text-sm">{errors.category.message}</p>
                             )}
                         </div>
                         {/* Type */}
