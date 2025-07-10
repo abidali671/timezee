@@ -83,7 +83,7 @@ const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselPr
                             return (
                                 <CarouselItem
                                     key={item.id}
-                                    className="basis-full sm:basis-1/2 lg:basis-1/4"
+                                    className=" h-full sm:basis-1/2 lg:basis-1/4"
                                 >
                                     <div className="bg-zinc-900 text-white rounded-2xl shadow-lg hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden cursor-pointer group">
                                         {hasDiscount && (
@@ -95,20 +95,21 @@ const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselPr
                                         <div className="absolute -z-10 inset-0 h-60 opacity-100 transition-opacity duration-300"></div>
 
                                         <div className="p-4 flex flex-col items-center relative">
-                                            <div className="relative w-60 h-32 mb-4">
+                                            <div className="relative w-60 h-full  mb-4">
                                                 <Image
                                                     src={item.imageUrl}
                                                     alt={item.name}
-                                                    fill
-                                                    className="object-contain"
+                                                    width={400}
+                                                    height={400}
+                                                    className="object-contain h-[320px]"
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                                     priority={false}
                                                 />
                                             </div>
 
                                             <Link href={`/product/${item.slug}`} className="hover:underline">
-                                                <h3 className="text-xl font-semibold mb-1 text-center line-clamp-2">
-                                                    {item.name}
+                                                <h3 className="text-2xl font-bold mb-1 text-center ">
+                                                    {item.name.length > 14 ? `${item.name.slice(0, 14)}` : item.name}
                                                 </h3>
                                             </Link>
 

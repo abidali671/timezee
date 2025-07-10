@@ -15,7 +15,7 @@ export default function CartSidebar() {
         >
             <div className="p-4 flex justify-between items-center">
                 {cart.length > 0 && <h1 className='text-4xl text-white whitespace-nowrap'>Your cart</h1>}
-                <button onClick={toggleCart} className='text-2xl cursor-pointer'>✕</button>
+                <button onClick={toggleCart} className='text-2xl cursor-pointer text-white'>✕</button>
             </div>
             <div className="p-4 space-y-4 overflow-y-auto h-[calc(100%-180px)]">
                 {cart.length === 0 ? (
