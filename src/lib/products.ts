@@ -71,60 +71,7 @@ export const allProducts: AllProduct[] = [
     description: 'The Seiko Golden Classic is a luxury statement...',
     excerpt: 'Golden Seiko with polished case and quartz precision.'
   },
-  {
-    id: '3',
-    name: 'Vintage Elegance',
-    price: 120.00,
-    discount: 20.00,
-    rating: 4.5,
-    category: 'Classic',
-    categoryName: 'Classic',
-    brandName: 'Rolex',
-    img: '/images/product5.webp',
-    imageUrl: '/images/product5.webp',
-    brands: 'Fossil',
-    slug: 'vintage-elegance',
-    type: 'Analog',
-    stock: 15,
-    description: 'A beautiful blend of vintage charm and modern features...',
-    excerpt: 'Vintage-style Fossil watch with leather strap.'
-  },
-  {
-    id: '4',
-    name: 'Rose Gold Chic',
-    price: 210.00,
-    discount: 30.00,
-    rating: 4.8,
-    category: 'Luxury',
-    categoryName: 'Luxury',
-    brandName: 'Michael Kors',
-    img: '/images/product6.webp',
-    imageUrl: '/images/product6.webp',
-    brands: 'Michael Kors',
-    slug: 'rose-gold-chic',
-    type: 'Analog',
-    stock: 8,
-    description: 'Chic and stylish, this rose gold watch turns heads...',
-    excerpt: 'Michael Kors rose gold with elegant minimalist dial.'
-  },
-  {
-    id: '5',
-    name: 'Casual Classic',
-    price: 89.99,
-    discount: 10.00,
-    rating: 4.2,
-    category: 'Everyday',
-    categoryName: 'Everyday',
-    brandName: 'Timex',
-    img: '/images/product7.webp',
-    imageUrl: '/images/product7.webp',
-    brands: 'Timex',
-    slug: 'casual-classic',
-    type: 'Analog',
-    stock: 20,
-    description: 'Perfect for everyday wear with a durable build...',
-    excerpt: 'Affordable and durable Timex classic watch.'
-  }
+
 ];
 
 
