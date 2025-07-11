@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { createContentfulProduct, fetchAllBrands, fetchAllCategories, updateContentfulProduct } from '@/lib/contentfull/management';
 import { useProducts } from '@/context/productsContext';
@@ -158,7 +158,7 @@ export default function ManageProducts() {
             toast.success('Product duplicated successfully!');
             setOpenDropdownId(null);
         } catch (error) {
-            toast.error('Failed to duplicate product',error);
+            toast.error('Failed to duplicate product', error);
         }
     };
 
@@ -191,7 +191,7 @@ export default function ManageProducts() {
             };
 
             if (isEditing && data.id) {
-                await updateProduct(productToSave,  contentfulProduct.imageUrl);
+                await updateProduct(productToSave, contentfulProduct.imageUrl);
                 toast.success('Product updated successfully!');
             } else {
                 await addProduct(productToSave);
@@ -336,7 +336,6 @@ export default function ManageProducts() {
             />
 
             {/* Toast Notifications */}
-            <ToastContainer position="bottom-right" autoClose={3000} />
         </div>
     );
 }
