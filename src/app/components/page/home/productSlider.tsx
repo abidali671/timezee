@@ -35,7 +35,7 @@ const ProductSlider = () => {
             <div className="container py-16 mx-auto flex flex-col gap-y-5">
                 {/* Title */}
                 <div className="flex justify-center items-center mb-6">
-                    <SectionTitle className="text-center text-white whitespace-nowrap w-32">
+                    <SectionTitle className="text-center text-white whitespace-nowrap  ">
                         Popular In Store
                     </SectionTitle>
                 </div>

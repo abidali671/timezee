@@ -85,7 +85,7 @@ export default function Header() {
                 />
                 <div className={`relative ${index % 2 === 0 ? "justify-center md:w-7/12" : "justify-end md:w-11/12"} px-10 z-20 flex h-full w-full items-center *:text-left`}>
                   <div className="tex p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/50 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
-                    <SectionTitle className='w-full md:w-full' font={true}>
+                    <SectionTitle className=' w-full md:w-full' font={true}>
                       {product.name}
                     </SectionTitle>
                     <h3 className="text-sm md:text-lg font-light text-yellow-400 mb-4">
