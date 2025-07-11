@@ -27,7 +27,7 @@ const ProductSlider = () => {
         fetchData();
     }, []);
 
-    const filteredProducts = [...allProducts, ...productsData].filter(
+    const filteredProducts = [...productsData].filter(
         (product: any) => product.brandName === activeCategory
     );
 
