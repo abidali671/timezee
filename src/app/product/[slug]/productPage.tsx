@@ -29,6 +29,7 @@ export default function ProductPage({ product }: { product: any }) {
         });
     };
 
+    console.log(product, 'prodc');
 
 
     return (

@@ -12,6 +12,7 @@ import { deleteContentfulProduct, updateContentfulProduct } from '@/lib/contentf
 import { ProductData } from '@/types/product';
 
 export interface Product {
+    slug: string;
     id: string;
     name: string;
     price: number;

@@ -23,10 +23,11 @@ export async function generateMetadata(
         return { title: 'Product Not Found' };
     }
     const { slug } = await params;
-    const findProduct = product.find((item) => item.fields.slug === slug);
+    const findProduct: any = product.find((item) => item.slug === slug);
+
     return {
-        title: findProduct?.fields.title,
-        description: findProduct?.fields.excerpt || 'Product details page',
+        title: findProduct?.name,
+        description: findProduct?.excerpt || 'Product details page',
     };
 }
 
@@ -34,7 +35,6 @@ export default async function Page({ params }: PageProps) {
     const { slug } = params;
 
     const product = await getProductBySlugFromContentful(slug);
-
     if (!product) return notFound();
 
     return <ProductPage product={product} />;
