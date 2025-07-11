@@ -85,7 +85,7 @@ const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselPr
                                     key={item.id}
                                     className=" h-full sm:basis-1/2 lg:basis-1/4"
                                 >
-                                    <div className="  text-white rounded-2xl shadow-lg hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden cursor-pointer group">
+                                    <div className="  text-white rounded-2xl shadow-lg   transition-transform duration-300 relative overflow-hidden cursor-pointer group">
                                         {hasDiscount && (
                                             <div className="w-16 text-xs absolute top-2 right-2 bg-yellow-400 text-black whitespace-nowrap font-semibold px-2 py-1 rounded z-10">
                                                 {discountPercent}% OFF
@@ -95,9 +95,8 @@ const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselPr
 
                                         <div className=" flex flex-col items-center relative">
 
-                                            <div className="relative w-60 h-full  mb-4">
+                                            <div className="relative w-full h-full  mb-4">
                                                 <div className="absolute inset-0 rounded bg-gray-50/20 h-8/12 group-hover:h-full group-hover:bg-gray-50/40 transition-all duration-500 ease-in-out z-0" />
-
                                                 <Image
                                                     src={item.imageUrl}
                                                     alt={item.name}
