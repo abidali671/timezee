@@ -13,11 +13,12 @@ import SectionTitle from "./page/home/sectionTitle";
 import { fetchAllProducts } from '@/lib/contentfull/client';
 import { Product } from "@/context/productsContext";
 import Link from "next/link";
+import useIsMobile from "@/hooks/useIsMobile";
 
 export default function Header() {
   const [productsData, setProductsData] = React.useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
+  const isMobile = useIsMobile()
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -41,15 +42,15 @@ export default function Header() {
           {loading ? (
             // Static loading UI with black background
             <CarouselItem className="relative h-[calc(100vh_-_75px)] w-full bg-black">
-              <div className="relative justify-center ml-20 md:justify-start md:w-8/12 px-10 z-20 flex h-full w-full items-center *:text-left">
+              <div className="relative justify-center md:ml-20 md:justify-start md:w-8/12 px-10 z-20 flex h-full w-full items-center *:text-left">
                 <div className="p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl w-10/12 bg-black/50 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
                   <div className="space-y-6">
-                    <div className="h-10 w-3/4 mr-auto bg-gray-300/70 rounded animate-pulse"></div>
-                    <div className="h-6 w-1/2 mr-auto bg-gray-300/50 rounded animate-pulse"></div>
+                    <div className="h-10 w-3/4 mx-auto md:mr-auto bg-gray-300/70 rounded animate-pulse"></div>
+                    <div className="h-6 w-1/2mx-auto md:mr-auto bg-gray-300/50 rounded animate-pulse"></div>
                     <div className="space-y-2">
-                      <div className="h-4 w-1/2 bg-gray-300/40 mr-auto rounded animate-pulse"></div>
+                      <div className="h-4 w-1/2 bg-gray-300/40 mx-auto md:mr-auto rounded animate-pulse"></div>
                     </div>
-                    <div className="h-12 w-40 mr-auto bg-gray-300/70 rounded-lg animate-pulse"></div>
+                    <div className="h-12 w-40 mx-auto md:mr-auto bg-gray-300/70 rounded-lg animate-pulse"></div>
                   </div>
                 </div>
               </div>
@@ -65,12 +66,12 @@ export default function Header() {
                   src={product.imageUrl as string}
                   alt={product.name}
                   style={{ objectFit: 'contain' }}
-                  width={500}
-                  height={500}
-                  className={`absolute flex justify-end ${index % 2 === 0 ? 'right-20 md:right-32' : 'left-20 md:left-32'} z-20`}
+                  width={isMobile ? 300 : 500}
+                  height={isMobile ? 300 : 500}
+                  className={`absolute flex justify-end ${index % 2 === 0 ? 'right-40 md:right-32 bottom-20 md:bottom-0' : 'left-40 bottom-20 md:bottom-0 md:left-32'} z-20`}
                 />
-                <div className={`relative ${index % 2 === 0 ? "justify-center md:w-7/12" : "justify-end md:w-11/12"} px-10 z-20 flex h-full w-full items-center *:text-left`}>
-                  <div className="p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/80 py-7 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
+                <div className={`relative top-6 ${index % 2 === 0 ? "justify-center md:w-7/12" : "justify-end md:w-11/12"} px-10 z-20 flex h-full w-full items-center *:text-left`}>
+                  <div className="p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/85 py-7 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
                     <SectionTitle className="w-full md:w-full" font={true}>
                       {product.name}
                     </SectionTitle>
@@ -100,8 +101,8 @@ export default function Header() {
 
         {(productsData.length > 1 || (!loading && productsData.length > 1)) && (
           <>
-            <CarouselPrevious className="absolute left-4 top-1/2 z-30 -translate-y-1/2" />
-            <CarouselNext className="absolute right-4 top-1/2 z-30 -translate-y-1/2" />
+            <CarouselPrevious className="absolute left-1 md:left-4 top-1/2 z-30 -translate-y-1/2" />
+            <CarouselNext className="absolute right-1 md:right-4 top-1/2 z-30 -translate-y-1/2" />
           </>
         )}
       </Carousel>
