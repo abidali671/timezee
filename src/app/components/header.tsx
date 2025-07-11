@@ -60,7 +60,7 @@ export default function Header() {
                 key={product.id || index}
                 className="relative h-[calc(100vh_-_75px)] w-full"
               >
-                <div className="absolute inset-0 z-10 bg-black/95"></div>
+                <div className="absolute inset-0 z-10 bg-center   " style={{ backgroundImage: 'url("/images/bg-dark2.jpg")' }}></div>
                 <Image
                   src={product.imageUrl as string}
                   alt={product.name}
