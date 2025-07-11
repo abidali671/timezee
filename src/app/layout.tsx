@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import ClientLayoutWrapper from "./ClientLayoutWrapper";
+import { ToastContainer } from 'react-toastify';
 
 export const metadata: Metadata = {
   title: "SwissTime",
@@ -22,8 +23,8 @@ export default function RootLayout({
       <body>
         <Providers>
           <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
-
         </Providers>
+        <ToastContainer position="bottom-right" autoClose={3000} />
       </body>
     </html>
   );
