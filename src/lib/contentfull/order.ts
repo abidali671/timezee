@@ -9,57 +9,66 @@ export async function createOrderInContentful(orderData: {
     customerName: string;
     customerEmail: string;
     customerPhoneNumber: string;
+    country: string;
+    state: string;
+    address: string;
     products: { id: string; quantity: number }[];
     price: number;
     status?: string;
     orderDate?: string;
 }) {
     try {
-        if (!orderData.customerName || !orderData.customerEmail || !orderData.customerPhoneNumber) {
-            throw new Error('Missing required customer information');
+        // Validation
+        if (
+            !orderData.customerName ||
+            !orderData.customerEmail ||
+            !orderData.customerPhoneNumber ||
+            !orderData.country ||
+            !orderData.state ||
+            !orderData.address
+        ) {
+            throw new Error('Missing required customer or address information');
         }
-
-        if (!orderData.products || orderData.products.length === 0) {
+        if (!orderData.products?.length) {
             throw new Error('At least one product is required');
         }
 
         const space = await client.getSpace(CONTENTFUL_SPACE_ID);
         const environment = await space.getEnvironment('master');
 
-        // Prepare product references and update stock
-        const productReferences = await Promise.all(orderData.products.map(async ({ id, quantity }) => {
-            const product = await environment.getEntry(id);
-            const currentStock = product.fields.inStock?.['en-US'] || 0;
-            const newStock = Math.max(currentStock - quantity, 0);
+        // Update product stock and build references
+        const productReferences = await Promise.all(
+            orderData.products.map(async ({ id, quantity }) => {
+                const product = await environment.getEntry(id);
+                const currentStock = product.fields.inStock?.['en-US'] || 0;
+                product.fields.inStock = { 'en-US': Math.max(currentStock - quantity, 0) };
+                const updated = await product.update();
+                await updated.publish();
+                return {
+                    sys: { type: 'Link', linkType: 'Entry', id }
+                };
+            })
+        );
 
-            product.fields.inStock = { 'en-US': newStock };
-
-            const updatedProduct = await product.update();
-            await updatedProduct.publish();
-
-            return {
-                sys: {
-                    type: 'Link',
-                    linkType: 'Entry',
-                    id: id
-                }
-            };
-        }));
-
+        // Create order entry with full fields
         const orderEntry = await environment.createEntry('orders', {
             fields: {
                 customerName: { 'en-US': orderData.customerName },
                 customerEmail: { 'en-US': orderData.customerEmail },
                 customerPhoneNumber: { 'en-US': parseInt(orderData.customerPhoneNumber.replace(/\D/g, '')) || 0 },
-                price: { 'en-US': Math.round(orderData.price) },
+                country: { 'en-US': orderData.country },
+                state: { 'en-US': orderData.state },
+                address: { 'en-US': orderData.address },
                 products: { 'en-US': productReferences },
+                price: { 'en-US': Math.round(orderData.price) },
                 status: { 'en-US': orderData.status || 'pending' },
-                orderDate: { 'en-US': orderData.orderDate || new Date().toISOString() }
+                orderDate: { 'en-US': orderData.orderDate || new Date().toISOString() },
             }
         });
 
         await orderEntry.publish();
 
+        // Return the new entry ID
         return {
             id: orderEntry.sys.id,
             success: true
