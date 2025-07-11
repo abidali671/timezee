@@ -2,7 +2,7 @@
 import { useForm } from 'react-hook-form';
 import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatedButton } from '../components/animatedButton';
 import { createOrderInContentful } from '@/lib/contentfull/order';
 
@@ -14,6 +14,8 @@ type FormData = {
 
 export default function CheckoutPage() {
     const { cart, dispatch } = useCart();
+    const [orderCompleted, setOrderCompleted] = useState(false);
+
     const router = useRouter();
     const {
         register,
@@ -21,12 +23,12 @@ export default function CheckoutPage() {
         formState: { errors, isSubmitting },
     } = useForm<FormData>();
 
-    // Redirect if cart is empty
+
     useEffect(() => {
-        if (cart.length === 0) {
+        if (cart.length === 0 && !orderCompleted) {
             router.push('/');
         }
-    }, [cart, router]);
+    }, [cart, orderCompleted, router]);
 
     const onSubmit = async (data: FormData) => {
         try {
@@ -44,6 +46,7 @@ export default function CheckoutPage() {
             };
 
             await createOrderInContentful(orderData);
+            setOrderCompleted(true); // prevent redirect
             dispatch({ type: 'CLEAR_CART' });
             router.push('/checkout/success');
         } catch (error) {
