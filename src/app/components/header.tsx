@@ -34,58 +34,44 @@ export default function Header() {
     fetchData();
   }, []);
 
-  const defaultBanners = [
-    '/images/slider1.webp',
-    '/images/slider2.webp',
-  ];
-
   return (
     <div className="relative w-full mx-auto">
       <Carousel className="w-full">
         <CarouselContent>
           {loading ? (
-            // Show loading state with default banner
-            <CarouselItem className="relative h-[calc(100vh_-_75px)] w-full">
-              <Image
-                src={defaultBanners[0]}
-                alt="Loading banner"
-                style={{ objectFit: 'cover' }}
-                fill
-                className="absolute inset-0 z-0 w-full h-full"
-                priority
-              />
+            // Static loading UI with black background
+            <CarouselItem className="relative h-[calc(100vh_-_75px)] w-full bg-black">
               <div className="relative justify-center ml-20 md:justify-start md:w-8/12 px-10 z-20 flex h-full w-full items-center *:text-left">
-                <div className="tex p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl  w-10/12 bg-black/50 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
+                <div className="p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl w-10/12 bg-black/50 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
                   <div className="space-y-6">
-                    <div className="h-10 w-3/4  mr-auto bg-gray-300/70 rounded animate-pulse"></div>
-                    <div className="h-6 w-1/2  mr-auto bg-gray-300/50 rounded animate-pulse"></div>
+                    <div className="h-10 w-3/4 mr-auto bg-gray-300/70 rounded animate-pulse"></div>
+                    <div className="h-6 w-1/2 mr-auto bg-gray-300/50 rounded animate-pulse"></div>
                     <div className="space-y-2">
                       <div className="h-4 w-1/2 bg-gray-300/40 mr-auto rounded animate-pulse"></div>
-
                     </div>
-
-                    <div className="h-12 w-40  mr-auto bg-gray-300/70 rounded-lg animate-pulse"></div>
+                    <div className="h-12 w-40 mr-auto bg-gray-300/70 rounded-lg animate-pulse"></div>
                   </div>
                 </div>
               </div>
             </CarouselItem>
-          ) : productsData.length > 0 ? (
+          ) : (
             productsData.map((product, index) => (
               <CarouselItem
                 key={product.id || index}
                 className="relative h-[calc(100vh_-_75px)] w-full"
               >
+                <div className="absolute inset-0 z-10 bg-black/95"></div>
                 <Image
-                  src={defaultBanners[index % defaultBanners.length]}
+                  src={product.imageUrl as string}
                   alt={product.name}
-                  style={{ objectFit: 'cover' }}
-                  fill
-                  className="absolute inset-0 z-0 w-full h-full"
-                  priority={index === 0}
+                  style={{ objectFit: 'contain' }}
+                  width={500}
+                  height={500}
+                  className={`absolute flex justify-end ${index % 2 === 0 ? 'right-20 md:right-32' : 'left-20 md:left-32'} z-20`}
                 />
                 <div className={`relative ${index % 2 === 0 ? "justify-center md:w-7/12" : "justify-end md:w-11/12"} px-10 z-20 flex h-full w-full items-center *:text-left`}>
-                  <div className="tex p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/50 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
-                    <SectionTitle className=' w-full md:w-full' font={true}>
+                  <div className="p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/80 py-7 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
+                    <SectionTitle className="w-full md:w-full" font={true}>
                       {product.name}
                     </SectionTitle>
                     <h3 className="text-sm md:text-lg font-light text-yellow-400 mb-4">
@@ -100,7 +86,7 @@ export default function Header() {
                         {product.price}
                       </span>
                     </div>
-                    <Link href={`/product/${product.slug}`} className="w-full">
+                    <Link href={`/product/${product.slug}`}>
                       <AnimatedButton className="h-10 flex text-sm md:h-16 md:mx-0 mx-auto">
                         View Product
                       </AnimatedButton>
@@ -109,33 +95,10 @@ export default function Header() {
                 </div>
               </CarouselItem>
             ))
-          ) : (
-            // Fallback if no products available
-            defaultBanners.map((banner, index) => (
-              <CarouselItem key={`fallback-${index}`} className="relative h-[calc(100vh_-_75px)] w-full">
-                <Image
-                  src={banner}
-                  alt="Default banner"
-                  style={{ objectFit: 'cover' }}
-                  fill
-                  className="absolute inset-0 z-0 w-full h-full"
-                  priority={index === 0}
-                />
-                <div className="relative justify-center md:w-7/12 px-10 z-20 flex h-full w-full items-center *:text-left">
-                  <div className="tex p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/50 text-white text-center">
-                    <SectionTitle className='w-full' font={true}>
-                      Featured Products
-                    </SectionTitle>
-                    <p className="text-white/70">Discover our amazing collection</p>
-                  </div>
-                </div>
-              </CarouselItem>
-            ))
           )}
         </CarouselContent>
 
-        {/* Only show navigation if we have multiple items */}
-        {(productsData.length > 1 || (!loading && defaultBanners.length > 1)) && (
+        {(productsData.length > 1 || (!loading && productsData.length > 1)) && (
           <>
             <CarouselPrevious className="absolute left-4 top-1/2 z-30 -translate-y-1/2" />
             <CarouselNext className="absolute right-4 top-1/2 z-30 -translate-y-1/2" />
