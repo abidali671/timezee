@@ -23,7 +23,7 @@ export async function generateMetadata(
         return { title: 'Product Not Found' };
     }
     const { slug } = await params;
-    const findProduct: any = product.find((item) => item.slug === slug);
+    const findProduct = product.find((item) => item.slug === slug);
 
     return {
         title: findProduct?.name,
