@@ -24,6 +24,7 @@ export interface Product {
     type?: string;
     discount?: number;
     rating?: number;
+    excerpt?: string;
 }
 
 interface ProductContextProps {
