@@ -78,3 +78,36 @@ export async function createOrderInContentful(orderData: {
         throw error;
     }
 }
+
+const getEnvironment = async () => {
+    const space = await client.getSpace(CONTENTFUL_SPACE_ID);
+    return space.getEnvironment('master');
+};
+export const fetchOrders = async () => {
+    const env = await getEnvironment();
+    const entries = await env.getEntries({ content_type: 'orders' });
+    return entries.items.map((entry) => ({
+        id: entry.sys.id,
+        customer: entry.fields.customerName['en-US'],
+        total: entry.fields.price['en-US'],
+        status: entry.fields.status['en-US'],
+        phone: entry.fields.customerPhoneNumber['en-US'],
+    }));
+};
+
+export const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const env = await getEnvironment();
+    const order = await env.getEntry(orderId);
+    order.fields.status['en-US'] = newStatus;
+    const updated = await order.update();
+    await updated.publish();
+    return true;
+};
+
+export const deleteOrder = async (orderId: string) => {
+    const env = await getEnvironment();
+    const entry = await env.getEntry(orderId);
+    await entry.unpublish().catch(() => null); // In case already unpublished
+    await entry.delete();
+    return true;
+};
