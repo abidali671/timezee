@@ -1,289 +1,186 @@
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
-import { useOrders } from '@/context/orderContext';
+import React, { useEffect, useState, useRef } from 'react';
+import { toast } from 'react-toastify';
 
-interface OrderT {
-    id: number;
+interface Order {
+    id: string;
     customer: string;
     total: number;
     status: string;
+    phone: string;
 }
 
+const statusOptions = ['pending', 'shipped', 'delivered'];
+
 export default function ManageOrders() {
-    const { orders, addOrder, updateOrder, removeOrder, loading } = useOrders();
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [statusToUpdate, setStatusToUpdate] = useState('');
+    const [dropdownOpenId, setDropdownOpenId] = useState<string | null>(null);
+    const dropdownRef = useRef(null);
 
-    const initialOrder: OrderT = {
-        id: 0,
-        customer: '',
-        total: 0,
-        status: 'Pending',
+    // Fetch orders
+    const loadOrders = async () => {
+        setLoading(true);
+        const res = await fetch('/api/orders');
+        const data = await res.json();
+        setOrders(data);
+        setLoading(false);
     };
-
-    const [formOrder, setFormOrder] = useState<OrderT>(initialOrder);
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
-    const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-    const popoverRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-                setIsPopoverOpen(false);
-                setIsEditing(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        loadOrders();
     }, []);
 
-    const resetForm = () => {
-        setFormOrder(initialOrder);
-        setIsEditing(false);
-    };
-
-    const validateForm = () => {
-        if (!formOrder.customer.trim()) return 'Customer name is required';
-        if (formOrder.total <= 0) return 'Total must be greater than 0';
-        return null;
-    };
-
-    const openAddPopover = () => {
-        resetForm();
-        setIsPopoverOpen(true);
-    };
-
-    const openEditPopover = (order: OrderT) => {
-        setFormOrder(order);
-        setIsEditing(true);
-        setIsPopoverOpen(true);
-    };
-
-    const handleFormSubmit = () => {
-        const error = validateForm();
-        if (error) {
-            alert(error);
-            return;
-        }
-
-        const orderToSave = {
-            ...formOrder,
-            id: isEditing ? formOrder.id : orders.length > 0 ? orders[orders.length - 1].id + 1 : 1,
+    // Close dropdown when clicked outside
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            if (dropdownRef.current && !(dropdownRef.current as any).contains(e.target)) {
+                setDropdownOpenId(null);
+            }
         };
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
 
-        if (isEditing) {
-            updateOrder(orderToSave);
-        } else {
-            addOrder(orderToSave);
+    const handleStatusUpdate = async () => {
+        if (!selectedOrder) return;
+        try {
+            await fetch('/api/orders/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: selectedOrder.id, status: statusToUpdate }),
+            });
+            setSelectedOrder(null);
+            toast.success('Order status updated successfully!');
+        } catch (error) {
+            console.error('Error updating order status:', error);
+            toast.error('Failed to update order status.');
+
+        }
+        await loadOrders();
+    };
+
+    const handleDelete = async (id: string) => {
+        try {
+            const response = await fetch(`/api/orders/delete?id=${id}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to delete order');
+            }
+            toast.success('Order deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            toast.error('Failed to delete order.');
         }
 
-        setIsPopoverOpen(false);
-        setIsEditing(false);
+        await loadOrders();
     };
-
-    const handleDropdownOpen = (event: React.MouseEvent<HTMLButtonElement>, id: number) => {
-        const rect = event.currentTarget.getBoundingClientRect();
-        setDropdownPosition({
-            top: rect.bottom + window.scrollY + 4,
-            left: rect.left + window.scrollX,
-        });
-        setOpenDropdownId((prev) => (prev === id ? null : id));
-    };
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="text-lg font-medium">Loading Orders...</div>
-            </div>
-        );
-    }
 
     return (
-        <div className="relative">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-semibold">Manage Orders</h2>
-                <button onClick={openAddPopover} className="bg-blue-900 text-white px-4 py-2 rounded">+</button>
-            </div>
+        <div className="p-0 md:p-6">
+            <h2 className="text-2xl font-semibold mb-4">Manage Orders</h2>
 
-            {/* Popover */}
-            {isPopoverOpen && (
-                <div
-                    ref={popoverRef}
-                    className="absolute z-10 right-0 mx-auto bg-white shadow-lg rounded-lg p-6 w-full md:w-6/12 border border-gray-300"
-                >
-                    <h3 className="text-xl font-bold mb-4 font-serif">
-                        {isEditing ? 'Edit Order' : 'Add New Order'}
-                    </h3>
+            {loading ? (
+                <div>Loading...</div>
+            ) : (
+                <div className="w-full overflow-x-auto">
 
-                    <FormInput label="Customer Name" value={formOrder.customer} onChange={(val) => setFormOrder((o) => ({ ...o, customer: val }))} />
-                    <FormInput label="Total" type="number" value={formOrder.total} onChange={(val) => setFormOrder((o) => ({ ...o, total: +val }))} />
-                    <FormSelect
-                        label="Status"
-                        value={formOrder.status}
-                        options={['Pending', 'Shipped', 'Delivered']}
-                        onChange={(val) => setFormOrder((o) => ({ ...o, status: val }))}
-                    />
+                    <table className="min-w-full bg-white border shadow">
+                        <thead className="bg-gray-100">
+                            <tr>
+                                <th className="py-2 px-4">Order ID</th>
+                                <th className="py-2 px-4">Customer</th>
+                                <th className="py-2 px-4">Phone</th>
+                                <th className="py-2 px-4">Total</th>
+                                <th className="py-2 px-4">Status</th>
+                                <th className="py-2 px-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {orders.map((order) => (
+                                <tr key={order.id} className="border-t text-center">
+                                    <td className="py-2 px-4">{order.id}</td>
+                                    <td className="py-2 px-4">{order.customer}</td>
+                                    <td className="py-2 px-4">{order.phone}</td>
+                                    <td className="py-2 px-4">{order.total}</td>
+                                    <td className="py-2 px-4">{order.status}</td>
+                                    <td className="py-2 px-4 relative">
+                                        <button
+                                            className="text-black hover:text-black focus:outline-none cursor-pointer h-10 w-10 bg-gray-50 rounded-full"
+                                            onClick={() => setDropdownOpenId(dropdownOpenId === order.id ? null : order.id)}
+                                        >
+                                            ⋮
+                                        </button>
 
-                    <div className="flex justify-end space-x-2">
-                        <button
-                            onClick={() => {
-                                setIsPopoverOpen(false);
-                                setIsEditing(false);
-                            }}
-                            className="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100"
-                        >
-                            Cancel
-                        </button>
-                        <button onClick={handleFormSubmit} className="px-4 py-2 rounded bg-blue-900 text-white">
-                            {isEditing ? 'Save' : 'Add'}
-                        </button>
-                    </div>
+                                        {dropdownOpenId === order.id && (
+                                            <div
+                                                ref={dropdownRef}
+                                                className="absolute bg-white border shadow-md rounded mt-2 right-0 z-10 w-40"
+                                            >
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedOrder(order);
+                                                        setStatusToUpdate(order.status);
+                                                        setDropdownOpenId(null);
+                                                    }}
+                                                    className="block w-full px-4 py-2 hover:bg-gray-100 cursor-pointer text-left"
+                                                >
+                                                    Edit Status
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(order.id)}
+                                                    className="block w-full px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer text-left"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
 
-            {/* Orders Table */}
-            <div className="overflow-x-auto">
-                <table className="min-w-full bg-white shadow-md rounded-lg">
-                    <thead>
-                        <tr className="bg-gray-100 text-center">
-                            <th className="py-3 px-4">Order ID</th>
-                            <th className="py-3 px-4  ">Customer</th>
-                            <th className="py-3 px-4">Total</th>
-                            <th className="py-3 px-4">Status</th>
-                            <th className="py-3 px-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="text-center">
-                        {orders.map((order) => (
-                            <tr key={order.id} className="hover:bg-gray-100">
-                                <td className="py-2 px-4">{order.id}</td>
-                                <td className="py-2 px-4 truncate max-w-20">{order.customer}</td>
-                                <td className="py-2 px-4">{order.total}</td>
-                                <td className="py-2 px-4">{order.status}</td>
-                                <td className="py-2 px-4 relative">
-                                    <button
-                                        onClick={(e) => handleDropdownOpen(e, order.id)}
-                                        className="text-black hover:text-black focus:outline-none cursor-pointer h-10 w-10 bg-gray-50 rounded-full"
+            {/* Status Edit Modal */}
+            {selectedOrder && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-20">
+                    <div className="bg-white p-6 rounded shadow-md w-96">
+                        <h3 className="text-lg font-semibold mb-4">Update Order Status</h3>
+                        <select
+                            value={statusToUpdate}
+                            onChange={(e) => setStatusToUpdate(e.target.value)}
+                            className="w-full border px-3 py-2 rounded mb-4"
+                        >
+                            {statusOptions.map((status) => (
+                                <option key={status} value={status}>
+                                    {status}
+                                </option>
+                            ))}
+                        </select>
 
-                                    >
-                                        ⋮
-                                    </button>
-                                    {openDropdownId === order.id && (
-                                        <DropdownMenu
-                                            position={dropdownPosition}
-                                            onEdit={() => {
-                                                openEditPopover(order);
-                                                setOpenDropdownId(null);
-                                            }}
-                                            onDelete={() => {
-                                                removeOrder(order.id);
-                                                setOpenDropdownId(null);
-                                            }}
-                                        />
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        <div className="flex justify-end space-x-2">
+                            <button
+                                onClick={() => setSelectedOrder(null)}
+                                className="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleStatusUpdate}
+                                className="px-4 py-2 rounded bg-blue-900 text-white hover:bg-blue-800"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
 
-/** Reusable Form Input */
-function FormInput({
-    label,
-    value,
-    onChange,
-    type = 'text',
-}: {
-    label: string;
-    value: string | number;
-    onChange: (val: string) => void;
-    type?: React.HTMLInputTypeAttribute;
-}) {
-    return (
-        <div className="flex flex-col mb-3">
-            <label className="font-medium mb-1">{label}</label>
-            <input
-                type={type}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="border p-2 rounded w-full"
-            />
-        </div>
-    );
-}
-
-/** Reusable Select Dropdown */
-function FormSelect({
-    label,
-    value,
-    onChange,
-    options,
-}: {
-    label: string;
-    value: string;
-    onChange: (val: string) => void;
-    options: string[];
-}) {
-    return (
-        <div className="flex flex-col mb-3">
-            <label className="font-medium mb-1">{label}</label>
-            <select
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="border p-2 rounded w-full"
-            >
-                {options.map((opt) => (
-                    <option key={opt} value={opt}>
-                        {opt}
-                    </option>
-                ))}
-            </select>
-        </div>
-    );
-}
-
-/** Dropdown Menu Component */
-function DropdownMenu({
-    position,
-    onEdit,
-    onDelete,
-}: {
-    position: { top: number; left: number };
-    onEdit: () => void;
-    onDelete: () => void;
-}) {
-    return (
-        <div
-            className="z-50 bg-white border border-gray-200 rounded-md shadow-lg w-40"
-            style={{
-                position: 'fixed',
-                top: position.top,
-                left: position.left,
-                marginTop: '0.25rem',
-                marginLeft: '-40px'
-            }}
-            role="menu"
-        >
-            <button
-                onClick={onEdit}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
-                role="menuitem"
-            >
-                <span>✏️</span>
-                <span>Edit</span>
-            </button>
-            <button
-                onClick={onDelete}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
-                role="menuitem"
-            >
-                <span>🗑️</span>
-                <span>Delete</span>
-            </button>
-        </div>
-    );
-}
