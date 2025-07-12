@@ -8,6 +8,11 @@ interface Order {
     total: number;
     status: string;
     phone: string;
+    address: string;
+    country: string;
+    state: string;
+    orderDate: string;
+    // products?: { id: string; quantity: number }[]; // Optional products field
 }
 
 const statusOptions = ['pending', 'shipped', 'delivered'];
@@ -33,15 +38,16 @@ export default function ManageOrders() {
         loadOrders();
     }, []);
 
-    // Close dropdown when clicked outside
+    const wrapperRef = useRef(null);
+
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
-            if (dropdownRef.current && !(dropdownRef.current as any).contains(e.target)) {
+            if (wrapperRef.current && !(wrapperRef.current as any).contains(e.target)) {
                 setDropdownOpenId(null);
             }
         };
-        document.addEventListener('mousedown', handleClick);
-        return () => document.removeEventListener('mousedown', handleClick);
+        document.addEventListener('click', handleClick);
+        return () => document.removeEventListener('click', handleClick);
     }, []);
 
     const handleStatusUpdate = async () => {
@@ -78,6 +84,7 @@ export default function ManageOrders() {
 
         await loadOrders();
     };
+    console.log(orders, 'orders');
 
     return (
         <div className="p-0 md:p-6">
@@ -91,8 +98,9 @@ export default function ManageOrders() {
                     <table className="min-w-full bg-white border shadow">
                         <thead className="bg-gray-100">
                             <tr>
-                                <th className="py-2 px-4">Order ID</th>
+                                <th className="py-2 px-4 w-20">Order ID</th>
                                 <th className="py-2 px-4">Customer</th>
+                                <th className="py-2 px-4">Address</th>
                                 <th className="py-2 px-4">Phone</th>
                                 <th className="py-2 px-4">Total</th>
                                 <th className="py-2 px-4">Status</th>
@@ -100,26 +108,25 @@ export default function ManageOrders() {
                             </tr>
                         </thead>
                         <tbody>
-                            {orders.map((order) => (
+                            {orders?.map((order) => (
                                 <tr key={order.id} className="border-t text-center">
-                                    <td className="py-2 px-4">{order.id}</td>
+                                    <td className="py-2 px-4 w-20">{order.id}</td>
                                     <td className="py-2 px-4">{order.customer}</td>
+                                    <td className="py-2 px-4 w-32 ">{order.address}, {order.state}</td>
                                     <td className="py-2 px-4">{order.phone}</td>
                                     <td className="py-2 px-4">{order.total}</td>
                                     <td className="py-2 px-4">{order.status}</td>
-                                    <td className="py-2 px-4 relative">
+                                    <td className="py-2 px-4 relative" ref={wrapperRef}>
                                         <button
                                             className="text-black hover:text-black focus:outline-none cursor-pointer h-10 w-10 bg-gray-50 rounded-full"
                                             onClick={() => setDropdownOpenId(dropdownOpenId === order.id ? null : order.id)}
                                         >
                                             ⋮
                                         </button>
-
+                                    </td>
+                                    <td>
                                         {dropdownOpenId === order.id && (
-                                            <div
-                                                ref={dropdownRef}
-                                                className="absolute bg-white border shadow-md rounded mt-2 right-0 z-10 w-40"
-                                            >
+                                            <div className="absolute bg-white border shadow-md rounded mt-6 right-12 z-20 w-40">
                                                 <button
                                                     onClick={() => {
                                                         setSelectedOrder(order);
