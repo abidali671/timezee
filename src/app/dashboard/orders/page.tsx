@@ -23,7 +23,6 @@ export default function ManageOrders() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [statusToUpdate, setStatusToUpdate] = useState('');
     const [dropdownOpenId, setDropdownOpenId] = useState<string | null>(null);
-    const dropdownRef = useRef(null);
 
     // Fetch orders
     const loadOrders = async () => {
