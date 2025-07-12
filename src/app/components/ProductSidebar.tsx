@@ -256,7 +256,7 @@ export function ProductSidebar({
                             )}
                         </div>
                         {/* Description */}
-                        <div className="space-y-2">
+                        {/* <div className="space-y-2">
                             <label className="block font-medium">Description</label>
                             <Controller
                                 name="description"
@@ -274,7 +274,7 @@ export function ProductSidebar({
                             {errors.description && (
                                 <p className="text-red-500 text-sm">{errors.description.message}</p>
                             )}
-                        </div>
+                        </div> */}
 
                         {/* Price */}
                         <div className="space-y-2">
