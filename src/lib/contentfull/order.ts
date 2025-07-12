@@ -96,7 +96,7 @@ export const fetchOrders = async () => {
         address: entry.fields.address['en-US'],
         // country: entry.fields.country['en-US'],
         state: entry.fields.state['en-US'],
-        // orderDate: entry.fields.orderDate['en-US'],
+        orderDate: entry.fields.orderDate['en-US'] ?? null,
         // products: entry.fields.products['en-US']?.map((product: any) => ({
         //     id: product.sys.id,
         //     quantity: product.fields.quantity ? product.fields.quantity['en-US'] : 1
