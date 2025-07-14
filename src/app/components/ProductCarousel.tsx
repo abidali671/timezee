@@ -72,7 +72,7 @@ const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselPr
         <div className="relative w-full">
             <Carousel opts={{ align: 'start' }} className="w-full">
                 <div className="w-10/12 mx-auto">
-                    <CarouselContent>
+                    <CarouselContent >
                         {products.map((item: AllProduct) => {
                             const hasDiscount = item.discount > item.price;
                             const discountPercent = hasDiscount
@@ -85,7 +85,7 @@ const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselPr
                                     key={item.id}
                                     className=" h-full sm:basis-1/2 lg:basis-1/4"
                                 >
-                                    <div className="  text-white rounded-2xl shadow-lg   transition-transform duration-300 relative overflow-hidden cursor-pointer group">
+                                    <div className="  text-white rounded-none shadow-lg   transition-transform duration-300 relative overflow-hidden cursor-pointer group">
                                         {hasDiscount && (
                                             <div className="w-16 text-xs absolute top-2 right-2 bg-yellow-400 text-black whitespace-nowrap font-semibold px-2 py-1 rounded z-10">
                                                 {discountPercent}% OFF
