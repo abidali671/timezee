@@ -183,7 +183,7 @@ function CarouselPrevious({
       variant="ghost"
       size="icon"
       className={cn(
-        "relative overflow-hidden group size-12 rounded-full bg-gray-900 text-white cursor-pointer",
+        "relative overflow-hidden group size-12 rounded-none bg-gray-900 text-white cursor-pointer",
         orientation === "horizontal"
           ? "top-1/2 -left-6 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -196,7 +196,7 @@ function CarouselPrevious({
       <span className="relative z-10">
         <ArrowLeft className="size-5" />
       </span>
-      <span className="absolute bottom-0 left-0 w-full h-1 group-hover:h-full bg-yellow-400 transition-all duration-300 ease-in-out z-0 rounded-full" />
+      <span className="absolute bottom-0 left-0 w-full h-1 group-hover:h-full bg-yellow-400 transition-all duration-300 ease-in-out z-0 rounded-none" />
       <span className="sr-only">Previous slide</span>
     </Button>
   );
@@ -214,7 +214,7 @@ function CarouselNext({
       variant="ghost"
       size="icon"
       className={cn(
-        "relative overflow-hidden group size-12 rounded-full bg-gray-900 text-white cursor-pointer",
+        "relative overflow-hidden group size-12 rounded-none bg-gray-900 text-white cursor-pointer",
         orientation === "horizontal"
           ? "top-1/2 -right-6 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -227,7 +227,7 @@ function CarouselNext({
       <span className="relative z-10">
         <ArrowRight className="size-5" />
       </span>
-      <span className="absolute bottom-0 left-0 w-full h-1 group-hover:h-full bg-yellow-400 transition-all duration-300 ease-in-out z-0 rounded-full" />
+      <span className="absolute bottom-0 left-0 w-full h-1 group-hover:h-full bg-yellow-400 transition-all duration-300 ease-in-out z-0 rounded-none" />
       <span className="sr-only">Next slide</span>
     </Button>
   );
