@@ -4,9 +4,9 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { createContentfulProduct, fetchAllBrands, fetchAllCategories, updateContentfulProduct } from '@/lib/contentfull/management';
-import { useProducts } from '@/context/productsContext';
+import { Product, useProducts } from '@/context/productsContext';
 import SafeImage from '@/components/ui/SafeImage';
-import { ProductT, Brand } from '@/types/product';
+import { Brand } from '@/types/product';
 import { ProductSidebar } from '@/app/components/ProductSidebar';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { duplicateContentfulProduct } from '../../../lib/contentfull/management';
@@ -21,7 +21,7 @@ export default function ManageProducts() {
         watch,
         setValue,
         formState: { errors }
-    } = useForm<ProductT>({
+    } = useForm<Product>({
         defaultValues: {
             name: '',
             slug: '',
@@ -117,7 +117,7 @@ export default function ManageProducts() {
         setSidebarOpen(true);
     };
 
-    const openEditSidebar = (product: ProductT) => {
+    const openEditSidebar = (product: Product) => {
         reset({
             ...product,
             description: typeof product.description === 'object'
@@ -154,16 +154,17 @@ export default function ManageProducts() {
     const handleDuplicate = async (productId: string) => {
         try {
             const newProduct = await duplicateContentfulProduct(productId);
-            await addProduct(newProduct);
+            await addProduct({ ...newProduct, slug: newProduct.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '') });
             toast.success('Product duplicated successfully!');
             setOpenDropdownId(null);
-        } catch (error) {
-            toast.error('Failed to duplicate product', error);
+        } catch (error: unknown) {
+            console.error('Failed to duplicate product:', error);
+            toast.error('Failed to duplicate product');
         }
     };
 
 
-    const onSubmit = async (data: ProductT) => {
+    const onSubmit = async (data: Product) => {
         closeSidebar();
         try {
             const productData = {

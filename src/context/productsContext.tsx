@@ -19,9 +19,9 @@ export interface Product {
     description: string;
     imageUrl?: string;
     category?: string;
-    brand?: string;
+    brands?: string;
     type?: string;
-    discount?: number;
+    discount: number;
     rating?: number;
     excerpt?: string;
     brandName?: string;
