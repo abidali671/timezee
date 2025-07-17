@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Carousel,
     CarouselContent,
@@ -16,12 +16,12 @@ import { Product } from '@/context/productsContext';
 const ProductCarousel = ({ products }: { products: Product[] }) => {
     const { dispatch } = useCart();
 
-    const calculateDiscountPercentage = (originalPrice: number, discountedPrice: number) => {
-        if (discountedPrice === 0) return null; // Return null if no discount
-        if (originalPrice <= 0 || discountedPrice <= 0 || originalPrice <= discountedPrice) return 0; // No valid discount
-        const discount = ((originalPrice - discountedPrice) / originalPrice) * 100;
-        return Math.round(discount); // Return rounded percentage
-    };
+    // const calculateDiscountPercentage = (originalPrice: number, discountedPrice: number) => {
+    //     if (discountedPrice === 0) return null; // Return null if no discount
+    //     if (originalPrice <= 0 || discountedPrice <= 0 || originalPrice <= discountedPrice) return 0; // No valid discount
+    //     const discount = ((originalPrice - discountedPrice) / originalPrice) * 100;
+    //     return Math.round(discount); // Return rounded percentage
+    // };
 
     // Function to handle adding item to the cart
     const handleAddToCart = async (product: Product) => {
