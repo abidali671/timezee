@@ -33,7 +33,7 @@ export default function Newsletter() {
                                     name="contact[email]"
                                     required
                                     placeholder="Email Address"
-                                    className="w-full px-4 py-3   border-1 text-white  "
+                                    className="w-full px-4 py-3.5   border-1 text-white  "
                                 />
                             </div>
 
@@ -41,7 +41,7 @@ export default function Newsletter() {
                         </form>
                         <AnimatedButton
                             type="submit"
-                            className="  h-full !w-20 text-xs"
+                            className=" h-full !w-20 text-xs"
                         >
                             Subscribe
                         </AnimatedButton>

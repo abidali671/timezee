@@ -158,3 +158,15 @@ h6 {
 .cool-link:hover::after {
   width: 100%;
 }
+
+/* Hide scrollbar on Webkit browsers */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox */
+}
