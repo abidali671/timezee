@@ -6,11 +6,13 @@ import ProductGallery from "./components/page/home/ProductGallery";
 import ProductSlider from "./components/page/home/productSlider";
 import Newsletter from "./components/page/Newsletter";
 import DealBanner from "./components/page/home/DealBanner";
+import { fetchAllProducts } from "@/lib/contentfull/client";
 
-export default function Home() {
+export default async function Home() {
+  const products = await fetchAllProducts();
   return (
     <div>
-      <Header />
+      <Header products={products} />
       <ProductCategory />
       <ProductSlider />
       <BannerSection />
@@ -21,4 +23,3 @@ export default function Home() {
     </div>
   );
 }
-
