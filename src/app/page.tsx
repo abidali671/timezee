@@ -1,3 +1,4 @@
+import { fetchAllProducts } from "@/lib/contentfull/client";
 import Header from "./components/header";
 import BrandLogoSlider from "./components/page/home/BrandLogoSlider";
 import BannerSection from "./components/page/home/BannerSection";
@@ -6,15 +7,15 @@ import ProductGallery from "./components/page/home/ProductGallery";
 import ProductSlider from "./components/page/home/productSlider";
 import Newsletter from "./components/page/Newsletter";
 import DealBanner from "./components/page/home/DealBanner";
-import { fetchAllProducts } from "@/lib/contentfull/client";
 
-export default async function Home() {
+const Home = async () => {
   const products = await fetchAllProducts();
+
   return (
     <div>
       <Header products={products} />
       <ProductCategory />
-      <ProductSlider />
+      <ProductSlider products={products} />
       <BannerSection />
       <ProductGallery />
       <DealBanner />
@@ -22,4 +23,6 @@ export default async function Home() {
       <Newsletter />
     </div>
   );
-}
+};
+
+export default Home;

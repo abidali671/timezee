@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react';
 import {
     Carousel,
@@ -10,15 +11,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { AnimatedButton } from './animatedButton';
-import { AllProduct } from '@/lib/products';
+import { Product } from '@/context/productsContext';
 
 
-interface ProductCarouselProps {
-    products: any;
-    loading?: boolean;
-}
 
-const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselProps) => {
+const ProductCarousel = ({ products, }: { products: Product[] }) => {
     const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
     const { dispatch } = useCart();
 
@@ -28,7 +25,7 @@ const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselPr
         return Math.round(discount);
     };
 
-    const handleAddToCart = async (product: AllProduct) => {
+    const handleAddToCart = async (product: any) => {
         try {
             setLoadingStates(prev => ({ ...prev, [product.id]: true }));
             dispatch({
@@ -43,66 +40,43 @@ const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselPr
         }
     };
 
-    if (parentLoading) {
-        return (
-            <div className="relative w-full">
-                <Carousel opts={{ align: 'start' }} className="w-full">
-                    <div className="w-10/12 mx-auto">
-                        <CarouselContent>
-                            {[...Array(4)].map((_, index) => (
-                                <CarouselItem key={index} className="basis-full  sm:basis-1/2 lg:basis-1/4">
-                                    <div className="bg-zinc-900  text-white   rounded-2xl shadow-lg p-4">
-                                        <div className="animate-pulse flex flex-col items-center">
-                                            <div className="bg-zinc-700 h-32 w-full rounded mb-4"></div>
-                                            <div className="bg-zinc-700 h-6 w-3/4 rounded mb-2"></div>
-                                            <div className="bg-zinc-700 h-4 w-1/2 rounded mb-4"></div>
-                                            <div className="bg-zinc-700 h-8 w-full rounded"></div>
-                                        </div>
-                                    </div>
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                    </div>
-                </Carousel>
-            </div>
-        );
-    }
 
     return (
         <div className="relative w-full">
             <Carousel opts={{ align: 'start' }} className="w-full">
                 <div className="w-10/12 mx-auto">
                     <CarouselContent >
-                        {products.map((item: AllProduct) => {
-                            const hasDiscount = item.discount > item.price;
+                        {products.map((item: Product) => {
+                            // Check if discount exists and calculate discount
+                            const hasDiscount = item.discount && item.discount > item.price;
                             const discountPercent = hasDiscount
-                                ? calculateDiscountPercentage(item.discount, item.price)
+                                ? calculateDiscountPercentage(item.discount as number, item.price)
                                 : 0;
+
+                            // Loading state check
                             const isLoading = loadingStates[item.id] || false;
 
                             return (
                                 <CarouselItem
                                     key={item.id}
-                                    className=" h-full sm:basis-1/2 lg:basis-1/4"
+                                    className="h-full sm:basis-1/2 lg:basis-1/4"
                                 >
-                                    <div className="  text-white  shadow-lg   transition-transform duration-300 relative overflow-hidden cursor-pointer group">
+                                    <div className="text-white shadow-lg transition-transform duration-300 relative overflow-hidden cursor-pointer group">
                                         {hasDiscount && (
                                             <div className="w-16 text-xs absolute top-2 right-2 bg-yellow-400 text-black whitespace-nowrap font-semibold px-2 py-1 rounded z-10">
                                                 {discountPercent}% OFF
                                             </div>
                                         )}
 
-
-                                        <div className=" flex flex-col items-center relative">
-
-                                            <div className="relative w-full h-full  mb-4">
+                                        <div className="flex flex-col items-center relative">
+                                            <div className="relative w-full h-full mb-4">
                                                 <div className="absolute inset-0 rounded-none bg-gray-50/20 h-8/12 group-hover:h-full group-hover:bg-gray-50/40 transition-all duration-500 ease-in-out z-0" />
                                                 <Image
-                                                    src={item.imageUrl}
+                                                    src={item.imageUrl || '/fallback-image.jpg'}  // Optional chaining to handle undefined imageUrl
                                                     alt={item.name}
                                                     width={400}
                                                     height={400}
-                                                    className="object-contain h-[320px] relative z-10  "
+                                                    className="object-contain h-[320px] relative z-10"
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                                     priority={false}
                                                 />
@@ -112,7 +86,6 @@ const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselPr
                                                 <h3 className="text-2xl font-bold mb-1 truncate text-center">
                                                     {item.name}
                                                 </h3>
-
                                             </Link>
 
                                             <div className="flex gap-x-3 items-center">
@@ -121,7 +94,7 @@ const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselPr
                                                 </p>
                                                 {hasDiscount && (
                                                     <p className="line-through text-sm text-red-400">
-                                                        ₹{item.discount.toFixed(2)}
+                                                        ₹{item.discount?.toFixed(2)}
                                                     </p>
                                                 )}
                                             </div>
@@ -130,10 +103,9 @@ const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselPr
                                             </p>
                                             <div className="flex items-center gap-2">
                                                 <p className="text-md text-yellow-400">
-                                                    {'★'.repeat(Math.floor(item.rating))}
-                                                    {'☆'.repeat(5 - Math.floor(item.rating))}
+                                                    {'★'.repeat(Math.floor(item.rating || 0))}
+                                                    {'☆'.repeat(5 - Math.floor(item.rating || 0))}
                                                 </p>
-
                                             </div>
 
                                             <AnimatedButton
@@ -154,6 +126,7 @@ const ProductCarousel = ({ products, loading: parentLoading }: ProductCarouselPr
                 <CarouselNext className="absolute md:right-0 top-1/2 right-4  -translate-y-1/2 z-10" />
             </Carousel>
         </div>
+
     );
 };
 
