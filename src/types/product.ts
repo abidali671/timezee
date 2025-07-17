@@ -1,20 +1,3 @@
-export interface ProductT {
-    id?: string;
-    name: string;
-    price: number;
-    stock: number;
-    description: string | Document;
-    imageUrl?: string;
-    category?: string;
-    brands?: string;
-    type?: string;
-    discount?: number;
-    rating?: number;
-    imageFile?: File | null;
-    slug?: string;
-    excerpt: string;
-
-}
 
 export interface Brand {
     id: string;
@@ -39,19 +22,3 @@ export interface ProductSidebarProps {
     categories: Brand[]
 }
 
-export interface ProductData {
-    id:string;
-    name: string;
-    excerpt: string;
-    slug: string;
-    price: number;
-    stock: number;
-    discount?: number;
-    rating?: number;
-    description: string;
-    type?: string;
-    brands: string;
-    category: string;
-    imageUrl?: string;
-    imageFile?: File | null;
-}

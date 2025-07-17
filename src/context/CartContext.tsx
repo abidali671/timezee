@@ -7,18 +7,18 @@ import React, {
     useEffect,
     useState,
 } from 'react';
-import { AllProduct } from '../lib/products';
+import { Product } from './productsContext';
 
 // Extend Action type with increase and decrease quantity
 type Action =
-    | { type: 'ADD_TO_CART'; payload: AllProduct }
+    | { type: 'ADD_TO_CART'; payload: Product }
     | { type: 'REMOVE_FROM_CART'; payload: string }
     | { type: 'CLEAR_CART' }
     | { type: 'INCREASE_QUANTITY'; payload: string }
     | { type: 'DECREASE_QUANTITY'; payload: string };
 
 const CartContext = createContext<{
-    cart: AllProduct[];
+    cart: Product[];
     dispatch: React.Dispatch<Action>;
     isOpen: boolean;
     toggleCart: () => void;
@@ -29,7 +29,7 @@ const CartContext = createContext<{
     toggleCart: () => { },
 });
 
-const reducer = (state: AllProduct[], action: Action): AllProduct[] => {
+const reducer = (state: Product[], action: Action): Product[] => {
     switch (action.type) {
         case 'ADD_TO_CART': {
             const existing = state.find(item => item.slug === action.payload.slug);
@@ -80,7 +80,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         const storedCart = localStorage.getItem('cart');
         if (storedCart) {
             try {
-                const parsed = JSON.parse(storedCart) as AllProduct[];
+                const parsed = JSON.parse(storedCart) as Product[];
                 if (Array.isArray(parsed)) {
                     dispatch({ type: 'CLEAR_CART' });
                     parsed.forEach(item => {

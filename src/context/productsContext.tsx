@@ -9,7 +9,6 @@ import React, {
 } from 'react';
 import { fetchAllProducts } from '@/lib/contentfull/client';
 import { deleteContentfulProduct, updateContentfulProduct } from '@/lib/contentfull/management';
-import { ProductData } from '@/types/product';
 
 export interface Product {
     slug: string;
@@ -25,13 +24,16 @@ export interface Product {
     discount?: number;
     rating?: number;
     excerpt?: string;
+    brandName?: string;
+    categoryName?: string;
+    imageFile?: File | null;
 }
 
 interface ProductContextProps {
     products: Product[];
     loading: boolean;
     addProduct: (product: Product) => Promise<Product>;
-    updateProduct: (product: ProductData, ImageFile: File | undefined) => Promise<Product>;
+    updateProduct: (product: Product, ImageFile: File | undefined) => Promise<Product>;
     removeProduct: (productId: string) => Promise<void>;
     refreshProducts: () => Promise<void>;
 }
@@ -64,7 +66,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         return Promise.resolve(product);
     };
 
-    const updateProduct = async (product: ProductData, imageFile?: File): Promise<Product> => {
+    const updateProduct = async (product: Product, imageFile?: File): Promise<Product> => {
         try {
             const updatedProduct = await updateContentfulProduct(product.id, product, imageFile);
 

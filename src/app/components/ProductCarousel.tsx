@@ -25,12 +25,12 @@ const ProductCarousel = ({ products, }: { products: Product[] }) => {
         return Math.round(discount);
     };
 
-    const handleAddToCart = async (product: any) => {
+    const handleAddToCart = async (product: Product) => {
         try {
             setLoadingStates(prev => ({ ...prev, [product.id]: true }));
             dispatch({
                 type: 'ADD_TO_CART',
-                payload: { ...product, inStock: product.stock }
+                payload: { ...product, stock: product.stock }
             });
             await new Promise(resolve => setTimeout(resolve, 500));
         } catch (error) {

@@ -1,4 +1,3 @@
-import { allProducts } from "@/lib/products";
 import { notFound } from "next/navigation";
 import ProductPage from "./productPage";
 import { fetchAllProducts, getProductBySlugFromContentful } from "@/lib/contentfull/client";
@@ -8,12 +7,6 @@ type PageProps = {
         slug: string;
     };
 };
-// Generate static paths at build time
-export async function generateStaticParams() {
-    return allProducts.map((product) => ({
-        slug: product.slug,
-    }));
-}
 
 export async function generateMetadata(
     { params }: { params: Promise<{ slug: string }> }
