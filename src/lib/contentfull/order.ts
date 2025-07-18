@@ -5,6 +5,19 @@ const CONTENTFUL_MANAGEMENT_TOKEN = process.env.NEXT_PUBLIC_CONTENTFUL_MANAGEMEN
 
 const client = createClient({ accessToken: CONTENTFUL_MANAGEMENT_TOKEN });
 
+interface OrderUpdate {
+    id: string;
+    customer: string;
+    total: number;
+    status: string;
+    phone: string;
+    address: string;
+    country: string;
+    state: string;
+    orderDate?: string | null;
+}
+
+
 export async function createOrderInContentful(orderData: {
     customerName: string;
     customerEmail: string;
@@ -50,13 +63,12 @@ export async function createOrderInContentful(orderData: {
             })
         );
 
-        // Create order entry with full fields
         const orderEntry = await environment.createEntry('orders', {
             fields: {
                 customerName: { 'en-US': orderData.customerName },
                 customerEmail: { 'en-US': orderData.customerEmail },
                 customerPhoneNumber: { 'en-US': parseInt(orderData.customerPhoneNumber.replace(/\D/g, '')) || 0 },
-                country: { 'en-US': orderData.country },
+                country: { 'en-US': orderData.country || 'Pakistan' },
                 state: { 'en-US': orderData.state },
                 address: { 'en-US': orderData.address },
                 products: { 'en-US': productReferences },
@@ -83,37 +95,53 @@ const getEnvironment = async () => {
     const space = await client.getSpace(CONTENTFUL_SPACE_ID);
     return space.getEnvironment('master');
 };
+
 export const fetchOrders = async () => {
     const env = await getEnvironment();
-    const entries = await env.getEntries({ content_type: 'orders' });
+    const entries = await env.getEntries({
+        content_type: 'orders',
+        include: 2 // includes linked products
+    });
 
-    return entries.items.map((entry) => ({
+    return entries.items.map((entry: any) => ({
         id: entry.sys.id,
         customer: entry.fields.customerName['en-US'],
         total: entry.fields.price['en-US'],
         status: entry.fields.status['en-US'],
         phone: entry.fields.customerPhoneNumber['en-US'],
         address: entry.fields.address['en-US'],
-        // country: entry.fields.country['en-US'],
+        country: entry.fields.country['en-US'],
         state: entry.fields.state['en-US'],
-        orderDate: entry.fields.orderDate['en-US'] ?? null,
-        // products: entry.fields.products['en-US']?.map((product: any) => ({
-        //     id: product.sys.id,
-        //     quantity: product.fields.quantity ? product.fields.quantity['en-US'] : 1
-        // }))
+        orderDate: entry.fields.orderDate?.['en-US'] ?? null,
+        products: entry.fields.products?.['en-US']?.map((p: any) => ({
+            id: p.sys.id,
+            ...p,
+        })) || []
     }));
 
 };
 
-export const updateOrderStatus = async (orderId: string, newStatus: string) => {
+export async function updateFullOrder(order: OrderUpdate) {
     const env = await getEnvironment();
-    const order = await env.getEntry(orderId);
-    order.fields.status['en-US'] = newStatus;
-    const updated = await order.update();
-    await updated.publish();
-    return true;
-};
+    const entry = await env.getEntry(order.id);
 
+    // Update all fields in 'en-US' locale (adjust locale if needed)
+    entry.fields.customerName = { 'en-US': order.customer };
+    entry.fields.price = { 'en-US': order.total };
+    entry.fields.status = { 'en-US': order.status };
+    entry.fields.customerPhoneNumber = { 'en-US': order.phone };
+    entry.fields.address = { 'en-US': order.address };
+    entry.fields.country = { 'en-US': order.country };
+    entry.fields.state = { 'en-US': order.state };
+    if (order.orderDate) {
+        entry.fields.orderDate = { 'en-US': order.orderDate };
+    }
+
+    const updated = await entry.update();
+    await updated.publish();
+
+    return true;
+}
 export const deleteOrder = async (orderId: string) => {
     const env = await getEnvironment();
     const entry = await env.getEntry(orderId);

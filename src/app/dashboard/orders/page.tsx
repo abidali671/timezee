@@ -1,8 +1,10 @@
 'use client';
+import { Product } from '@/context/productsContext';
 import React, { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-toastify';
 
 interface Order {
+    products: any;
     id: string;
     customer: string;
     total: number;
@@ -11,8 +13,7 @@ interface Order {
     address: string;
     country: string;
     state: string;
-    orderDate: string;
-    // products?: { id: string; quantity: number }[]; // Optional products field
+    orderDate?: string | null;
 }
 
 const statusOptions = ['pending', 'shipped', 'delivered'];
@@ -21,15 +22,19 @@ export default function ManageOrders() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [statusToUpdate, setStatusToUpdate] = useState('');
     const [dropdownOpenId, setDropdownOpenId] = useState<string | null>(null);
+    const [viewProductsOrder, setViewProductsOrder] = useState<Order | null>(null);
 
     // Fetch orders
     const loadOrders = async () => {
         setLoading(true);
-        const res = await fetch('/api/orders');
-        const data = await res.json();
-        setOrders(data);
+        try {
+            const res = await fetch('/api/orders');
+            const data = await res.json();
+            setOrders(data);
+        } catch {
+            toast.error('Failed to load orders');
+        }
         setLoading(false);
     };
 
@@ -37,11 +42,10 @@ export default function ManageOrders() {
         loadOrders();
     }, []);
 
-    const wrapperRef = useRef(null);
-
+    const wrapperRef = useRef<HTMLTableCellElement | null>(null);
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
-            if (wrapperRef.current && !(wrapperRef.current as any).contains(e.target)) {
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
                 setDropdownOpenId(null);
             }
         };
@@ -49,41 +53,37 @@ export default function ManageOrders() {
         return () => document.removeEventListener('click', handleClick);
     }, []);
 
-    const handleStatusUpdate = async () => {
+    const handleUpdate = async () => {
         if (!selectedOrder) return;
+
         try {
-            await fetch('/api/orders/update', {
+            const res = await fetch('/api/orders/update', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: selectedOrder.id, status: statusToUpdate }),
+                body: JSON.stringify(selectedOrder),
             });
-            setSelectedOrder(null);
-            toast.success('Order status updated successfully!');
-        } catch (error) {
-            console.error('Error updating order status:', error);
-            toast.error('Failed to update order status.');
+            if (!res.ok) throw new Error('Update failed');
 
+            toast.success('Order updated successfully!');
+            setSelectedOrder(null);
+            await loadOrders();
+        } catch {
+            toast.error('Failed to update order.');
         }
-        await loadOrders();
     };
 
     const handleDelete = async (id: string) => {
         try {
-            const response = await fetch(`/api/orders/delete?id=${id}`, {
-                method: 'DELETE',
-            });
-            if (!response.ok) {
-                throw new Error('Failed to delete order');
-            }
+            const response = await fetch(`/api/orders/delete?id=${id}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('Delete failed');
             toast.success('Order deleted successfully!');
-        } catch (error) {
-            console.error('Error deleting order:', error);
+            await loadOrders();
+        } catch {
             toast.error('Failed to delete order.');
         }
-
-        await loadOrders();
     };
-    console.log(orders, 'orders');
+    console.log(orders, 'order');
+
 
     return (
         <div className="p-0 md:p-6">
@@ -93,11 +93,9 @@ export default function ManageOrders() {
                 <div>Loading...</div>
             ) : (
                 <div className="w-full overflow-x-auto">
-
                     <table className="min-w-full bg-white border shadow">
                         <thead className="bg-gray-100">
                             <tr>
-                                <th className="py-2 px-4 w-20">Order ID</th>
                                 <th className="py-2 px-4">Customer</th>
                                 <th className="py-2 px-4">Address</th>
                                 <th className="py-2 px-4">Phone</th>
@@ -107,44 +105,47 @@ export default function ManageOrders() {
                             </tr>
                         </thead>
                         <tbody>
-                            {orders?.map((order) => (
+                            {orders.map((order) => (
                                 <tr key={order.id} className="border-t text-center">
-                                    <td className="py-2 px-4 w-20">{order.id}</td>
                                     <td className="py-2 px-4">{order.customer}</td>
-                                    <td className="py-2 px-4 w-32 ">{order.address}, {order.state}</td>
+                                    <td className="py-2 px-4 w-32">{order.address}, {order.state}</td>
                                     <td className="py-2 px-4">{order.phone}</td>
                                     <td className="py-2 px-4">{order.total}</td>
                                     <td className="py-2 px-4">{order.status}</td>
-                                    <td className="py-2 px-4 relative" ref={wrapperRef}>
+                                    <td className="py-2 px-4 relative"  >
                                         <button
                                             className="text-black hover:text-black focus:outline-none cursor-pointer h-10 w-10 bg-gray-50 rounded-full"
                                             onClick={() => setDropdownOpenId(dropdownOpenId === order.id ? null : order.id)}
                                         >
                                             ⋮
                                         </button>
+
+
                                     </td>
-                                    <td>
-                                        {dropdownOpenId === order.id && (
-                                            <div className="absolute bg-white border shadow-md rounded mt-6 right-12 z-20 w-40">
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedOrder(order);
-                                                        setStatusToUpdate(order.status);
-                                                        setDropdownOpenId(null);
-                                                    }}
-                                                    className="block w-full px-4 py-2 hover:bg-gray-100 cursor-pointer text-left"
-                                                >
-                                                    Edit Status
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(order.id)}
-                                                    className="block w-full px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer text-left"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        )}
-                                    </td>
+                                    <td>  {dropdownOpenId === order.id && (
+                                        <div className="absolute bg-white border shadow-md rounded mt-6 right-12 z-30 w-40">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedOrder(order);
+                                                    setDropdownOpenId(null);
+                                                }}
+                                                className="block w-full px-4 py-2 hover:bg-gray-100 cursor-pointer text-left"
+                                            >
+                                                Edit Order
+                                            </button>
+                                            {/* <button
+                                                    onClick={() => setViewProductsOrder(order)}
+                                                 >
+                                                    View Products
+                                                </button> */}
+                                            <button
+                                                onClick={() => handleDelete(order.id)}
+                                                className="block w-full px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer text-left"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    )}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -152,24 +153,88 @@ export default function ManageOrders() {
                 </div>
             )}
 
-            {/* Status Edit Modal */}
+            {/* Edit Modal */}
             {selectedOrder && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-20">
-                    <div className="bg-white p-6 rounded shadow-md w-96">
-                        <h3 className="text-lg font-semibold mb-4">Update Order Status</h3>
-                        <select
-                            value={statusToUpdate}
-                            onChange={(e) => setStatusToUpdate(e.target.value)}
-                            className="w-full border px-3 py-2 rounded mb-4"
-                        >
-                            {statusOptions.map((status) => (
-                                <option key={status} value={status}>
-                                    {status}
-                                </option>
-                            ))}
-                        </select>
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-20 p-4">
+                    <div className="bg-white p-6 rounded shadow-md w-full max-w-lg max-h-[90vh] overflow-auto">
+                        <h3 className="text-lg font-semibold mb-4">Edit Order</h3>
 
-                        <div className="flex justify-end space-x-2">
+                        <label className="block mb-3">
+                            Customer Name
+                            <input
+                                type="text"
+                                value={selectedOrder.customer}
+                                onChange={(e) => setSelectedOrder({ ...selectedOrder, customer: e.target.value })}
+                                className="w-full border px-3 py-2 rounded"
+                            />
+                        </label>
+
+                        <label className="block mb-3">
+                            Phone
+                            <input
+                                type="text"
+                                value={selectedOrder.phone}
+                                onChange={(e) => setSelectedOrder({ ...selectedOrder, phone: e.target.value })}
+                                className="w-full border px-3 py-2 rounded"
+                            />
+                        </label>
+
+                        <label className="block mb-3">
+                            Address
+                            <input
+                                type="text"
+                                value={selectedOrder.address}
+                                onChange={(e) => setSelectedOrder({ ...selectedOrder, address: e.target.value })}
+                                className="w-full border px-3 py-2 rounded"
+                            />
+                        </label>
+
+                        <label className="block mb-3">
+                            State
+                            <input
+                                type="text"
+                                value={selectedOrder.state}
+                                onChange={(e) => setSelectedOrder({ ...selectedOrder, state: e.target.value })}
+                                className="w-full border px-3 py-2 rounded"
+                            />
+                        </label>
+
+                        <label className="block mb-3">
+                            Country
+                            <input
+                                type="text"
+                                value={selectedOrder.country}
+                                onChange={(e) => setSelectedOrder({ ...selectedOrder, country: e.target.value })}
+                                className="w-full border px-3 py-2 rounded"
+                            />
+                        </label>
+
+                        <label className="block mb-3">
+                            Status
+                            <select
+                                value={selectedOrder.status}
+                                onChange={(e) => setSelectedOrder({ ...selectedOrder, status: e.target.value })}
+                                className="w-full border px-3 py-2 rounded"
+                            >
+                                {statusOptions.map((status) => (
+                                    <option key={status} value={status}>
+                                        {status}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+
+                        <label className="block mb-3">
+                            Total
+                            <input
+                                type="number"
+                                value={selectedOrder.total}
+                                onChange={(e) => setSelectedOrder({ ...selectedOrder, total: Number(e.target.value) })}
+                                className="w-full border px-3 py-2 rounded"
+                            />
+                        </label>
+
+                        <div className="flex justify-end space-x-2 mt-4">
                             <button
                                 onClick={() => setSelectedOrder(null)}
                                 className="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100"
@@ -177,7 +242,7 @@ export default function ManageOrders() {
                                 Cancel
                             </button>
                             <button
-                                onClick={handleStatusUpdate}
+                                onClick={handleUpdate}
                                 className="px-4 py-2 rounded bg-blue-900 text-white hover:bg-blue-800"
                             >
                                 Save
@@ -186,7 +251,34 @@ export default function ManageOrders() {
                     </div>
                 </div>
             )}
+
+            {/* {viewProductsOrder && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 p-4">
+                    <div className="bg-white p-6 rounded shadow-md max-w-lg w-full max-h-[90vh] overflow-auto">
+                        <h3 className="text-xl font-semibold mb-4">Order Products</h3>
+                        {viewProductsOrder.products.length > 0 ? (
+                            <ul className="divide-y">
+                                {viewProductsOrder.products.map((p: Product, idx: number) => (
+                                    <li key={idx} className="py-2 flex justify-between">
+                                        <span className="font-medium">{p.name}</span>
+                                        <span>Qty: {p.stock}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p>No products found in this order.</p>
+                        )}
+                        <div className="text-right mt-4">
+                            <button
+                                onClick={() => setViewProductsOrder(null)}
+                                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )} */}
         </div>
     );
 }
-
