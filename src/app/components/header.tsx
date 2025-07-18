@@ -16,41 +16,41 @@ export default function Header({ products }: { products: Product[] }) {
   return (
     <div className="relative w-full mx-auto">
       <Carousel className="w-full">
-        <CarouselContent>
+        <div
+          className="absolute inset-0 z-10 bg-center   "
+          style={{ backgroundImage: 'url("/images/bg-dark2.jpg")' }}
+        ></div>
+        <CarouselContent className="relative z-20">
+
           {products.map((product, index) => (
             <CarouselItem
               key={product.id || index}
               className="relative h-[calc(100vh_-_75px)] w-full"
             >
-              <div
-                className="absolute inset-0 z-10 bg-center   "
-                style={{ backgroundImage: 'url("/images/bg-dark2.jpg")' }}
-              ></div>
               <Image
                 src={product.imageUrl as string}
                 alt={product.name}
                 style={{ objectFit: "contain" }}
-                width={500}
-                height={500}
-                className={`absolute flex justify-end ${
-                  index % 2 === 0
-                    ? "right-40  md:right-32 bottom-20 md:bottom-0"
-                    : "left-40 bottom-20 md:bottom-0 md:left-32"
-                } z-20`}
+                width={600}
+                height={600}
+                className={`absolute flex justify-end  w-[270px] lg:w-[600px] h-[270px] lg:h-[600px]  
+                 ${index % 2 === 0
+                    ? "right-40 md:right-32 bottom-20 md:bottom-0"
+                    : "left-48 bottom-20 md:bottom-0 md:left-32"
+                  } z-20`}
               />
               <div
-                className={`relative top-6 ${
-                  index % 2 === 0
-                    ? "justify-center md:w-7/12"
-                    : "justify-end md:w-11/12"
-                } px-10 z-20 flex h-full w-full items-center *:text-left`}
+                className={`relative top-6 ${index % 2 === 0
+                  ? "justify-center md:w-7/12"
+                  : "justify-end md:w-11/12"
+                  } px-10 z-20 flex h-full w-full items-center *:text-left`}
               >
                 <div className="p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/85 py-7 md:bg-transparent text-gray-800 md:*:text-left *:text-center text-center">
                   <SectionTitle className="w-full md:w-full" font={true}>
                     {product.name}
                   </SectionTitle>
                   <h3 className="text-sm md:text-lg font-light text-yellow-400 mb-4">
-                    {product.brand}
+                    {product.brands}
                   </h3>
                   <p className="text-sm md:text-xl font-light text-white/70 mb-6 leading-8">
                     {product.excerpt}
