@@ -6,7 +6,7 @@ import {
     buildEntryFields,
     uploadImageAsset,
 } from '@/lib/contentful-services'
-import { ProductData } from '../../types/product';
+import { Product } from '@/context/productsContext';
 const CONTENTFUL_SPACE_ID = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID!;
 
 export async function fetchAllBrands() {
@@ -22,7 +22,7 @@ export async function fetchAllCategories() {
 }
 
 
-export async function createContentfulProduct(productData: ProductData, imageFile: File | null) {
+export async function createContentfulProduct(productData: Product, imageFile: File | null) {
     const environment = await getEnvironment();
     const data = sanitizeProductData(productData);
 
@@ -54,7 +54,7 @@ export async function createContentfulProduct(productData: ProductData, imageFil
     };
 }
 
-export async function updateContentfulProduct(id: string, productData: ProductData, imageFile?: File | null) {
+export async function updateContentfulProduct(id: string, productData: Product, imageFile?: File | null) {
     const environment = await getEnvironment();
     const entry = await environment.getEntry(id);
     const data = sanitizeProductData(productData);
