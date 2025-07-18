@@ -18,6 +18,30 @@ interface OrderUpdate {
 }
 
 
+export const getProductById = async (productId: string) => {
+    const env = await getEnvironment();
+    const entry = await env.getEntry(productId);
+
+    // Get the image asset ID from the link
+    const imageAssetId = entry.fields.image?.['en-US']?.sys?.id;
+
+    let imageUrl = '';
+    if (imageAssetId) {
+        // Fetch the actual asset
+        const asset = await env.getAsset(imageAssetId);
+        imageUrl = asset.fields.file?.['en-US']?.url || '';
+    }
+
+    return {
+        id: entry.sys.id,
+        name: entry.fields.title?.['en-US'] || 'Untitled Product',
+        price: entry.fields.price?.['en-US'] || 0,
+        stock: entry.fields.inStock?.['en-US'] || 0,
+        imageUrl: imageUrl ? `https:${imageUrl}` : '',
+
+    };
+};
+
 export async function createOrderInContentful(orderData: {
     customerName: string;
     customerEmail: string;
@@ -100,27 +124,37 @@ export const fetchOrders = async () => {
     const env = await getEnvironment();
     const entries = await env.getEntries({
         content_type: 'orders',
-        include: 2 // includes linked products
+        include: 0 // No includes since we'll fetch products individually
     });
 
-    return entries.items.map((entry: any) => ({
-        id: entry.sys.id,
-        customer: entry.fields.customerName['en-US'],
-        total: entry.fields.price['en-US'],
-        status: entry.fields.status['en-US'],
-        phone: entry.fields.customerPhoneNumber['en-US'],
-        address: entry.fields.address['en-US'],
-        country: entry.fields.country['en-US'],
-        state: entry.fields.state['en-US'],
-        orderDate: entry.fields.orderDate?.['en-US'] ?? null,
-        products: entry.fields.products?.['en-US']?.map((p: any) => ({
-            id: p.sys.id,
-            ...p,
-        })) || []
+    return await Promise.all(entries.items.map(async (entry: any) => {
+        const products = await Promise.all(
+            entry.fields.products?.['en-US']?.map(async (productRef: any) => {
+                try {
+                    const product = await getProductById(productRef.sys.id);
+                    return {
+                        ...product,
+                    };
+                } catch (error) {
+                    console.error(`Failed to fetch product ${productRef.sys.id}:`, error);
+                }
+            }) || []
+        );
+
+        return {
+            id: entry.sys.id,
+            customer: entry.fields.customerName?.['en-US'] || '',
+            total: entry.fields.price?.['en-US'] || 0,
+            status: entry.fields.status?.['en-US'] || 'pending',
+            phone: entry.fields.customerPhoneNumber?.['en-US'] || '',
+            address: entry.fields.address?.['en-US'] || '',
+            country: entry.fields.country?.['en-US'] || '',
+            state: entry.fields.state?.['en-US'] || '',
+            orderDate: entry.fields.orderDate?.['en-US'] || null,
+            products
+        };
     }));
-
 };
-
 export async function updateFullOrder(order: OrderUpdate) {
     const env = await getEnvironment();
     const entry = await env.getEntry(order.id);

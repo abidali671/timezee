@@ -1,5 +1,6 @@
 'use client';
 import { Product } from '@/context/productsContext';
+import Image from 'next/image';
 import React, { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-toastify';
 
@@ -133,11 +134,13 @@ export default function ManageOrders() {
                                             >
                                                 Edit Order
                                             </button>
-                                            {/* <button
-                                                    onClick={() => setViewProductsOrder(order)}
-                                                 >
-                                                    View Products
-                                                </button> */}
+                                            <button
+                                                onClick={() => setViewProductsOrder(order)}
+                                                className="block w-full px-4 py-2 hover:bg-gray-100 cursor-pointer text-left"
+
+                                            >
+                                                View Products
+                                            </button>
                                             <button
                                                 onClick={() => handleDelete(order.id)}
                                                 className="block w-full px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer text-left"
@@ -252,16 +255,17 @@ export default function ManageOrders() {
                 </div>
             )}
 
-            {/* {viewProductsOrder && (
+            {viewProductsOrder && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 p-4">
                     <div className="bg-white p-6 rounded shadow-md max-w-lg w-full max-h-[90vh] overflow-auto">
-                        <h3 className="text-xl font-semibold mb-4">Order Products</h3>
+                        <h3 className="text-xl !font-bold mb-4">Order Products</h3>
                         {viewProductsOrder.products.length > 0 ? (
-                            <ul className="divide-y">
+                            <ul className="divide-y w-10/12 overflow-y-auto max-h-80 scrollbar-hide">
                                 {viewProductsOrder.products.map((p: Product, idx: number) => (
-                                    <li key={idx} className="py-2 flex justify-between">
-                                        <span className="font-medium">{p.name}</span>
-                                        <span>Qty: {p.stock}</span>
+                                    <li key={idx} className="py-2 flex justify-between items-center">
+                                        <Image width={50} height={50} alt={p.name} src={p.imageUrl as string} />
+                                        <span className="font-bold">{p.name}</span>
+                                        <span className='font-bold'>Qty: {p.stock}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -278,7 +282,7 @@ export default function ManageOrders() {
                         </div>
                     </div>
                 </div>
-            )} */}
+            )}
         </div>
     );
 }
