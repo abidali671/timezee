@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React from 'react';
 import {
     Carousel,
@@ -14,36 +14,31 @@ import { AnimatedButton } from './animatedButton';
 import { Product } from '@/context/productsContext';
 
 const ProductCarousel = ({ products }: { products: Product[] }) => {
-    const { dispatch } = useCart();
+    const { cart, dispatch } = useCart();
+    const handleAddToCart = (product: Product) => {
+        const cartItem = cart.find(item => item.slug === product.slug);
+        const currentQty = cartItem?.quantity || 0;
 
-    // const calculateDiscountPercentage = (originalPrice: number, discountedPrice: number) => {
-    //     if (discountedPrice === 0) return null; // Return null if no discount
-    //     if (originalPrice <= 0 || discountedPrice <= 0 || originalPrice <= discountedPrice) return 0; // No valid discount
-    //     const discount = ((originalPrice - discountedPrice) / originalPrice) * 100;
-    //     return Math.round(discount); // Return rounded percentage
-    // };
-
-    // Function to handle adding item to the cart
-    const handleAddToCart = async (product: Product) => {
-        try {
-            dispatch({
-                type: 'ADD_TO_CART',
-                payload: { ...product, stock: product.stock }
-            });
-            await new Promise(resolve => setTimeout(resolve, 500));
-        } catch (error) {
-            console.error('Failed to add to cart:', error);
+        if (currentQty >= product.stock) {
+            alert('Product is out of stock');
+            return;
         }
+
+        dispatch({
+            type: 'ADD_TO_CART',
+            payload: { ...product, quantity: 1 }, // stock already exists in `product`
+        });
     };
+
+
     return (
         <div className="relative w-full">
             <Carousel opts={{ align: 'start' }} className="w-full">
                 <div className="w-10/12 mx-auto">
                     <CarouselContent>
                         {products.map((item: Product) => {
-                            // // Check if item has a discount
-                            // const hasDiscount = item.discount && item.discount > 0;
-                            // const discountPercent = hasDiscount ? calculateDiscountPercentage(item.price, item.discount) : null;
+                            const cartItem = cart.find(ci => ci.slug === item.slug);
+                            const isOutOfStock = item.stock === 0 || (cartItem?.quantity || 0) >= item.stock;
 
                             return (
                                 <CarouselItem
@@ -51,19 +46,11 @@ const ProductCarousel = ({ products }: { products: Product[] }) => {
                                     className="h-full sm:basis-1/2 lg:basis-1/4"
                                 >
                                     <div className="text-white shadow-lg transition-transform duration-300 relative overflow-hidden cursor-pointer group">
-
-                                        {/* Show discount only if it's valid (greater than 0) */}
-                                        {/* {hasDiscount && discountPercent !== null && (
-                                            <div className="w-16 text-xs absolute top-2 right-2 bg-yellow-400 text-black whitespace-nowrap font-semibold px-2 py-1 rounded z-10">
-                                                {discountPercent}% OFF
-                                            </div>
-                                        )} */}
-
                                         <div className="flex flex-col items-center relative">
                                             <div className="relative w-full h-full mb-4">
                                                 <div className="absolute inset-0 rounded-none bg-gray-50/20 h-8/12 group-hover:h-full group-hover:bg-gray-50/40 transition-all duration-500 ease-in-out z-0" />
                                                 <Image
-                                                    src={item.imageUrl || '/fallback-image.jpg'}  // Optional chaining to handle undefined imageUrl
+                                                    src={item.imageUrl || '/fallback-image.jpg'}
                                                     alt={item.name}
                                                     width={400}
                                                     height={400}
@@ -83,12 +70,6 @@ const ProductCarousel = ({ products }: { products: Product[] }) => {
                                                 <p className="text-xl text-gray-200 mb-2">
                                                     {item.price.toFixed(2)}
                                                 </p>
-
-                                                {/* {hasDiscount && (
-                                                    <p className="line-through text-sm text-red-400">
-                                                        ₹{item.price.toFixed(2)}
-                                                    </p>
-                                                )} */}
                                             </div>
 
                                             <p className="text-sm text-gray-400 mb-2">
@@ -105,9 +86,9 @@ const ProductCarousel = ({ products }: { products: Product[] }) => {
                                             <AnimatedButton
                                                 onClick={() => handleAddToCart(item)}
                                                 className="!w-8/12 text-xs font-light mx-auto flex mt-3"
-                                                disabled={item.stock === 0}
+                                                disabled={isOutOfStock}
                                             >
-                                                {item.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                                                {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
                                             </AnimatedButton>
                                         </div>
                                     </div>

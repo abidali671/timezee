@@ -1,4 +1,5 @@
 'use client';
+
 import React, {
     createContext,
     useReducer,
@@ -9,16 +10,19 @@ import React, {
 } from 'react';
 import { Product } from './productsContext';
 
-// Extend Action type with increase and decrease quantity
+export interface CartItem extends Product {
+    quantity: number;
+}
+
 type Action =
-    | { type: 'ADD_TO_CART'; payload: Product }
+    | { type: 'ADD_TO_CART'; payload: CartItem }
     | { type: 'REMOVE_FROM_CART'; payload: string }
     | { type: 'CLEAR_CART' }
     | { type: 'INCREASE_QUANTITY'; payload: string }
     | { type: 'DECREASE_QUANTITY'; payload: string };
 
 const CartContext = createContext<{
-    cart: Product[];
+    cart: CartItem[];
     dispatch: React.Dispatch<Action>;
     isOpen: boolean;
     toggleCart: () => void;
@@ -29,45 +33,56 @@ const CartContext = createContext<{
     toggleCart: () => { },
 });
 
-const reducer = (state: Product[], action: Action): Product[] => {
+const reducer = (state: CartItem[], action: Action): CartItem[] => {
     switch (action.type) {
         case 'ADD_TO_CART': {
             const existing = state.find(item => item.slug === action.payload.slug);
             if (existing) {
+                if (existing.quantity >= existing.stock) return state;
+
                 return state.map(item =>
                     item.slug === action.payload.slug
-                        ? { ...item, stock: item.stock + 1 }
+                        ? { ...item, quantity: item.quantity + 1 }
                         : item
                 );
             }
-            return [...state, { ...action.payload, stock: 1 }];
+
+            // Use quantity from payload if loading from localStorage
+            const initialQuantity = action.payload.quantity || 1;
+
+            // Never add more than stock
+            if (initialQuantity > action.payload.stock) {
+                return [...state, { ...action.payload, quantity: action.payload.stock }];
+            }
+
+            return [...state, { ...action.payload, quantity: initialQuantity }];
         }
+
+        case 'INCREASE_QUANTITY':
+            return state.map(item =>
+                item.slug === action.payload && item.quantity < item.stock
+                    ? { ...item, quantity: item.quantity + 1 }
+                    : item
+            );
+
+        case 'DECREASE_QUANTITY':
+            return state.map(item =>
+                item.slug === action.payload && item.quantity > 1
+                    ? { ...item, quantity: item.quantity - 1 }
+                    : item
+            );
+
         case 'REMOVE_FROM_CART':
             return state.filter(item => item.slug !== action.payload);
 
         case 'CLEAR_CART':
             return [];
 
-        case 'INCREASE_QUANTITY':
-            return state.map(item =>
-                item.slug === action.payload
-                    ? { ...item, stock: item.stock + 1 }
-                    : item
-            );
-
-
-
-        case 'DECREASE_QUANTITY':
-            return state.map(item =>
-                item.slug === action.payload && item.stock > 1
-                    ? { ...item, stock: item.stock - 1 }
-                    : item
-            );
-
         default:
             return state;
     }
 };
+
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
     const [cart, dispatch] = useReducer(reducer, []);
@@ -75,16 +90,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     const toggleCart = () => setIsOpen(prev => !prev);
 
-    // Load cart from localStorage on first render
+    // ✅ Load cart from localStorage on mount
     useEffect(() => {
         const storedCart = localStorage.getItem('cart');
         if (storedCart) {
             try {
-                const parsed = JSON.parse(storedCart) as Product[];
+                const parsed = JSON.parse(storedCart) as CartItem[];
                 if (Array.isArray(parsed)) {
                     dispatch({ type: 'CLEAR_CART' });
                     parsed.forEach(item => {
-                        dispatch({ type: 'ADD_TO_CART', payload: item });
+                        if (!item.slug || item.quantity < 1) return;
+                        dispatch({
+                            type: 'ADD_TO_CART',
+                            payload: item,
+                        });
                     });
                 }
             } catch {
@@ -93,6 +112,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         }
     }, []);
 
+    // ✅ Save cart to localStorage on change
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(cart));
     }, [cart]);
