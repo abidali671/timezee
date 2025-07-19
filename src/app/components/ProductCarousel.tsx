@@ -105,6 +105,7 @@ const ProductCarousel = ({ products }: { products: Product[] }) => {
                                             <AnimatedButton
                                                 onClick={() => handleAddToCart(item)}
                                                 className="!w-8/12 text-xs font-light mx-auto flex mt-3"
+                                                disabled={item.stock === 0}
                                             >
                                                 {item.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                                             </AnimatedButton>
