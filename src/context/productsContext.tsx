@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { fetchAllProducts } from '@/lib/contentfull/client';
 import { deleteContentfulProduct, updateContentfulProduct } from '@/lib/contentfull/management';
+import { Document } from '@contentful/rich-text-types';
 
 export interface Product {
     slug: string;
@@ -16,7 +17,7 @@ export interface Product {
     name: string;
     price: number;
     stock: number;
-    description: string;
+    description: Document;
     imageUrl?: string;
     category?: string;
     brands?: string;
