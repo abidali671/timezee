@@ -4,6 +4,7 @@ import { AnimatedButton } from './animatedButton';
 import { Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Product } from '@/context/productsContext';
 
 export default function CartSidebar() {
     const { cart, dispatch, isOpen, toggleCart } = useCart();
@@ -28,11 +29,11 @@ export default function CartSidebar() {
                         <AnimatedButton className="!w-10/12 md:w-full text-sm">Continue Shopping</AnimatedButton>
                     </div>
                 ) : (
-                    cart.map(item => (
+                    cart.map((item: Product) => (
                         <div key={item.slug} className="grid grid-cols-2 w-8/12 gap-4">
                             <div>
                                 <Image
-                                    src={item.imageUrl || 'https:' + item.image?.fields?.file?.url}
+                                    src={item.imageUrl || '/fallback-image.jpg'}
                                     alt={item.name}
                                     height={100}
                                     width={100}
@@ -40,7 +41,7 @@ export default function CartSidebar() {
                             </div>
                             <div className="grid gap-2">
                                 <p>{item.brandName}</p>
-                                <h1 className="text-md text-white whitespace-nowrap">{item.name || item.title}</h1>
+                                <h1 className="text-md text-white whitespace-nowrap">{item.name}</h1>
                                 <p>PKR {(item.stock * item.price).toFixed(2)}</p>
                                 <div className="flex items-center space-x-2">
                                     <button
@@ -54,7 +55,7 @@ export default function CartSidebar() {
                                     <button
                                         className="text-sm border flex items-center justify-center w-8 h-8 rounded"
                                         onClick={() => dispatch({ type: 'INCREASE_QUANTITY', payload: item.slug })}
-                                        disabled={item.stock === item.inStock}
+                                        disabled={item.stock == 10}
                                     >
                                         +
                                     </button>
