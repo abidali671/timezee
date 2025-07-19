@@ -11,9 +11,9 @@ export const getProductTabs = (product: Product): TabItem[] => [
         label: "Description",
         value: "description",
         content: (
-            <p className="text-white" >
+            <div>
                 {documentToReactComponents(product.description)}
-            </p>
+            </div>
         ),
     },
     {
