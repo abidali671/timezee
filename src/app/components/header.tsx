@@ -50,7 +50,7 @@ export default function Header({ products }: { products: Product[] }) {
                     {product.name}
                   </SectionTitle>
                   <h3 className="text-sm md:text-lg font-light text-yellow-400 mb-4">
-                    {product.brands}
+                    {product.brandName}
                   </h3>
                   <p className="text-sm md:text-xl font-light text-white/70 mb-6 leading-8">
                     {product.excerpt}
