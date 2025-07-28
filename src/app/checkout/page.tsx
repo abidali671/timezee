@@ -47,7 +47,7 @@ export default function CheckoutPage() {
                 address: data.address,
                 products: cart.map(item => ({
                     id: item.id,
-                    quantity: item.stock,
+                    quantity: item.quantity,
                 })),
                 status: 'pending',
                 orderDate: new Date().toISOString(),
@@ -83,11 +83,11 @@ export default function CheckoutPage() {
                                 <div>
                                     <p className="font-medium">{item.name}</p>
                                     <p className="text-sm text-gray-600">
-                                        {item.stock} × PKR {item.price.toFixed(2)}
+                                        {item.quantity} × PKR {item.price.toFixed(2)}
                                     </p>
                                 </div>
                                 <p className="font-medium">
-                                    PKR {(item.stock * item.price).toFixed(2)}
+                                    PKR {(item.quantity * item.price).toFixed(2)}
                                 </p>
                             </div>
                         ))}
