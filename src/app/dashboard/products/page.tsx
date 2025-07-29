@@ -8,10 +8,16 @@ import { Product, useProducts } from '@/context/productsContext';
 import SafeImage from '@/components/ui/SafeImage';
 import { Brand } from '@/types/product';
 import { ProductSidebar } from '@/app/components/ProductSidebar';
-import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { duplicateContentfulProduct } from '../../../lib/contentfull/management';
 import { RefreshCcw } from 'lucide-react';
+import { BLOCKS, Document } from '@contentful/rich-text-types';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
+const emptyRichTextDocument: Document = {
+    nodeType: BLOCKS.DOCUMENT,
+    data: {},
+    content: []
+};
 export default function ManageProducts() {
     const { products, addProduct, updateProduct, removeProduct, loading } = useProducts();
     const {
@@ -27,7 +33,7 @@ export default function ManageProducts() {
             slug: '',
             price: 0,
             stock: 0,
-            description: '',
+            description: emptyRichTextDocument,
             discount: 0,
             rating: 1,
             category: 'general',
@@ -36,6 +42,7 @@ export default function ManageProducts() {
             type: 'Kids'
         }
     });
+
 
     const name = watch('name');
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -104,7 +111,7 @@ export default function ManageProducts() {
             slug: '',
             price: 0,
             stock: 0,
-            description: '',
+            description: emptyRichTextDocument,
             discount: 0,
             rating: 1,
             category: 'general',
@@ -118,20 +125,22 @@ export default function ManageProducts() {
     };
 
     const openEditSidebar = (product: Product) => {
+        const htmlDescription =
+            typeof product.description === 'object'
+                ? documentToHtmlString(product.description)
+                : product.description;
+
         reset({
             ...product,
-            description: typeof product.description === 'object'
-                ? documentToHtmlString(product.description)
-                : product.description,
-            slug: product.name.toLowerCase().replace(/\s+/g, '-'),
-
+            description: htmlDescription as any,
+            slug: product.slug,
         });
+
         setImagePreview(product.imageUrl ?? null);
         setSelectedImage(null);
         setIsEditing(true);
         setSidebarOpen(true);
     };
-
     const closeSidebar = () => {
         setSidebarOpen(false);
     };
@@ -154,7 +163,7 @@ export default function ManageProducts() {
     const handleDuplicate = async (productId: string) => {
         try {
             const newProduct = await duplicateContentfulProduct(productId);
-            await addProduct({ ...newProduct, slug: newProduct.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '') });
+            await addProduct({ ...newProduct, slug: newProduct.slug });
             toast.success('Product duplicated successfully!');
             setOpenDropdownId(null);
         } catch (error: unknown) {
@@ -166,22 +175,27 @@ export default function ManageProducts() {
 
     const onSubmit = async (data: Product) => {
         closeSidebar();
+
         try {
             const productData = {
                 ...data,
                 rating: Math.round(data.rating || 1),
-                imageFile: selectedImage
+                imageFile: selectedImage instanceof File ? selectedImage : undefined,
             };
 
             let contentfulProduct;
             let clientSideImageUrl = data.imageUrl;
 
             if (isEditing && data.id) {
-                contentfulProduct = await updateContentfulProduct(data.id, productData, selectedImage || undefined);
+                contentfulProduct = await updateContentfulProduct(
+                    data.id,
+                    productData,
+                    productData.imageFile
+                );
             } else {
-                contentfulProduct = await createContentfulProduct(productData, selectedImage);
-                if (selectedImage) {
-                    clientSideImageUrl = URL.createObjectURL(selectedImage);
+                contentfulProduct = await createContentfulProduct(productData, productData.imageFile ?? null);
+                if (productData.imageFile) {
+                    clientSideImageUrl = URL.createObjectURL(productData.imageFile);
                 }
             }
 
@@ -193,18 +207,19 @@ export default function ManageProducts() {
 
             if (isEditing && data.id) {
                 await updateProduct(productToSave, contentfulProduct.imageUrl);
+
                 toast.success('Product updated successfully!');
             } else {
                 await addProduct(productToSave);
                 toast.success('Product created successfully!');
             }
-
-
         } catch (error) {
             console.error('Error submitting product:', error);
             toast.error(`Failed to ${isEditing ? 'update' : 'create'} product`);
         }
     };
+
+
 
     const handleDelete = async (id: string) => {
         try {

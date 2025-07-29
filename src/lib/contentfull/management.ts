@@ -30,10 +30,10 @@ export async function createContentfulProduct(productData: Product, imageFile: F
     if (!brandEntry) throw new Error(`Brand with ID ${data.brands} not found`);
 
     let assetId: string | undefined;
-    if (imageFile) {
+    // Only upload if imageFile is a File instance
+    if (imageFile && imageFile instanceof File) {
         assetId = await uploadImageAsset(environment, imageFile, data.name);
     }
-
     const richDescription = htmlToContentfulRichText(data.description);
     console.log('Creating product with data:', data, 'and assetId:', assetId);
     console.log('Rich description:', richDescription);
@@ -63,7 +63,8 @@ export async function updateContentfulProduct(id: string, productData: Product, 
     if (!brandEntry) throw new Error(`Brand with ID ${data.brands} not found`);
 
     let assetId = entry.fields.image?.['en-US']?.sys?.id;
-    if (imageFile) {
+    // Upload new image only if imageFile is a File
+    if (imageFile && imageFile instanceof File) {
         assetId = await uploadImageAsset(environment, imageFile, data.name);
     }
 
@@ -115,6 +116,7 @@ export async function duplicateContentfulProduct(productId: string) {
 
     return {
         id: newEntry.sys.id,
+        slug:newEntry.fields.slug[locale],
         name: newName,
         price: newEntry.fields.price[locale],
         stock: newEntry.fields.inStock[locale],

@@ -62,9 +62,13 @@ export const buildEntryFields = (
 
 export const uploadImageAsset = async (
     environment: any,
-    imageFile: File,
+    imageFile: File | undefined,
     title: string
 ): Promise<string> => {
+    if (!imageFile || !(imageFile instanceof File)) {
+        throw new Error('Invalid image file. Please provide a valid File.');
+    }
+
     const MAX_SIZE_MB = 10;
 
     if (imageFile.size > MAX_SIZE_MB * 1024 * 1024) {
@@ -96,4 +100,3 @@ export const uploadImageAsset = async (
     await processedAsset.publish();
     return processedAsset.sys.id;
 };
- 

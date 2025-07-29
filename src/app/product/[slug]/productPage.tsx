@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AnimatedButton } from "@/app/components/animatedButton";
 import ZoomImage from "@/app/components/ZoomImage";
 import ProductTabs from "@/app/components/page/productDetail/ProductTabs";
