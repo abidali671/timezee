@@ -2,10 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { AlignJustify } from 'lucide-react';
-import CartToggle from '../components/CartToggle';
 import CartSidebar from '../components/cart';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Navbar from '../components/layout/navbar';
 
@@ -13,7 +10,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const pathname = usePathname();
 
-    const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
     const closeSidebar = () => setIsSidebarOpen(false);
 
     const isActive = (link: string) => pathname.startsWith(link);
@@ -21,7 +17,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="h-screen flex flex-col">
             {/* Header */}
-            <Navbar page={true}/>
+            <Navbar page={true} />
 
             {/* Overlay for mobile sidebar */}
             {isSidebarOpen && (
