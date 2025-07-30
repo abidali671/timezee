@@ -19,6 +19,19 @@ const nextConfig: NextConfig = {
 
     ],
   },
+  async headers() {
+    return [
+      {
+        source: "/product/:slug",
+        headers: [
+          {
+            key: "X-Robots-Tag",
+            value: "index, follow",
+          },
+        ],
+      },
+    ];
+  },
   // typescript: {
   //   ignoreBuildErrors: true,
   // }
