@@ -7,6 +7,7 @@ import CartToggle from '../components/CartToggle';
 import CartSidebar from '../components/cart';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import Navbar from '../components/layout/navbar';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -20,24 +21,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="h-screen flex flex-col">
             {/* Header */}
-            <header className="sticky top-0 z-30 bg-blue-900 shadow px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                    <button onClick={toggleSidebar} className="md:hidden text-white">
-                        <AlignJustify />
-                    </button>
-
-                    <Link href="/">
-                        <Image
-                            src="https://timzee-demo.myshopify.com/cdn/shop/files/logo_1.png?v=1645517921&width=500"
-                            width={120}
-                            height={120}
-                            alt="logo"
-                            className="w-auto h-10"
-                        />
-                    </Link>
-                </div>
-                <CartToggle color="white" />
-            </header>
+            <Navbar page={true}/>
 
             {/* Overlay for mobile sidebar */}
             {isSidebarOpen && (
@@ -71,7 +55,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     href="/dashboard/products"
                                     className={`hover:text-gray-300 ${isActive('/dashboard/products') ? 'text-gray-300' : ''}`}
                                 >
-                                     Products
+                                    Products
                                 </Link>
                             </li>
                             <li>
@@ -79,7 +63,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     href="/dashboard/orders"
                                     className={`hover:text-gray-300 ${isActive('/dashboard/orders') ? 'text-gray-300' : ''}`}
                                 >
-                                     Orders
+                                    Orders
                                 </Link>
                             </li>
                         </ul>

@@ -6,7 +6,7 @@ import { useState } from "react";
 import CartToggle from "../CartToggle";
 import CartSidebar from "../cart";
 
-export default function Navbar() {
+export default function Navbar({ page }: { page?: boolean }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 
@@ -38,12 +38,12 @@ export default function Navbar() {
         </div>
 
         {/* Desktop Nav */}
-        <ul className="hidden lg:flex gap-x-10 *:hover:text-yellow-400 *:uppercase *:font-medium *:text-lg">
+        {!page && <ul className="hidden lg:flex gap-x-10 *:hover:text-yellow-400 *:uppercase *:font-medium *:text-lg">
           <Link href="/">Home</Link>
           <Link href="/shop">Shop</Link>
           <Link href="#">Pages</Link>
           <Link href="/contact-us">Contact us</Link>
-        </ul>
+        </ul>}
 
         {/* Icons */}
         <div className="flex gap-x-5 items-center">
