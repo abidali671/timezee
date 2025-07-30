@@ -51,7 +51,7 @@ export default function CheckoutPage() {
                 })),
                 status: 'pending',
                 orderDate: new Date().toISOString(),
-                price: cart.reduce((total, item) => total + item.price * item.stock, 0),
+                price: cart.reduce((total, item) => total + item.price * item.quantity, 0),
             };
             console.log(orderData, 'order');
 
@@ -96,7 +96,7 @@ export default function CheckoutPage() {
                             <span>
                                 PKR{' '}
                                 {cart
-                                    .reduce((total, item) => total + item.price * item.stock, 0)
+                                    .reduce((total, item) => total + item.price * item.quantity, 0)
                                     .toFixed(2)}
                             </span>
                         </div>

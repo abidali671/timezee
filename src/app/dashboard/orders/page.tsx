@@ -1,4 +1,5 @@
 'use client';
+import { CartItem } from '@/context/CartContext';
 import { Product } from '@/context/productsContext';
 import Image from 'next/image';
 import React, { useEffect, useState, useRef } from 'react';
@@ -260,14 +261,19 @@ export default function ManageOrders() {
                     <div className="bg-white p-6 rounded shadow-md max-w-lg w-full max-h-[90vh] overflow-auto">
                         <h3 className="text-xl !font-bold mb-4">Order Products</h3>
                         {viewProductsOrder.products.length > 0 ? (
-                            <ul className="divide-y w-10/12 overflow-y-auto max-h-80 scrollbar-hide">
-                                {viewProductsOrder.products.map((p: Product, idx: number) => (
-                                    <li key={idx} className="py-2 flex justify-between items-center">
-                                        <Image width={50} height={50} alt={p.name} src={p.imageUrl as string} />
-                                        <span className="font-bold">{p.name}</span>
-                                        <span className='font-bold'>Qty: {p.stock}</span>
-                                    </li>
+                            <ul className="divide-y w-full overflow-y-auto max-h-80 scrollbar-hide">
+                                {viewProductsOrder.products.map((p: CartItem, idx: number) => (
+                                    <>
+                                        <li key={idx} className="py-2 flex justify-between items-center">
+                                            <Image width={50} height={50} alt={p.name} src={p.imageUrl as string} />
+                                            <span className="font-bold">{p.name}</span>
+                                            <span className='font-bold'>Qty: {p.quantity}</span>
+                                            <span className='font-bold'>Price: {p.price}</span>
+                                        </li>
+
+                                    </>
                                 ))}
+
                             </ul>
                         ) : (
                             <p>No products found in this order.</p>

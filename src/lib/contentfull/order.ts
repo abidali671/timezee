@@ -55,65 +55,73 @@ export async function createOrderInContentful(orderData: {
     orderDate?: string;
 }) {
     try {
-        // Validation
-        if (
-            !orderData.customerName ||
-            !orderData.customerEmail ||
-            !orderData.customerPhoneNumber ||
-            !orderData.country ||
-            !orderData.state ||
-            !orderData.address
-        ) {
-            throw new Error('Missing required customer or address information');
-        }
-        if (!orderData.products?.length) {
-            throw new Error('At least one product is required');
-        }
-
         const space = await client.getSpace(CONTENTFUL_SPACE_ID);
         const environment = await space.getEnvironment('master');
 
-        // Update product stock and build references
-        const productReferences = await Promise.all(
+        const productQuantityRefs = await Promise.all(
             orderData.products.map(async ({ id, quantity }) => {
-                const product = await environment.getEntry(id);
-                const currentStock = product.fields.inStock?.['en-US'] || 0;
-                product.fields.inStock = { 'en-US': Math.max(currentStock - quantity, 0) };
-                const updated = await product.update();
-                await updated.publish();
+                const productEntry = await environment.getEntry(id);
+
+                // 1. Deduct stock
+                const currentStock = productEntry.fields.inStock?.['en-US'] || 0;
+                productEntry.fields.inStock = {
+                    'en-US': Math.max(currentStock - quantity, 0),
+                };
+                const updatedProduct = await productEntry.update();
+                await updatedProduct.publish();
+
+                // 2. Create productWithQuantity entry
+                const pqEntry = await environment.createEntry('productWithQuantity', {
+                    fields: {
+                        product: {
+                            'en-US': {
+                                sys: { type: 'Link', linkType: 'Entry', id },
+                            },
+                        },
+                        quantity: {
+                            'en-US': quantity,
+                        },
+                    },
+                });
+                await pqEntry.publish();
+
+                // 3. Return ref
                 return {
-                    sys: { type: 'Link', linkType: 'Entry', id }
+                    sys: { type: 'Link', linkType: 'Entry', id: pqEntry.sys.id },
                 };
             })
         );
 
+        // 4. Create order
         const orderEntry = await environment.createEntry('orders', {
             fields: {
                 customerName: { 'en-US': orderData.customerName },
                 customerEmail: { 'en-US': orderData.customerEmail },
-                customerPhoneNumber: { 'en-US': parseInt(orderData.customerPhoneNumber.replace(/\D/g, '')) || 0 },
+                customerPhoneNumber: {
+                    'en-US': parseInt(orderData.customerPhoneNumber.replace(/\D/g, '')) || 0,
+                },
                 country: { 'en-US': orderData.country || 'Pakistan' },
                 state: { 'en-US': orderData.state },
                 address: { 'en-US': orderData.address },
-                products: { 'en-US': productReferences },
+                productQuantities: { 'en-US': productQuantityRefs },
                 price: { 'en-US': Math.round(orderData.price) },
                 status: { 'en-US': orderData.status || 'pending' },
                 orderDate: { 'en-US': orderData.orderDate || new Date().toISOString() },
-            }
+            },
         });
 
         await orderEntry.publish();
 
-        // Return the new entry ID
         return {
             id: orderEntry.sys.id,
-            success: true
+            success: true,
         };
     } catch (error) {
         console.error('Order creation or stock update failed:', error);
         throw error;
     }
 }
+
 
 const getEnvironment = async () => {
     const space = await client.getSpace(CONTENTFUL_SPACE_ID);
@@ -124,37 +132,52 @@ export const fetchOrders = async () => {
     const env = await getEnvironment();
     const entries = await env.getEntries({
         content_type: 'orders',
-        include: 0 // No includes since we'll fetch products individually
+        include: 0
     });
 
-    return await Promise.all(entries.items.map(async (entry: any) => {
-        const products = await Promise.all(
-            entry.fields.products?.['en-US']?.map(async (productRef: any) => {
-                try {
-                    const product = await getProductById(productRef.sys.id);
-                    return {
-                        ...product,
-                    };
-                } catch (error) {
-                    console.error(`Failed to fetch product ${productRef.sys.id}:`, error);
-                }
-            }) || []
-        );
+    return await Promise.all(
+        entries.items.map(async (entry: any) => {
+            const pqRefs = entry.fields.productQuantities?.['en-US'] || [];
 
-        return {
-            id: entry.sys.id,
-            customer: entry.fields.customerName?.['en-US'] || '',
-            total: entry.fields.price?.['en-US'] || 0,
-            status: entry.fields.status?.['en-US'] || 'pending',
-            phone: entry.fields.customerPhoneNumber?.['en-US'] || '',
-            address: entry.fields.address?.['en-US'] || '',
-            country: entry.fields.country?.['en-US'] || '',
-            state: entry.fields.state?.['en-US'] || '',
-            orderDate: entry.fields.orderDate?.['en-US'] || null,
-            products
-        };
-    }));
+            const products = await Promise.all(
+                pqRefs.map(async (pqRef: any) => {
+                    try {
+                        const pqEntry = await env.getEntry(pqRef.sys.id);
+
+                        const productRef = pqEntry.fields.product?.['en-US'];
+                        const quantity = pqEntry.fields.quantity?.['en-US'];
+
+                        if (!productRef || quantity == null) return null;
+
+                        const product = await getProductById(productRef.sys.id);
+
+                        return {
+                            ...product,
+                            quantity, // how much the user bought
+                        };
+                    } catch (error) {
+                        console.error(`Failed to fetch productWithQuantity ${pqRef.sys.id}:`, error);
+                        return null;
+                    }
+                })
+            );
+
+            return {
+                id: entry.sys.id,
+                customer: entry.fields.customerName?.['en-US'] || '',
+                total: entry.fields.price?.['en-US'] || 0,
+                status: entry.fields.status?.['en-US'] || 'pending',
+                phone: entry.fields.customerPhoneNumber?.['en-US'] || '',
+                address: entry.fields.address?.['en-US'] || '',
+                country: entry.fields.country?.['en-US'] || '',
+                state: entry.fields.state?.['en-US'] || '',
+                orderDate: entry.fields.orderDate?.['en-US'] || null,
+                products: products.filter(Boolean)
+            };
+        })
+    );
 };
+
 export async function updateFullOrder(order: OrderUpdate) {
     const env = await getEnvironment();
     const entry = await env.getEntry(order.id);
