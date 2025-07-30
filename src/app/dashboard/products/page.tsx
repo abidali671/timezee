@@ -246,7 +246,7 @@ export default function ManageProducts() {
             <div className="flex-1 p-2 md:p-6 w-full overflow-hidden">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-semibold">Manage Products</h2>
+                    <h2 className="text-2xl font-semibold">Products</h2>
                     <div className="flex items-center space-x-2">
                         <RefreshCcw className="transition-transform duration-300 hover:rotate-90 text-gray-200 cursor-pointer" />
                         <button

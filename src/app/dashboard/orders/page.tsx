@@ -89,7 +89,7 @@ export default function ManageOrders() {
 
     return (
         <div className="p-0 md:p-6">
-            <h2 className="text-2xl font-semibold mb-4">Manage Orders</h2>
+            <h2 className="text-2xl font-semibold mb-4">Orders</h2>
 
             {loading ? (
                 <div>Loading...</div>
