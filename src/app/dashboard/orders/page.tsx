@@ -1,6 +1,5 @@
 'use client';
 import { CartItem } from '@/context/CartContext';
-import { Product } from '@/context/productsContext';
 import Image from 'next/image';
 import React, { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-toastify';
