@@ -8,7 +8,7 @@ const client = createClient({
 });
 
 // Helper function to map Contentful entry to Product
-const mapContentfulEntryToProduct = (item: any): Product => ({
+export const mapContentfulEntryToProduct = (item: any): Product => ({
     id: item.sys?.id || '',
     name: item.fields?.title || '',
     price: item.fields?.price || 0,
@@ -28,15 +28,7 @@ const mapContentfulEntryToProduct = (item: any): Product => ({
     slug: item.fields?.slug || '',
 });
 
-export const fetchAllProducts = async (): Promise<Product[]> => {
-    try {
-        const entries = await client.getEntries({ content_type: 'products' });
-        return entries.items.map(mapContentfulEntryToProduct);
-    } catch (error) {
-        console.error('Error fetching all products:', error);
-        throw error;
-    }
-};
+ 
 
 export const fetchProductSlugs = async () => {
     try {

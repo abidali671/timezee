@@ -1,8 +1,8 @@
-import { fetchAllProducts } from '@/lib/contentfull/client';
+import { getProducts } from '@/lib/getProduct';
 import type { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const products = await fetchAllProducts();
+    const { items: products } = await getProducts({ page: 1, limit: 100 });
 
     const staticPages = [
         {

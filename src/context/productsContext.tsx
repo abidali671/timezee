@@ -7,9 +7,9 @@ import React, {
     ReactNode,
     useCallback,
 } from 'react';
-import { fetchAllProducts } from '@/lib/contentfull/client';
 import { deleteContentfulProduct, updateContentfulProduct } from '@/lib/contentfull/management';
 import { Document } from '@contentful/rich-text-types';
+import { getProducts } from '@/lib/getProduct';
 
 export interface Product {
     slug: string;
@@ -48,8 +48,8 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         try {
-            const products = await fetchAllProducts();
-            setProducts(products);
+            const { items } = await getProducts({ page: 1, limit: 100 });
+            setProducts(items);
         } catch (error) {
             console.error('Failed to fetch products:', error);
         } finally {
