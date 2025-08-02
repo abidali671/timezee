@@ -30,8 +30,8 @@ export async function createContentfulProduct(productData: Product, imageFile: F
     if (!brandEntry) throw new Error(`Brand with ID ${data.brands} not found`);
 
     let assetId: string | undefined;
-    // Only upload if imageFile is a File instance
-    if (imageFile && imageFile instanceof File) {
+    // Just check if imageFile exists and is a Blob (which File extends)
+    if (imageFile instanceof Blob) {
         assetId = await uploadImageAsset(environment, imageFile, data.name);
     }
     const richDescription = htmlToContentfulRichText(data.description);
@@ -54,7 +54,11 @@ export async function createContentfulProduct(productData: Product, imageFile: F
     };
 }
 
-export async function updateContentfulProduct(id: string, productData: Product, imageFile?: File | null) {
+export async function updateContentfulProduct(
+    id: string,
+    productData: Product,
+    imageToUpdate: File | Blob | null | undefined // This parameter handles all scenarios
+): Promise<Product> {
     const environment = await getEnvironment();
     const entry = await environment.getEntry(id);
     const data = sanitizeProductData(productData);
@@ -62,25 +66,40 @@ export async function updateContentfulProduct(id: string, productData: Product, 
     const brandEntry = await environment.getEntry(data.brands);
     if (!brandEntry) throw new Error(`Brand with ID ${data.brands} not found`);
 
-    let assetId = entry.fields.image?.['en-US']?.sys?.id;
-    // Upload new image only if imageFile is a File
-    if (imageFile && imageFile instanceof File) {
-        assetId = await uploadImageAsset(environment, imageFile, data.name);
+    let assetId = entry.fields.image?.['en-US']?.sys?.id; // Get current asset ID
+
+    if (imageToUpdate instanceof Blob) { // A new image (File/Blob) was provided
+        console.log('Updating product with a new image.');
+        assetId = await uploadImageAsset(environment, imageToUpdate, data.name);
+    } else if (imageToUpdate === null) { // Explicitly remove the image
+        console.log('Removing product image.');
+        assetId = undefined; // Setting to undefined will clear the asset link in Contentful
     }
+    // If imageToUpdate is undefined, assetId remains its current value,
+    // effectively keeping the existing image.
 
     const richDescription = htmlToContentfulRichText(data.description);
+
+    // Build the fields for update. If assetId is undefined, the image field will be cleared.
     entry.fields = buildEntryFields(data, richDescription, assetId);
 
     const updated = await entry.update();
     const published = await updated.publish();
 
+    // Determine the final imageUrl to return to the client
+    let finalImageUrl = data.imageUrl; // Start with the client-side imageUrl
+    if (assetId) {
+        finalImageUrl = `https://images.ctfassets.net/${CONTENTFUL_SPACE_ID}/${assetId}`;
+    } else if (imageToUpdate === null) {
+        finalImageUrl = ''; // Image was explicitly removed
+    }
+    // If imageToUpdate was undefined, and assetId didn't change, finalImageUrl correctly retains data.imageUrl
+
     return {
         id: published.sys.id,
         name: data.name,
-        imageUrl: assetId
-            ? `https://images.ctfassets.net/${CONTENTFUL_SPACE_ID}/${assetId}`
-            : data.imageUrl,
-        ...data,
+        imageUrl: finalImageUrl,
+        ...data, // Spread other updated product data
     };
 }
 
@@ -116,7 +135,7 @@ export async function duplicateContentfulProduct(productId: string) {
 
     return {
         id: newEntry.sys.id,
-        slug:newEntry.fields.slug[locale],
+        slug: newEntry.fields.slug[locale],
         name: newName,
         price: newEntry.fields.price[locale],
         stock: newEntry.fields.inStock[locale],
