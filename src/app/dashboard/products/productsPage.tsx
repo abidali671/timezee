@@ -3,23 +3,32 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { createContentfulProduct, fetchAllBrands, fetchAllCategories, updateContentfulProduct } from '@/lib/contentfull/management';
-import { Product, useProducts } from '@/context/productsContext';
 import SafeImage from '@/components/ui/SafeImage';
-import { Brand } from '@/types/product';
 import { ProductSidebar } from '@/app/components/ProductSidebar';
-import { duplicateContentfulProduct } from '../../../lib/contentfull/management';
 import { RefreshCcw } from 'lucide-react';
 import { BLOCKS, Document } from '@contentful/rich-text-types';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import { Brand } from '@/types/product';
+import { Product } from '@/context/productsContext';
 
 const emptyRichTextDocument: Document = {
     nodeType: BLOCKS.DOCUMENT,
     data: {},
     content: []
 };
+
 export default function ManageProducts() {
-    const { products, addProduct, updateProduct, removeProduct, loading } = useProducts();
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+    const [brands, setBrands] = useState<Brand[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+
     const {
         control,
         handleSubmit,
@@ -36,26 +45,40 @@ export default function ManageProducts() {
             description: emptyRichTextDocument,
             discount: 0,
             rating: 1,
-            category: 'general',
+            category: '',
             brands: '',
             excerpt: '',
             type: 'Kids'
         }
     });
 
-
     const name = watch('name');
-    const [selectedImage, setSelectedImage] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
-    const [brands, setBrands] = useState<Brand[]>([]);
-    const [categories, SetCategories] = useState<any>([])
-    const [brandsLoading, setBrandsLoading] = useState(true);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
 
-    // Generate slug from product name
+    // Replace the useEffect for fetching data with:
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch('/api/products');
+                const data = await response.json();
+
+                if (response.ok) {
+                    setProducts(data.items || []);
+                    setBrands(data.brands || []);
+                    setCategories(data.categories || []);
+                } else {
+                    throw new Error(data.message || 'Failed to load data');
+                }
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                toast.error('Failed to load data');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
     useEffect(() => {
         if (name) {
             const slug = name.toLowerCase()
@@ -64,46 +87,6 @@ export default function ManageProducts() {
             setValue('slug', slug);
         }
     }, [name, setValue]);
-
-    useEffect(() => {
-        const loadBrands = async () => {
-            try {
-                setBrandsLoading(true);
-                const contentfulBrands = await fetchAllBrands();
-                const mappedBrands = contentfulBrands.map((brand: any) => ({
-                    id: brand.sys.id,
-                    name: brand.fields.name?.['en-US'] || 'Unnamed Brand'
-                }));
-                setBrands(mappedBrands);
-            } catch (error) {
-                console.error('Failed to fetch brands:', error);
-                toast.error('Failed to load brands');
-            } finally {
-                setBrandsLoading(false);
-            }
-        };
-        loadBrands();
-    }, []);
-
-    useEffect(() => {
-        const loadCategories = async () => {
-            try {
-                setBrandsLoading(true);
-                const contentfulBrands = await fetchAllCategories();
-                const mappedBrands = contentfulBrands.map((category: any) => ({
-                    id: category.sys.id,
-                    name: category.fields.name?.['en-US'] || 'Unnamed category'
-                }));
-                SetCategories(mappedBrands);
-            } catch (error) {
-                console.error('Failed to fetch brands:', error);
-                toast.error('Failed to load brands');
-            } finally {
-                setBrandsLoading(false);
-            }
-        };
-        loadCategories();
-    }, []);
 
     const openAddSidebar = () => {
         reset({
@@ -114,9 +97,10 @@ export default function ManageProducts() {
             description: emptyRichTextDocument,
             discount: 0,
             rating: 1,
-            category: 'general',
+            category: '',
             brands: '',
-            type: 'Male'
+            type: 'Male',
+            ...products
         });
         setSelectedImage(null);
         setImagePreview(null);
@@ -125,10 +109,9 @@ export default function ManageProducts() {
     };
 
     const openEditSidebar = (product: Product) => {
-        const htmlDescription =
-            typeof product.description === 'object'
-                ? documentToHtmlString(product.description)
-                : product.description;
+        const htmlDescription = typeof product.description === 'object'
+            ? documentToHtmlString(product.description)
+            : product.description;
 
         reset({
             ...product,
@@ -141,6 +124,7 @@ export default function ManageProducts() {
         setIsEditing(true);
         setSidebarOpen(true);
     };
+
     const closeSidebar = () => {
         setSidebarOpen(false);
     };
@@ -157,18 +141,37 @@ export default function ManageProducts() {
             top: rect.bottom + window.scrollY + 4,
             left: rect.left + window.scrollX,
         });
-        setOpenDropdownId((currentId) => (currentId === id ? null : id));
+        setOpenDropdownId(openDropdownId === id ? null : id);
     };
 
     const handleDuplicate = async (productId: string) => {
         try {
-            const newProduct = await duplicateContentfulProduct(productId);
-            await addProduct({ ...newProduct, slug: newProduct.slug });
-            toast.success('Product duplicated successfully!');
-            setOpenDropdownId(null);
-        } catch (error: unknown) {
-            console.error('Failed to duplicate product:', error);
-            toast.error('Failed to duplicate product');
+            const response = await fetch('/api/products/duplicate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to duplicate product via API');
+            }
+
+            const result = await response.json();
+            const duplicatedProduct: Product = result.data;
+
+            // Update local state to include the new product
+            setProducts(prev => [...prev, duplicatedProduct]);
+            toast.success(`Product "${duplicatedProduct.name}" duplicated successfully!`);
+
+            // Optional: Revalidate the products listing page if using App Router
+
+
+        } catch (error: any) {
+            console.error('Error duplicating product:', error);
+            toast.error(`Failed to duplicate product: ${error.message || 'Unknown error'}`);
         }
     };
 
@@ -177,45 +180,44 @@ export default function ManageProducts() {
         closeSidebar();
 
         try {
-            const productData = {
+            const formData = new FormData();
+            formData.append('data', JSON.stringify({
                 ...data,
                 rating: Math.round(data.rating || 1),
-                imageFile: selectedImage instanceof File ? selectedImage : undefined,
-            };
+            }));
 
-            let contentfulProduct;
-            let clientSideImageUrl = data.imageUrl;
-
-            if (isEditing && data.id) {
-                contentfulProduct = await updateContentfulProduct(
-                    data.id,
-                    productData,
-                    productData.imageFile
-                );
-            } else {
-                contentfulProduct = await createContentfulProduct(productData, productData.imageFile ?? null);
-                if (productData.imageFile) {
-                    clientSideImageUrl = URL.createObjectURL(productData.imageFile);
-                }
+            // This part is correct:
+            if (selectedImage instanceof File) {
+                formData.append('image', selectedImage); // selectedImage is a File on the client
+            } else if (isEditing && !data.imageUrl && selectedImage === null) {
+                formData.append('removeImage', 'true');
             }
 
-            const productToSave = {
-                ...data,
-                id: contentfulProduct.id,
-                imageUrl: data.imageUrl || clientSideImageUrl,
-            };
+            const endpoint = isEditing && data.id ? `/api/products/${data.id}` : '/api/products';
+            const method = isEditing ? 'PATCH' : 'POST';
 
-            if (isEditing && data.id) {
-                await updateProduct(productToSave, contentfulProduct.imageUrl);
+            const response = await fetch(endpoint, {
+                method,
+                body: formData,
+            });
 
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'API request failed');
+            }
+
+            const result = await response.json();
+
+            if (isEditing) {
+                setProducts(prev => prev.map(p => (p.id === data.id ? result.data : p)));
                 toast.success('Product updated successfully!');
             } else {
-                await addProduct(productToSave);
+                setProducts(prev => [...prev, result.data]);
                 toast.success('Product created successfully!');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error submitting product:', error);
-            toast.error(`Failed to ${isEditing ? 'update' : 'create'} product`);
+            toast.error(`Failed to ${isEditing ? 'update' : 'create'} product: ${error.message || 'Unknown error'}`);
         }
     };
 
@@ -223,16 +225,26 @@ export default function ManageProducts() {
 
     const handleDelete = async (id: string) => {
         try {
-            await removeProduct(id);
-            toast.success('Product deleted successfully!');
-            setOpenDropdownId(null);
+            const response = await fetch(`/api/products/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                setProducts(prev => prev.filter(p => p.id !== id));
+                toast.success('Product deleted successfully!');
+            } else {
+                const data = await response.json();
+                throw new Error(data.message || 'Failed to delete product');
+            }
         } catch (error) {
             console.error('Error deleting product:', error);
-            toast.error('Failed to delete product');
+            toast.error(error instanceof Error ? error.message : 'Failed to delete product');
+        } finally {
+            setOpenDropdownId(null);
         }
     };
 
-    if (loading) {
+    if (loading && products.length === 0) {
         return (
             <div className="flex justify-center items-center h-64">
                 <div className="text-lg font-medium">Loading Products...</div>
@@ -248,7 +260,10 @@ export default function ManageProducts() {
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-semibold">Products</h2>
                     <div className="flex items-center space-x-2">
-                        <RefreshCcw className="transition-transform duration-300 hover:rotate-90 text-gray-200 cursor-pointer" />
+                        <RefreshCcw
+                            className="transition-transform duration-300 hover:rotate-90 text-gray-200 cursor-pointer"
+                            onClick={() => window.location.reload()}
+                        />
                         <button
                             onClick={openAddSidebar}
                             className="bg-blue-900 text-white px-4 py-2 rounded cursor-pointer"
@@ -260,7 +275,6 @@ export default function ManageProducts() {
                 </div>
 
                 {/* Products Table */}
-
                 <div className="w-full overflow-x-auto">
                     <table className="min-w-[800px] w-full bg-white shadow-md rounded-lg text-center">
                         <thead>
@@ -276,7 +290,7 @@ export default function ManageProducts() {
                             {products.map((product) => (
                                 <tr key={product.id} className="hover:bg-gray-100">
                                     <td className="py-2 px-4">
-                                        {product.imageUrl && (
+                                        {product?.imageUrl && (
                                             <SafeImage
                                                 src={product.imageUrl}
                                                 alt={product.name}
@@ -287,7 +301,6 @@ export default function ManageProducts() {
                                         )}
                                     </td>
                                     <td className="py-2 px-4 truncate max-w-[120px]">{product.name}</td>
-
                                     <td className="py-2 px-4">{product.price}</td>
                                     <td className="py-2 px-4">{product.stock}</td>
                                     <td className="py-2 px-4 relative">
@@ -300,7 +313,7 @@ export default function ManageProducts() {
                                         >
                                             ⋮
                                         </button>
-                                        {openDropdownId === product.id && (
+                                        {openDropdownId === product?.id && (
                                             <DropdownMenu
                                                 position={dropdownPosition}
                                                 onEdit={() => {
@@ -309,8 +322,6 @@ export default function ManageProducts() {
                                                 }}
                                                 onDelete={() => handleDelete(product.id)}
                                                 onDuplicate={() => handleDuplicate(product.id)}
-
-
                                             />
                                         )}
                                     </td>
@@ -319,14 +330,12 @@ export default function ManageProducts() {
                         </tbody>
                     </table>
 
-                    {products.length === 0 && (
+                    {products.length === 0 && !loading && (
                         <div className="flex justify-center items-center my-5">
-                            <span className="font-bold">No Products..</span>
+                            <span className="font-bold">No Products Found</span>
                         </div>
                     )}
                 </div>
-
-
             </div>
 
             {/* Sidebar */}
@@ -339,7 +348,7 @@ export default function ManageProducts() {
                 handleSubmit={handleSubmit}
                 onSubmit={onSubmit}
                 brands={brands}
-                brandsLoading={brandsLoading}
+                brandsLoading={loading}
                 imagePreview={imagePreview}
                 handleImageChange={handleImageChange}
                 selectedImage={selectedImage}
@@ -347,13 +356,9 @@ export default function ManageProducts() {
                 setValue={setValue}
                 categories={categories}
             />
-
-            {/* Toast Notifications */}
         </div>
     );
 }
-
-
 
 function DropdownMenu({
     position,
@@ -389,14 +394,6 @@ function DropdownMenu({
                 <span>Edit</span>
             </button>
             <button
-                onClick={onDelete}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
-                role="menuitem"
-            >
-                <span>🗑️</span>
-                <span>Delete</span>
-            </button>
-            <button
                 onClick={onDuplicate}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
                 role="menuitem"
@@ -404,7 +401,14 @@ function DropdownMenu({
                 <span>📋</span>
                 <span>Duplicate</span>
             </button>
-
+            <button
+                onClick={onDelete}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
+                role="menuitem"
+            >
+                <span>🗑️</span>
+                <span>Delete</span>
+            </button>
         </div>
     );
 }
