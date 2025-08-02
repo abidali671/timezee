@@ -48,7 +48,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         try {
-            const { items } = await getProducts({ page: 1, limit: 100 });
+            const { items } = await getProducts({ page: 1, limit: 10 });
             setProducts(items);
         } catch (error) {
             console.error('Failed to fetch products:', error);
@@ -84,13 +84,9 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
 
     const removeProduct = async (productId: string): Promise<void> => {
         try {
-            // Optimistically remove from local state
             setProducts(prev => prev.filter(p => p.id !== productId));
-
-            // Delete from Contentful
             await deleteContentfulProduct(productId);
         } catch (error) {
-            // Refresh from server on error
             await fetchProducts();
             console.error('Failed to delete product:', error);
             throw error;
