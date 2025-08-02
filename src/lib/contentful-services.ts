@@ -1,6 +1,5 @@
-// utils/contentful-utils.ts
 
-import { createClient } from 'contentful-management'
+import { createClient, Environment } from 'contentful-management'
 
 const CONTENTFUL_SPACE_ID = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID!;
 const CONTENTFUL_MANAGEMENT_TOKEN = process.env.NEXT_PUBLIC_CONTENTFUL_MANAGEMENT_TOKEN!;
@@ -60,43 +59,45 @@ export const buildEntryFields = (
     return fields;
 };
 
-export const uploadImageAsset = async (
-    environment: any,
-    imageFile: File | undefined,
-    title: string
-): Promise<string> => {
-    if (!imageFile || !(imageFile instanceof File)) {
-        throw new Error('Invalid image file. Please provide a valid File.');
-    }
-
-    const MAX_SIZE_MB = 10;
-
-    if (imageFile.size > MAX_SIZE_MB * 1024 * 1024) {
-        throw new Error(`Image exceeds ${MAX_SIZE_MB}MB limit`);
-    }
-
-    const buffer = await new Promise<ArrayBuffer>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as ArrayBuffer);
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(imageFile);
-    });
-
-    const asset = await environment.createAssetFromFiles({
-        fields: {
-            title: { 'en-US': title },
-            description: { 'en-US': `Image for ${title}` },
-            file: {
-                'en-US': {
-                    contentType: imageFile.type,
-                    fileName: imageFile.name,
-                    file: buffer,
+export async function uploadImageAsset(environment: Environment, file: File | Blob, fileName: string): Promise<string> {
+    try {
+        // The structure for createAssetFromFiles is different.
+        // It expects the 'file' property to be directly at the top level of 'fields',
+        // and its value is the actual File/Blob object.
+        const asset = await environment.createAssetFromFiles({
+            fields: {
+                // The 'file' property here refers to the actual File/Blob object
+                file: {
+                    'en-US': {
+                        file: await file.arrayBuffer(), // Convert File/Blob to ArrayBuffer
+                        contentType: file.type, // Extract content type from the File/Blob
+                        fileName: fileName || 'untitled-image', // Use provided fileName or default
+                    },
+                },
+                title: {
+                    'en-US': fileName || 'Product Image', // Add a title for the asset
+                },
+                description: { // Optional: You can also add a description
+                    'en-US': `Image for product: ${fileName}`,
                 },
             },
-        },
-    });
+            // The method might also support providing content type and filename here,
+            // but providing it via the Blob's properties (file.type, file.name) is usually sufficient.
+            // If the SDK needs explicit contentType and fileName, you might add them directly here
+            // contentType: file.type, // Not usually needed if Blob provides it
+            // fileName: fileName || 'untitled-image', // Not usually needed if Blob provides it
+        });
 
-    const processedAsset = await asset.processForAllLocales();
-    await processedAsset.publish();
-    return processedAsset.sys.id;
-};
+        // Wait for the asset to be processed (uploaded to Contentful's CDN)
+        const processedAsset = await asset.processForAllLocales();
+
+        // Publish the asset to make it publicly accessible
+        const publishedAsset = await processedAsset.publish();
+
+        return publishedAsset.sys.id; // Return the ID of the new asset
+    } catch (error) {
+        console.error('Error uploading asset to Contentful:', error);
+        // Provide more detailed error message
+        throw new Error(`Failed to upload image asset: ${(error as Error).message}`);
+    }
+}
