@@ -36,11 +36,11 @@ export function useOrdersHook(): UseOrdersResult {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const res = await fetch('/api/orders'); // You'll map this to your backend route
+                const res = await fetch('/api/orders');
                 if (!res.ok) throw new Error('Failed to fetch orders');
                 const data = await res.json();
 
-                setOrders(data);
+                setOrders(data.items || []);
                 setLoading(false);
             } catch (err: any) {
                 setError(err.message || 'Unknown error');
