@@ -57,31 +57,52 @@ export default function ManageProducts() {
     const name = watch('name');
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchProducts = async () => {
+            setLoading(true);
             try {
-                setLoading(true);
-                const response = await fetch(`/api/products?page=${page}&limit=${limit}`);
-                const data = await response.json();
+                const res = await fetch(`/api/products?page=${page}&limit=${limit}`);
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Failed to fetch products');
 
-                if (response.ok) {
-                    setProducts(data.items || []);
-                    setBrands(data.brands || []);
-                    setCategories(data.categories || []);
-                    setTotalPages(data.totalPages || 1);
-                } else {
-                    throw new Error(data.message || 'Failed to load data');
-                }
-            } catch (error) {
-                console.error('Failed to fetch data:', error);
-                toast.error('Failed to load data');
+                setProducts(data.items || []);
+                setTotalPages(data.totalPages || 1);
+            } catch (err) {
+                console.error(err);
+                toast.error('Failed to load products');
             } finally {
                 setLoading(false);
             }
         };
-        fetchData();
+
+        fetchProducts();
     }, [page, limit]);
 
+    useEffect(() => {
+        const fetchFilterData = async () => {
+            try {
+                const [brandsRes, categoriesRes] = await Promise.all([
+                    fetch('/api/brands'),
+                    fetch('/api/categories')
+                ]);
 
+                const [brandsData, categoriesData] = await Promise.all([
+                    brandsRes.json(),
+                    categoriesRes.json()
+                ]);
+
+                if (!brandsRes.ok) throw new Error(brandsData.message || 'Failed to fetch brands');
+                if (!categoriesRes.ok) throw new Error(categoriesData.message || 'Failed to fetch categories');
+
+                setBrands(brandsData.items || []);
+                setCategories(categoriesData.items || []);
+            } catch (err) {
+                console.error(err);
+                toast.error('Failed to load filters');
+            }
+        };
+
+        fetchFilterData();
+    }, []);
     useEffect(() => {
         if (name) {
             const slug = name.toLowerCase()
