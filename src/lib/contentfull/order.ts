@@ -128,56 +128,6 @@ const getEnvironment = async () => {
     return space.getEnvironment('master');
 };
 
-export const fetchOrders = async () => {
-    const env = await getEnvironment();
-    const entries = await env.getEntries({
-        content_type: 'orders',
-        include: 0
-    });
-
-    return await Promise.all(
-        entries.items.map(async (entry: any) => {
-            const pqRefs = entry.fields.productQuantities?.['en-US'] || [];
-
-            const products = await Promise.all(
-                pqRefs.map(async (pqRef: any) => {
-                    try {
-                        const pqEntry = await env.getEntry(pqRef.sys.id);
-
-                        const productRef = pqEntry.fields.product?.['en-US'];
-                        const quantity = pqEntry.fields.quantity?.['en-US'];
-
-                        if (!productRef || quantity == null) return null;
-
-                        const product = await getProductById(productRef.sys.id);
-
-                        return {
-                            ...product,
-                            quantity, // how much the user bought
-                        };
-                    } catch (error) {
-                        console.error(`Failed to fetch productWithQuantity ${pqRef.sys.id}:`, error);
-                        return null;
-                    }
-                })
-            );
-
-            return {
-                id: entry.sys.id,
-                customer: entry.fields.customerName?.['en-US'] || '',
-                total: entry.fields.price?.['en-US'] || 0,
-                status: entry.fields.status?.['en-US'] || 'pending',
-                phone: entry.fields.customerPhoneNumber?.['en-US'] || '',
-                address: entry.fields.address?.['en-US'] || '',
-                country: entry.fields.country?.['en-US'] || '',
-                state: entry.fields.state?.['en-US'] || '',
-                orderDate: entry.fields.orderDate?.['en-US'] || null,
-                products: products.filter(Boolean)
-            };
-        })
-    );
-};
-
 export async function updateFullOrder(order: OrderUpdate) {
     const env = await getEnvironment();
     const entry = await env.getEntry(order.id);
