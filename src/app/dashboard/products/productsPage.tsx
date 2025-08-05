@@ -28,7 +28,9 @@ export default function ManageProducts() {
     const [categories, setCategories] = useState<any[]>([]);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [limit, setLimit] = useState(10);
     const {
         control,
         handleSubmit,
@@ -54,18 +56,18 @@ export default function ManageProducts() {
 
     const name = watch('name');
 
-    // Replace the useEffect for fetching data with:
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const response = await fetch('/api/products');
+                const response = await fetch(`/api/products?page=${page}&limit=${limit}`);
                 const data = await response.json();
 
                 if (response.ok) {
                     setProducts(data.items || []);
                     setBrands(data.brands || []);
                     setCategories(data.categories || []);
+                    setTotalPages(data.totalPages || 1);
                 } else {
                     throw new Error(data.message || 'Failed to load data');
                 }
@@ -77,7 +79,8 @@ export default function ManageProducts() {
             }
         };
         fetchData();
-    }, []);
+    }, [page, limit]);
+
 
     useEffect(() => {
         if (name) {
@@ -329,6 +332,31 @@ export default function ManageProducts() {
                             ))}
                         </tbody>
                     </table>
+                    <div className='flex gap-x-2 items-center mt-4 justify-end '>
+                        <select className='bg-white shadow py-2 px-2 w-20' onChange={(e) => setLimit(Number(e.target.value))} value={limit}>
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                        </select>
+                        <div className='flex  items-center  space-x-2'>
+                            <button
+                                className='w-20 bg-white shadow cursor-pointer py-2 disabled:opacity-50'
+                                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                                disabled={page === 1}
+                            >
+                                Prev
+                            </button>
+                            <span>{page}</span>
+                            <button
+                                className='w-20 bg-white shadow cursor-pointer py-2 disabled:opacity-50'
+                                onClick={() => setPage((prev) => prev + 1)}
+                                disabled={page === totalPages}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+
 
                     {products.length === 0 && !loading && (
                         <div className="flex justify-center items-center my-5">

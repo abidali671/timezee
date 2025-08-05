@@ -30,7 +30,7 @@ export default function ManageOrders() {
     const loadOrders = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/orders');
+            const res = await fetch('/api/orders?limit=1');
             const data = await res.json();
             setOrders(data);
         } catch {
