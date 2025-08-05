@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import client, { mapContentfulEntryToProduct } from '@/lib/contentfull/client';
 import { Product } from '@/context/productsContext';
 import { createContentfulProduct } from '@/lib/contentfull/management';
-import { getEnvironment } from '@/lib/contentful-services';
 
 export async function GET(request: Request) {
     try {
@@ -10,56 +9,27 @@ export async function GET(request: Request) {
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');
         const searchQuery = searchParams.get('query') || '';
-        const categoryId = searchParams.get('category');
-        const brandId = searchParams.get('brand');
-
         const skip = (page - 1) * limit;
 
         const contentfulQuery: any = {
             content_type: 'products',
             limit,
             skip,
-            include: 2, // Include linked entries (brands and categories)
+            include: 2,
         };
 
         if (searchQuery) {
             contentfulQuery['query'] = searchQuery;
         }
-
-        if (categoryId) {
-            contentfulQuery['fields.category.sys.id'] = categoryId;
-        }
-
-        if (brandId) {
-            contentfulQuery['fields.brands.sys.id'] = brandId;
-        }
-
         const entries = await client.getEntries(contentfulQuery);
-
-        const environment = await getEnvironment();
-        const [brandsResponse, categoriesResponse] = await Promise.all([
-            environment.getEntries({ content_type: 'brands', limit: 1000 }),
-            environment.getEntries({ content_type: 'categories', limit: 1000 })
-        ]);
-
         const products: Product[] = entries.items.map(mapContentfulEntryToProduct);
-        const brands = brandsResponse.items.map((brand: any) => ({
-            id: brand.sys.id,
-            name: brand.fields.name?.['en-US'] || 'Unnamed Brand'
-        }));
-        const categories = categoriesResponse.items.map((category: any) => ({
-            id: category.sys.id,
-            name: category.fields.name?.['en-US'] || 'Unnamed Category'
-        }));
+
 
         return NextResponse.json({
             items: products,
-            count: products.length,
-            total: entries.total,
+            count: entries.total,
             page,
             totalPages: Math.ceil(entries.total / limit),
-            brands,
-            categories
         });
     } catch (error) {
         console.error('Error fetching products:', error);
