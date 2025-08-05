@@ -3,7 +3,7 @@ import { CartItem } from '@/context/CartContext';
 import Image from 'next/image';
 import React, { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-toastify';
- 
+
 interface Order {
     products: any;
     id: string;
@@ -25,23 +25,37 @@ export default function ManageOrders() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [dropdownOpenId, setDropdownOpenId] = useState<string | null>(null);
     const [viewProductsOrder, setViewProductsOrder] = useState<Order | null>(null);
-
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [limit, setLimit] = useState(10);
+    const [status, setStatus] = useState('');
     // Fetch orders
     const loadOrders = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/orders?limit=1');
+            const query = new URLSearchParams({
+                page: String(page),
+                limit: String(limit),
+            });
+
+            if (status) {
+                query.append('status', status); 
+            }
+
+            const res = await fetch(`/api/orders?${query.toString()}`);
             const data = await res.json();
-            setOrders(data);
-        } catch {
+            setOrders(data.items);
+            setTotalPages(data.totalPages || 1);
+        } catch (err) {
             toast.error('Failed to load orders');
         }
         setLoading(false);
     };
 
+
     useEffect(() => {
         loadOrders();
-    }, []);
+    }, [page, limit, status]);
 
     const wrapperRef = useRef<HTMLTableCellElement | null>(null);
     useEffect(() => {
@@ -83,14 +97,14 @@ export default function ManageOrders() {
             toast.error('Failed to delete order.');
         }
     };
-    console.log(orders, 'order');
+    console.log(status, 'order');
 
 
     return (
         <div className="p-0 md:p-6">
             <h2 className="text-2xl font-semibold mb-4">Orders</h2>
 
-            {loading ? (
+            {loading && orders.length === 0 ? (
                 <div>Loading...</div>
             ) : (
                 <div className="w-full overflow-x-auto">
@@ -155,7 +169,39 @@ export default function ManageOrders() {
                     </table>
                 </div>
             )}
-
+            <div className='flex gap-x-2 items-center mt-4 justify-end '>
+                <select className='bg-white shadow py-2 px-2 w-20' onChange={(e) => setLimit(Number(e.target.value))} value={limit}>
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                </select>
+                <select className='bg-white shadow py-2 px-2 w-20' onChange={(e) => {
+                    setPage(1);
+                    setStatus(e.target.value);
+                }} value={status}>
+                    <option value=''>All</option>
+                    {statusOptions.map((value, id) => (
+                        <option key={id} value={value} >{value}</option>
+                    ))}
+                </select>
+                <div className='flex  items-center  space-x-2'>
+                    <button
+                        className='w-20 bg-white shadow cursor-pointer py-2 disabled:opacity-50'
+                        onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={page === 1}
+                    >
+                        Prev
+                    </button>
+                    <span>{page}</span>
+                    <button
+                        className='w-20 bg-white shadow cursor-pointer py-2 disabled:opacity-50'
+                        onClick={() => setPage((prev) => prev + 1)}
+                        disabled={page === totalPages}
+                    >
+                        Next
+                    </button>
+                </div>
+            </div>
             {/* Edit Modal */}
             {selectedOrder && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-20 p-4">
