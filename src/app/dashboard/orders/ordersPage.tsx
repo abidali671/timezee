@@ -47,7 +47,7 @@ export default function ManageOrders() {
             setOrders(data.items);
             setTotalPages(data.totalPages || 1);
         } catch (err) {
-            toast.error('Failed to load orders');
+            toast.error('Failed to load orders',err as any);
         }
         setLoading(false);
     };
