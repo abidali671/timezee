@@ -9,6 +9,9 @@ export async function GET(request: Request) {
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');
         const searchQuery = searchParams.get('query') || '';
+        const sort = searchParams.get('sort') || '';
+        const minPrice = parseFloat(searchParams.get('minPrice') || '0');
+        const maxPrice = parseFloat(searchParams.get('maxPrice') || '0');
         const skip = (page - 1) * limit;
 
         const contentfulQuery: any = {
@@ -19,11 +22,30 @@ export async function GET(request: Request) {
         };
 
         if (searchQuery) {
-            contentfulQuery['query'] = searchQuery;
+            contentfulQuery['fields.title[match]'] = searchQuery;
         }
+
+        // ✅ Add price range filters
+        if (!isNaN(minPrice)) {
+            contentfulQuery['fields.price[gte]'] = minPrice;
+        }
+        if (!isNaN(maxPrice) && maxPrice > 0) {
+            contentfulQuery['fields.price[lte]'] = maxPrice;
+        }
+
+        // Sorting
+        if (sort === 'price-asc') {
+            contentfulQuery.order = 'fields.price';
+        } else if (sort === 'price-desc') {
+            contentfulQuery.order = '-fields.price';
+        } else if (sort === 'name-asc') {
+            contentfulQuery.order = 'fields.title';
+        } else if (sort === 'name-desc') {
+            contentfulQuery.order = '-fields.title';
+        }
+
         const entries = await client.getEntries(contentfulQuery);
         const products: Product[] = entries.items.map(mapContentfulEntryToProduct);
-
 
         return NextResponse.json({
             items: products,
@@ -36,6 +58,8 @@ export async function GET(request: Request) {
         return NextResponse.json({ message: 'Failed to fetch products' }, { status: 500 });
     }
 }
+
+
 
 export async function POST(request: NextRequest) {
     try {

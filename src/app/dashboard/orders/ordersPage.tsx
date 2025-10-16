@@ -17,7 +17,7 @@ interface Order {
     orderDate?: string | null;
 }
 
-const statusOptions = ['pending', 'shipped', 'delivered'];
+const statusOptions = ['pending', 'shipped', 'delivered', 'cancelled'];
 
 export default function ManageOrders() {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -39,7 +39,7 @@ export default function ManageOrders() {
             });
 
             if (status) {
-                query.append('status', status); 
+                query.append('status', status);
             }
 
             const res = await fetch(`/api/orders?${query.toString()}`);
@@ -47,7 +47,7 @@ export default function ManageOrders() {
             setOrders(data.items);
             setTotalPages(data.totalPages || 1);
         } catch (err) {
-            toast.error('Failed to load orders',err as any);
+            toast.error('Failed to load orders', err as any);
         }
         setLoading(false);
     };
@@ -126,18 +126,31 @@ export default function ManageOrders() {
                                     <td className="py-2 px-4 w-32">{order.address}, {order.state}</td>
                                     <td className="py-2 px-4">{order.phone}</td>
                                     <td className="py-2 px-4">{order.total}</td>
-                                    <td className="py-2 px-4">{order.status}</td>
-                                    <td className="py-2 px-4 relative"  >
+                                    <td className="py-2 px-4">
+                                        <span
+                                            className={`inline-block px-3 py-1 capitalize rounded-full text-sm font-semibold text-white ${order.status === 'Pending'
+                                                ? 'bg-yellow-400'
+                                                : order.status === 'shipped'
+                                                    ? 'bg-blue-500'
+                                                    : order.status === 'delivered'
+                                                        ? 'bg-green-500'
+                                                        : order.status === 'cancelled'
+                                                            ? 'bg-red-500'
+                                                            : 'bg-gray-500'
+                                                }`}
+                                        >
+                                            {order.status}
+                                        </span>
+                                    </td>
+                                    <td className="py-2 px-4 relative">
                                         <button
                                             className="text-black hover:text-black focus:outline-none cursor-pointer h-10 w-10 bg-gray-50 rounded-full"
                                             onClick={() => setDropdownOpenId(dropdownOpenId === order.id ? null : order.id)}
                                         >
                                             ⋮
                                         </button>
-
-
                                     </td>
-                                    <td>  {dropdownOpenId === order.id && (
+                                    <td>{dropdownOpenId === order.id && (
                                         <div className="absolute bg-white border shadow-md rounded mt-6 right-12 z-30 w-40">
                                             <button
                                                 onClick={() => {
@@ -204,9 +217,9 @@ export default function ManageOrders() {
             </div>
             {/* Edit Modal */}
             {selectedOrder && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-20 p-4">
-                    <div className="bg-white p-6 rounded shadow-md w-full max-w-lg max-h-[90vh] overflow-auto">
-                        <h3 className="text-lg font-semibold mb-4">Edit Order</h3>
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-30 p-4">
+                    <div className="bg-white p-6  mt-14 rounded shadow-md w-full max-w-lg max-h-[75vh] overflow-auto">
+                        <h3 className="text-lg !font-bold mb-4">Edit Order</h3>
 
                         <label className="block mb-3">
                             Customer Name
@@ -286,13 +299,13 @@ export default function ManageOrders() {
                         <div className="flex justify-end space-x-2 mt-4">
                             <button
                                 onClick={() => setSelectedOrder(null)}
-                                className="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100"
+                                className="px-4 py-2 rounded border cursor-pointer border-gray-300 hover:bg-gray-100"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleUpdate}
-                                className="px-4 py-2 rounded bg-blue-900 text-white hover:bg-blue-800"
+                                className="px-4 py-2 rounded cursor-pointer bg-blue-900 text-white hover:bg-blue-800"
                             >
                                 Save
                             </button>
