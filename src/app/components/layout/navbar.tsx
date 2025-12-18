@@ -41,7 +41,6 @@ export default function Navbar({ page }: { page?: boolean }) {
         {!page && <ul className="hidden lg:flex gap-x-10 *:hover:text-yellow-400 *:uppercase *:font-medium *:text-lg">
           <Link href="/">Home</Link>
           <Link href="/shop">Shop</Link>
-          <Link href="#">Pages</Link>
           <Link href="/contact-us">Contact us</Link>
         </ul>}
 
@@ -75,9 +74,7 @@ export default function Navbar({ page }: { page?: boolean }) {
           <Link href="/shop" onClick={() => setIsMenuOpen(false)}>
             Shop
           </Link>
-          <Link href="#" onClick={() => setIsMenuOpen(false)}>
-            Pages
-          </Link>
+
           <Link href="/contact-us" onClick={() => setIsMenuOpen(false)}>
             Contact us
           </Link>
