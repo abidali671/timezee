@@ -13,12 +13,13 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
+import LoadingSpinner from '../components/LoadingSpinner';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 export default function DashboardHome() {
     const { products } = useProducts();
     const { totalOrders, totalRevenue, totalProfit, loading, chartData } = useOrdersHook();
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <LoadingSpinner />;
     const chartConfig = {
         labels: chartData.map((d) => d.date),
         datasets: [

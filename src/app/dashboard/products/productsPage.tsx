@@ -10,6 +10,7 @@ import { BLOCKS, Document } from '@contentful/rich-text-types';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Brand } from '@/types/product';
 import { Product } from '@/context/productsContext';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 const emptyRichTextDocument: Document = {
     nodeType: BLOCKS.DOCUMENT,
@@ -270,9 +271,7 @@ export default function ManageProducts() {
 
     if (loading && products.length === 0) {
         return (
-            <div className="flex justify-center items-center h-64">
-                <div className="text-lg font-medium">Loading Products...</div>
-            </div>
+            <LoadingSpinner />
         );
     }
 

@@ -1,4 +1,5 @@
 'use client';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { CartItem } from '@/context/CartContext';
 import Image from 'next/image';
 import React, { useEffect, useState, useRef } from 'react';
@@ -97,7 +98,6 @@ export default function ManageOrders() {
             toast.error('Failed to delete order.');
         }
     };
-    console.log(status, 'order');
 
 
     return (
@@ -105,7 +105,7 @@ export default function ManageOrders() {
             <h2 className="text-2xl font-semibold mb-4">Orders</h2>
 
             {loading && orders.length === 0 ? (
-                <div>Loading...</div>
+                <LoadingSpinner />
             ) : (
                 <div className="w-full overflow-x-auto">
                     <table className="min-w-full bg-white border shadow">
