@@ -11,6 +11,7 @@ import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Brand } from '@/types/product';
 import { Product } from '@/context/productsContext';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
+import { cn } from '@/lib/utils';
 
 const emptyRichTextDocument: Document = {
     nodeType: BLOCKS.DOCUMENT,
@@ -32,6 +33,7 @@ export default function ManageProducts() {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [limit, setLimit] = useState(10);
+
     const {
         control,
         handleSubmit,
@@ -56,27 +58,28 @@ export default function ManageProducts() {
     });
 
     const name = watch('name');
+    const fetchProducts = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/products?page=${page}&limit=${limit}`);
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.message || "Failed to fetch products");
+
+            setProducts(data.items || []);
+            setTotalPages(data.totalPages || 1);
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to load products");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchProducts = async () => {
-            setLoading(true);
-            try {
-                const res = await fetch(`/api/products?page=${page}&limit=${limit}`);
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message || 'Failed to fetch products');
-
-                setProducts(data.items || []);
-                setTotalPages(data.totalPages || 1);
-            } catch (err) {
-                console.error(err);
-                toast.error('Failed to load products');
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchProducts();
     }, [page, limit]);
+
 
     useEffect(() => {
         const fetchFilterData = async () => {
@@ -269,7 +272,7 @@ export default function ManageProducts() {
         }
     };
 
-    if (loading && products.length === 0) {
+    if (loading) {
         return (
             <LoadingSpinner />
         );
@@ -284,8 +287,8 @@ export default function ManageProducts() {
                     <h2 className="text-2xl font-semibold">Products</h2>
                     <div className="flex items-center space-x-2">
                         <RefreshCcw
-                            className="transition-transform duration-300 hover:rotate-90 text-gray-200 cursor-pointer"
-                            onClick={() => window.location.reload()}
+                            className={cn("transition-transform duration-300 hover:rotate-90 text-gray-200 cursor-pointer", loading && "animate-spin")}
+                            onClick={fetchProducts}
                         />
                         <button
                             onClick={openAddSidebar}
@@ -310,7 +313,7 @@ export default function ManageProducts() {
                             </tr>
                         </thead>
                         <tbody className="transition-colors">
-                            {products.map((product) => (
+                            {products.length > 0 ? products.map((product) => (
                                 <tr key={product.id} className="hover:bg-gray-100">
                                     <td className="py-2 px-4">
                                         {product?.imageUrl && (
@@ -349,7 +352,7 @@ export default function ManageProducts() {
                                         )}
                                     </td>
                                 </tr>
-                            ))}
+                            )) : <div className='flex justify-center items-center w-full '><LoadingSpinner /></div>}
                         </tbody>
                     </table>
                     <div className='flex gap-x-2 items-center mt-4 justify-end '>

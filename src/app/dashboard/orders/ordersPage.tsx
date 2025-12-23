@@ -99,6 +99,7 @@ export default function ManageOrders() {
         }
     };
 
+    console.log(orders, 'orders===');
 
     return (
         <div className="p-0 md:p-6">
