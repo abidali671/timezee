@@ -16,10 +16,15 @@ export default function Header({ products }: { products: Product[] }) {
   return (
     <div className="relative w-full mx-auto">
       <Carousel className="w-full">
-        <div
-          className="absolute inset-0 z-10 bg-center   "
-          style={{ backgroundImage: 'url("/images/bg-dark2.jpg")' }}
-        ></div>
+        <div className="absolute inset-0 z-10">
+          <Image
+            src="/images/bg-dark2.jpg"
+            alt="Background"
+            fill
+            priority
+            className="object-cover"
+          />
+        </div>
         <CarouselContent className="relative z-20">
 
           {products.map((product, index) => (
