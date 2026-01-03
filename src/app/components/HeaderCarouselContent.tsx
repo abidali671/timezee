@@ -36,7 +36,7 @@ export default function HeaderCarouselContent({ products }: { products: Product[
                             className={`relative top-6 ${index % 2 === 0 ? "justify-center md:w-7/12" : "justify-end md:w-11/12"
                                 } px-10 z-20 flex h-full w-full items-center`}
                         >
-                            <div className="p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl max-w-full md:max-w-2xl bg-black/85 py-7 md:bg-transparent text-gray-800 text-center md:text-left">
+                            <div className="p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl max-w-full md:max-w-4xl bg-black/85 py-7 md:bg-transparent text-gray-800 text-center md:text-left">
                                 <SectionTitle font={true}>{product.name}</SectionTitle>
                                 <h3 className="text-sm md:text-lg font-light text-yellow-400 mb-4">
                                     {product.brandName}
