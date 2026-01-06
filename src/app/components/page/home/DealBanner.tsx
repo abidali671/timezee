@@ -62,6 +62,7 @@ const DealBanner = () => {
                         objectFit: 'cover',
                         objectPosition: 'center'
                     }}
+                    title='Banner Background Image'
 
                     className="z-0"
                 />

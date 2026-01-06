@@ -16,6 +16,7 @@ const BannerSection = () => {
                         }}
                         priority
                         className="brightness-90"
+                        title='Banner Image'
                     />
                 </div>
 

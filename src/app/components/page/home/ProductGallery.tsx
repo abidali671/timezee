@@ -26,6 +26,7 @@ const ProductGallery = () => {
                                 <Image
                                     src={banner.img}
                                     alt={banner.title}
+                                    title='Banner Image'
                                     
                                    fill
                                     className="object-cover transition-transform duration-500 group-hover:scale-110"

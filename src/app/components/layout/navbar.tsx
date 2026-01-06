@@ -33,7 +33,7 @@ export default function Navbar({ page }: { page?: boolean }) {
               alt="logo"
               className="w-auto h-10"
             /> */}
-            <h1 className="text-3xl font-bold text-white">SwissTime</h1>
+            <h2 className="text-3xl font-bold text-white">SwissTime</h2>
           </Link>
         </div>
 

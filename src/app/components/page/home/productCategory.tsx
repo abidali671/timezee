@@ -7,6 +7,7 @@ const ProductCategory = () => {
         <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 gap-10 justify-between bg-[#030D1D]">
             {productCategories.map((product, index) => (
                 <div
+                    title='Product Category'
                     key={index}
                     className="flex-1 h-auto md:h-72 border-6 border-gray-100/30 outline-8 outline-black  py-16 md:py-0"
                     style={{

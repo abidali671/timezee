@@ -9,7 +9,7 @@ import DealBanner from "./components/page/home/DealBanner";
 
 const Home = async () => {
   const res = await fetch(`https://timezee-five.vercel.app/api/products`, {
-    cache: 'no-store',
+    next: { revalidate: 3600 },
   });
 
   if (!res.ok) {
@@ -20,13 +20,14 @@ const Home = async () => {
   const products = data.items;
   return (
     <div>
+      <h1 className="sr-only">SwissTime Luxury Watches Store</h1>
       <Header products={products} />
       <ProductCategory />
       <ProductSlider products={products} />
       <BannerSection />
       <ProductGallery />
       <DealBanner />
-      <BrandLogoSlider />
+      {/* <BrandLogoSlider /> */}
       <Newsletter />
     </div>
   );

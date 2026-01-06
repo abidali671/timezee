@@ -57,6 +57,7 @@ const ProductCarousel = ({ products }: { products: Product[] }) => {
                                                     className="object-contain h-[320px] relative z-10"
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                                     priority={false}
+                                                    title='Product Image'
                                                 />
                                             </div>
 

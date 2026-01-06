@@ -16,7 +16,7 @@ export default function CartSidebar() {
                 }`}
         >
             <div className="p-4 flex justify-between items-center border-b border-gray-700">
-                <h1 className="text-4xl text-white whitespace-nowrap">Your cart</h1>
+                <h2 className="text-4xl text-white whitespace-nowrap">Your cart</h2>
                 <button onClick={toggleCart} className="text-2xl cursor-pointer text-white">
                     ✕
                 </button>
@@ -29,7 +29,7 @@ export default function CartSidebar() {
             >
                 {cart.length === 0 ? (
                     <div className="flex justify-center items-center flex-col mt-10">
-                        <h1 className="text-3xl md:text-4xl text-white whitespace-nowrap">Your cart is empty.</h1>
+                        <h2 className="text-3xl md:text-4xl text-white whitespace-nowrap">Your cart is empty.</h2>
                         <br />
                         <AnimatedButton className="!w-10/12 md:w-full text-sm">Continue Shopping</AnimatedButton>
                     </div>
@@ -46,6 +46,7 @@ export default function CartSidebar() {
                                         alt={item.name}
                                         height={100}
                                         width={100}
+                                        title='Product Image'
                                         className="rounded object-contain"
                                     />
                                 </div>

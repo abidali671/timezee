@@ -26,6 +26,7 @@ export default function HeaderCarouselContent({ products }: { products: Product[
                             style={{ objectFit: "contain" }}
                             width={600}
                             height={600}
+                            title="Product Image"
                             className="md:block hidden"
 
                         />

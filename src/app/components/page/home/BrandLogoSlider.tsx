@@ -41,7 +41,7 @@ export default function BrandLogoSlider() {
                                         style={{
                                             objectFit: 'contain', // cover, contain, none
                                         }}
-
+                                        title="logo image"
                                     />
                                 </CarouselItem>
                             ))}

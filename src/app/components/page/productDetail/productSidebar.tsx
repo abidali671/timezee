@@ -78,7 +78,7 @@ const ProductSidebar = () => {
                 <div className='flex flex-col  '>
                     <div className="flex flex-col py-10 px-7 lg:p-4">
                         <div className='flex flex-col gap-y-7 py-3'>
-                            <h1 className='text-3xl '>Heading</h1>
+                            <h3 className='text-3xl '>Heading</h3>
                             <hr className="max-w-md text-red-300 border-1 lg:border-2 border-yellow-400 relative bottom-4" />
                         </div>
 
@@ -90,7 +90,7 @@ const ProductSidebar = () => {
                                             {item.title}
                                         </AccordionTrigger>
                                     ) : (
-                                        <h1 className='text-lg text-gray-400'>{item.title}</h1>
+                                        <h4 className='text-lg text-gray-400'>{item.title}</h4>
                                     )}
                                     <AccordionContent>
                                         {item.children.length > 0 && (
@@ -109,7 +109,7 @@ const ProductSidebar = () => {
                     </div>
                     <div className="flex flex-col py-10 px-7 lg:p-4    ">
                         <div className='flex flex-col gap-y-7 py-3'>
-                            <h1 className='text-3xl '>Shopping</h1>
+                            <h2 className='text-3xl '>Shopping</h2>
                             <hr className="max-w-md text-red-300 border-1 lg:border-2 border-yellow-400 relative bottom-4" />
                         </div>
                         <div className="relative w-full h-60 lg:h-96">
@@ -120,6 +120,7 @@ const ProductSidebar = () => {
                                 className="object-contain"
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 priority
+                                title='Product Image'
                             />
                         </div>
                         <AnimatedButton className="w-full text-sm mx-auto">Shop Now</AnimatedButton>
