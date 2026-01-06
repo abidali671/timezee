@@ -49,7 +49,7 @@ export default function ProductPage({ product }: { product: Product }) {
                     </div>
                 </div>
                 <div className="col-span-6">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6">{product.name}</h1>
+                    <h2 className="text-4xl md:text-5xl font-bold mb-6">{product.name}</h2>
                     <div className="w-full md:w-80 *:text-lg grid gap-y-4 text-gray-400 text-sm">
                         <div className="flex justify-between">
                             <span>Price</span>
