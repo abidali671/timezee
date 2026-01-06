@@ -5,8 +5,8 @@ import ClientLayoutWrapper from "./ClientLayoutWrapper";
 import { ToastContainer } from "react-toastify";
 
 // Site constants
-const BASE_URL = "https://timezee-five.vercel.app/";
-const DEFAULT_OG_IMAGE = "/opengraph-image.png"; // place in /public
+const BASE_URL = "https://timezee-five.vercel.app";
+const DEFAULT_OG_IMAGE = "/swisstime-og.jpg";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
