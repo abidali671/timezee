@@ -1,4 +1,3 @@
-import React from "react";
 import {
     Carousel,
     CarouselContent,
@@ -14,12 +13,12 @@ import Link from "next/link";
 
 export default function HeaderCarouselContent({ products }: { products: Product[] }) {
     return (
-        <Carousel className="w-full">
+        <Carousel className="w-full" >
             <CarouselContent className="relative z-20">
                 {products.map((product, index) => (
                     <CarouselItem
                         key={product.id || index}
-                        className="relative h-[calc(100vh_-_75px)] w-full"
+                        className={`relative h-[calc(100vh_-_75px)] w-full flex  ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}   basis-full shrink-0`}
                     >
                         <Image
                             src={product.imageUrl as string}
@@ -27,14 +26,12 @@ export default function HeaderCarouselContent({ products }: { products: Product[
                             style={{ objectFit: "contain" }}
                             width={600}
                             height={600}
-                            className={`absolute w-[270px] lg:w-[600px] h-[270px] lg:h-[600px] ${index % 2 === 0
-                                    ? "right-40 md:right-32 bottom-20 md:bottom-0"
-                                    : "left-48 bottom-20 md:bottom-0 md:left-32"
-                                } z-20`}
+                            className="md:block hidden"
+
                         />
                         <div
-                            className={`relative top-6 ${index % 2 === 0 ? "justify-center md:w-7/12" : "justify-end md:w-11/12"
-                                } px-10 z-20 flex h-full w-full items-center`}
+                            className={`relative top-6 ${index % 2 === 0 ? "justify-center md:w-10/12" : "justify-end md:w-10/12"
+                                }  px-0 z-20 flex h-full w-full items-center`}
                         >
                             <div className="p-4 md:p-8 justify-center md:justify-start items-center rounded-xl shadow-xl max-w-full md:max-w-4xl bg-black/85 py-7 md:bg-transparent text-gray-800 text-center md:text-left">
                                 <SectionTitle font={true}>{product.name}</SectionTitle>
@@ -59,12 +56,24 @@ export default function HeaderCarouselContent({ products }: { products: Product[
                 ))}
             </CarouselContent>
 
-            {(products.length > 1) && (
+            {products.length > 1 && (
                 <>
-                    <CarouselPrevious className="absolute left-1 md:left-4 top-1/2 z-30 -translate-y-1/2" />
-                    <CarouselNext className="absolute right-1 md:right-4 top-1/2 z-30 -translate-y-1/2" />
+                    {/* Mobile arrows below carousel */}
+                    <div className="flex justify-center  mt-6   md:hidden">
+                        <CarouselPrevious className="w-10 h-10" />
+                        <CarouselNext className="w-10 h-10" />
+                    </div>
+
+                    {/* Desktop arrows on left/right */}
+                    <div className="hidden md:block">
+                        <CarouselPrevious className="absolute left-4 top-1/2 z-30 -translate-y-1/2" />
+                        <CarouselNext className="absolute right-4 top-1/2 z-30 -translate-y-1/2" />
+                    </div>
                 </>
             )}
+
+
+
         </Carousel>
     );
 }
